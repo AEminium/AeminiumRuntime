@@ -69,7 +69,7 @@ public class ParallelTaskGraph implements TaskGraph {
         for (Integer tid: tasksToBeRemoved) {
             taskDictionary.get(tid).getStatistics().setOutTime(System.nanoTime());
             taskDictionary.get(tid).getStatistics().calcTime();
-            System.out.println(taskDictionary.get(tid).getStatistics());
+            //System.out.println(taskDictionary.get(tid).getStatistics());
             
             runningList.remove(taskDictionary.get(tid));
             taskChildren.remove(tid);

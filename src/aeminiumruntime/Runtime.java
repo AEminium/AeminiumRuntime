@@ -1,14 +1,16 @@
 package aeminiumruntime;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 
 public abstract class Runtime {
     
-    /* TODO: fix later
-    public ﬁnal static Collection<Task> NO_DEPS;
-    public ﬁnal static Collection<Hint> NO_HINTS;
-    */
+	@SuppressWarnings("unchecked")
+    public final static Collection<Task> NO_DEPS = Collections.EMPTY_LIST;
+	@SuppressWarnings("unchecked")
+    public final static Collection<Hint> NO_HINTS = Collections.EMPTY_LIST;
+
 
     
     /* initalize runtime */
