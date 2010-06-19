@@ -11,11 +11,10 @@ public abstract class Runtime {
 	@SuppressWarnings("unchecked")
     public final static Collection<Hint> NO_HINTS = Collections.EMPTY_LIST;
 
-
     
-    /* initalize runtime */
+    /* initialize runtime */
     public abstract void init();
-    /* add a task along with it’s parent and dependencies */
+    /* add a task along with it's parent and dependencies */
     public abstract boolean schedule(Task task, Collection<Task> deps);
     /* returns the current task object */
     public abstract void shutdown();

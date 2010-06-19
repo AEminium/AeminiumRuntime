@@ -7,4 +7,5 @@ public interface Scheduler {
     // Thread stuff
     public void start();
     public void join() throws InterruptedException;
+	public void refresh();
 }

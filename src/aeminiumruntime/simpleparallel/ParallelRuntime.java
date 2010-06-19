@@ -6,18 +6,11 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import aeminiumruntime.AtomicTask;
-import aeminiumruntime.BlockingTask;
-import aeminiumruntime.Body;
-import aeminiumruntime.DataGroup;
-import aeminiumruntime.NonBlockingTask;
-import aeminiumruntime.Runtime;
-import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.Task;
-import aeminiumruntime.schedulers.ForkJoinScheduler;
+import aeminiumruntime.*;
+import aeminiumruntime.schedulers.HybridForkJoinScheduler;
 import aeminiumruntime.schedulers.Scheduler;
 
-public class ParallelRuntime extends Runtime {
+public class ParallelRuntime extends aeminiumruntime.Runtime {
 
     private ParallelTaskGraph graph;
     private Scheduler scheduler;
@@ -26,7 +19,7 @@ public class ParallelRuntime extends Runtime {
     @Override
     public void init() {
         graph = new ParallelTaskGraph();
-        scheduler = new ForkJoinScheduler(graph);
+        scheduler = new HybridForkJoinScheduler(graph);
         scheduler.start();
         idCounter = 0;
     }
@@ -41,7 +34,7 @@ public class ParallelRuntime extends Runtime {
         }
 
         graph.add((RuntimeTask) task, rdeps);
-        scheduler.interrupt();
+        scheduler.refresh();
 
         return true;
     }
@@ -58,7 +51,7 @@ public class ParallelRuntime extends Runtime {
 
     @Override
     public DataGroup createDataGroup() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new ParallelDataGroup();
     }
 
     @Override
@@ -83,7 +76,12 @@ public class ParallelRuntime extends Runtime {
 
     @Override
     public AtomicTask createAtomicTask(Body b, DataGroup g) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            return new ParallelAtomicTask(b, idCounter++, (ParallelDataGroup) g);
+        } catch (Exception ex) {
+            Logger.getLogger(ParallelRuntime.class.getName()).log(Level.SEVERE, "Error creating Task.", ex);
+            return null;
+        }
     }
 
 }

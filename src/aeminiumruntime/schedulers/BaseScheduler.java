@@ -37,4 +37,9 @@ public abstract class BaseScheduler extends Thread implements Scheduler {
         }
         return false;
     }
+    
+    public void refresh() {
+    	this.interrupt();
+    }
+    
 }

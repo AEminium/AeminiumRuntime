@@ -33,7 +33,7 @@ public class ForkJoinScheduler extends BaseScheduler {
         if (willWait) {
             try {
                 // Wait for other threads to execute;
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 // Get back to work, you lazy scheduler!
             }
@@ -41,7 +41,7 @@ public class ForkJoinScheduler extends BaseScheduler {
         
     }
 
-    private ForkJoinTask<Object> createThreadFromTask(final RuntimeTask task) {
+    protected ForkJoinTask<Object> createThreadFromTask(final RuntimeTask task) {
         Callable<Object> threadWrapper = new Callable<Object>() {
             public Object call() {
                 return task.execute();
