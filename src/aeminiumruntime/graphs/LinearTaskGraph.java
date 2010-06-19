@@ -1,4 +1,4 @@
-package aeminiumruntime.linear;
+package aeminiumruntime.graphs;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,9 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.TaskGraph;
 
-public class LinearTaskGraph implements TaskGraph {
+public class LinearTaskGraph extends BaseTaskGraph {
     List<RuntimeTask> readyList = new ArrayList<RuntimeTask>();
     List<RuntimeTask> runningList = new ArrayList<RuntimeTask>();
 
@@ -18,18 +17,13 @@ public class LinearTaskGraph implements TaskGraph {
     }
 
     /* Removes finished tasks from dependencies  */
-    private synchronized void updateGraph() {
+    protected synchronized void updateGraph() {
         for (Iterator<RuntimeTask> it = runningList.iterator(); it.hasNext(); ) {
             RuntimeTask t = (RuntimeTask) it.next();
             if (t.isDone()) {
                 it.remove();
             }
         }
-    }
-
-    public synchronized boolean hasNext() {
-        updateGraph();
-        return !readyList.isEmpty();
     }
 
     public synchronized RuntimeTask next() {

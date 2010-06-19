@@ -6,11 +6,8 @@ import java.util.concurrent.Callable;
 
 public abstract class Runtime {
     
-	@SuppressWarnings("unchecked")
-    public final static Collection<Task> NO_DEPS = Collections.EMPTY_LIST;
-	@SuppressWarnings("unchecked")
-    public final static Collection<Hint> NO_HINTS = Collections.EMPTY_LIST;
-
+    public final static Collection<Task> NO_DEPS = null;
+    public final static Collection<Hint> NO_HINTS = null;
     
     /* initialize runtime */
     public abstract void init();

@@ -26,7 +26,6 @@ public class ParallelScheduler extends BaseScheduler {
             if (graph.hasNext()) {
 
                 Thread taskThread = createWorkerThread((RuntimeTask) graph.next());
-                taskThread.setPriority(Thread.MIN_PRIORITY);
                 taskThread.start();
             } else {
                 willWait = true;

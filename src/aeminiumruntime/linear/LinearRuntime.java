@@ -8,6 +8,7 @@ import aeminiumruntime.NonBlockingTask;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.Task;
+import aeminiumruntime.graphs.LinearTaskGraph;
 import aeminiumruntime.schedulers.LinearScheduler;
 
 import java.util.ArrayList;
