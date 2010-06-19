@@ -1,5 +1,6 @@
 package aeminiumruntime;
 
+import aeminium.statistics.Statistics;
 
 
 public interface RuntimeTask extends Task {

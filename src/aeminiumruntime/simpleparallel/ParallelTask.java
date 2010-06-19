@@ -3,9 +3,9 @@ package aeminiumruntime.simpleparallel;
 import aeminiumruntime.Body;
 import aeminiumruntime.Hint;
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.Statistics;
 
 import java.util.Collection;
+import aeminium.statistics.Statistics;
 import aeminiumruntime.StatisticTask;
 
 public class ParallelTask extends StatisticTask implements RuntimeTask {

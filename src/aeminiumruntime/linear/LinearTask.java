@@ -1,5 +1,6 @@
 package aeminiumruntime.linear;
 
+import aeminium.statistics.Statistics;
 import aeminiumruntime.Body;
 import aeminiumruntime.Hint;
 import aeminiumruntime.RuntimeTask;
