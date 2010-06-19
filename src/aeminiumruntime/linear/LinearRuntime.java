@@ -28,7 +28,6 @@ public class LinearRuntime extends Runtime {
     public void init() {
         graph = new LinearTaskGraph();
         scheduler = new LinearScheduler(graph);
-        scheduler.start();
         idCounter = 0;
     }
 
@@ -42,17 +41,14 @@ public class LinearRuntime extends Runtime {
         }
 
         graph.add((RuntimeTask) task, rdeps);
+
+        scheduler.refresh();
+
         return true;
     }
 
     @Override
     public void shutdown() {
-        try {
-            scheduler.turnOff();
-            scheduler.join();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(LinearRuntime.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     @Override

@@ -24,14 +24,13 @@ public class HybridForkJoinScheduler extends ForkJoinScheduler {
             @Override
             public void run() {
                 task.execute();
+                refresh();
             }
         };
     }
 
 	@Override
     public void scheduleWork() {
-        boolean willWait = false;
-        
         synchronized (graph) {
             if (graph.hasNext()) {
                 RuntimeTask task = (RuntimeTask) graph.next();
@@ -43,19 +42,8 @@ public class HybridForkJoinScheduler extends ForkJoinScheduler {
                 	ForkJoinTask<Object> fjtask = createThreadFromTask(task);
                 	pool.execute(fjtask);
                 }
-            } else {
-                willWait = true;
             }
         }
-        if (willWait) {
-            try {
-                // Wait for other threads to execute;
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                // Get back to work, you lazy scheduler!
-            }
-        }
-        
     }
 	
 }

@@ -22,7 +22,6 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
     public void init() {
         graph = new ParallelTaskGraph();
         scheduler = new HybridForkJoinScheduler(graph);
-        scheduler.start();
         idCounter = 0;
     }
 
@@ -41,7 +40,6 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
 				graph.checkForCycles((RuntimeTask) task);
 			} catch (DependencyDeadlockException e) {
 				e.printStackTrace();
-				scheduler.turnOff();
 				System.exit(1);
 			}
         }
@@ -52,12 +50,6 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
 
     @Override
     public void shutdown() {
-        try {
-            scheduler.turnOff();
-            scheduler.join();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ParallelRuntime.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     @Override
