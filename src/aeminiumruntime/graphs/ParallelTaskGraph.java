@@ -91,7 +91,6 @@ public class ParallelTaskGraph extends BaseTaskGraph {
     }
 
     public synchronized RuntimeTask next() {
-        updateGraph();
         RuntimeTask task = prioritizer.getNext(readyList);
         readyList.remove(task);
         task.getStatistics().setRunningTime(System.nanoTime());

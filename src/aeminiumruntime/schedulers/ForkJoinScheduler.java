@@ -18,22 +18,16 @@ public class ForkJoinScheduler extends BaseScheduler {
     }
 
     @Override
-    public void scheduleWork() {
-
-        synchronized (graph) {
-            if (graph.hasNext()) {
-                RuntimeTask task = (RuntimeTask) graph.next();
-                ForkJoinTask<Object> thread = createThreadFromTask(task);
-                pool.execute(thread);
-            }
-        }
+    public void scheduleTask(RuntimeTask task) {
+    	ForkJoinTask<Object> thread = createThreadFromTask(task);
+        pool.execute(thread);
     }
 
     protected ForkJoinTask<Object> createThreadFromTask(final RuntimeTask task) {
         Callable<Object> threadWrapper = new Callable<Object>() {
             public Object call() {
                 Object result = task.execute();
-                refresh();
+                scheduleAllTasks();
                 return result;
             }
         };

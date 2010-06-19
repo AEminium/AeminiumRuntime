@@ -3,10 +3,11 @@ package aeminiumruntime.simpleparallel;
 import aeminiumruntime.Body;
 import aeminiumruntime.Hint;
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.Statistics;
 
 import java.util.Collection;
-import aeminiumruntime.StatisticTask;
+
+import aeminiumruntime.statistics.StatisticTask;
+import aeminiumruntime.statistics.Statistics;
 
 public class ParallelTask extends StatisticTask implements RuntimeTask {
     private int id;
@@ -48,9 +49,5 @@ public class ParallelTask extends StatisticTask implements RuntimeTask {
 
     public boolean hasStarted() {
         return this.started;
-    }
-    
-    public Statistics getStatistics(){
-        return statistics;
     }
 }

@@ -24,25 +24,20 @@ public class HybridForkJoinScheduler extends ForkJoinScheduler {
             @Override
             public void run() {
                 task.execute();
-                refresh();
+                scheduleAllTasks();
             }
         };
     }
 
 	@Override
-    public void scheduleWork() {
-        synchronized (graph) {
-            if (graph.hasNext()) {
-                RuntimeTask task = (RuntimeTask) graph.next();
-                if (task instanceof BlockingTask) {
-                	System.out.println("Blocked");
-                	iopool.execute(createWorkerTask(task));
-                } else {
-                	System.out.println("Computational");
-                	ForkJoinTask<Object> fjtask = createThreadFromTask(task);
-                	pool.execute(fjtask);
-                }
-            }
+    public void scheduleTask(RuntimeTask task) {
+        if (task instanceof BlockingTask) {
+        	System.out.println("Blocking");
+        	iopool.execute(createWorkerTask(task));
+        } else {
+        	System.out.println("Computational");
+        	ForkJoinTask<Object> fjtask = createThreadFromTask(task);
+        	pool.execute(fjtask);
         }
     }
 	

@@ -1,5 +1,5 @@
 package aeminiumruntime.schedulers;
 
 public interface Scheduler {
-	public void refresh();
+	public void scheduleAllTasks();
 }

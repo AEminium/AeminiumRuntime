@@ -1,5 +1,6 @@
 package aeminiumruntime.schedulers;
 
+import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.TaskGraph;
 
 public abstract class BaseScheduler implements Scheduler {
@@ -10,19 +11,26 @@ public abstract class BaseScheduler implements Scheduler {
         this.graph = graph;
     }
 
-    public void refresh() {
-    	while (hasWorkLeft()) {
-    		scheduleWork();
+    public void scheduleAllTasks() {
+    	while(hasTasksToRun()) {
+    		scheduleTask(getNextTask());
     	}
     }
+
+	public abstract void scheduleTask(RuntimeTask task);
     
-    public abstract void scheduleWork();
     
-    private boolean hasWorkLeft() {
-        synchronized (graph) {
-            if (!graph.isDone()) return true;
-        }
-        return false;
+	/* Methods below are not inlined together not to cause deadlocks on the graph */
+	
+    private boolean hasTasksToRun() {
+    	synchronized (graph) {
+    		return graph.hasNext();
+    	}	
     }
     
+    private RuntimeTask getNextTask() {
+    	synchronized (graph) {
+    		return graph.next();
+    	}
+	}
 }

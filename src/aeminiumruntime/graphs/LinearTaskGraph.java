@@ -1,15 +1,11 @@
 package aeminiumruntime.graphs;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import aeminiumruntime.RuntimeTask;
 
 public class LinearTaskGraph extends BaseTaskGraph {
-    List<RuntimeTask> readyList = new ArrayList<RuntimeTask>();
-    List<RuntimeTask> runningList = new ArrayList<RuntimeTask>();
 
     public synchronized boolean add(RuntimeTask task, Collection<RuntimeTask> deps) {
         readyList.add(task);
@@ -27,7 +23,6 @@ public class LinearTaskGraph extends BaseTaskGraph {
     }
 
     public synchronized RuntimeTask next() {
-        updateGraph();
         RuntimeTask task = readyList.get(0);
         readyList.remove(0);
         runningList.add(task);

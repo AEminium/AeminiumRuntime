@@ -3,8 +3,8 @@ package aeminiumruntime.linear;
 import aeminiumruntime.Body;
 import aeminiumruntime.Hint;
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.StatisticTask;
-import aeminiumruntime.Statistics;
+import aeminiumruntime.statistics.StatisticTask;
+import aeminiumruntime.statistics.Statistics;
 
 import java.util.Collection;
 
@@ -50,9 +50,4 @@ public class LinearTask extends StatisticTask implements RuntimeTask {
     public boolean hasStarted() {
         return this.started;
     }
-    
-    public Statistics getStatistics(){
-        return statistics;
-    }
-
 }

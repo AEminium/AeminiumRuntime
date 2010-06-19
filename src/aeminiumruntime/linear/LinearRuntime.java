@@ -41,9 +41,8 @@ public class LinearRuntime extends Runtime {
         }
 
         graph.add((RuntimeTask) task, rdeps);
-
-        scheduler.refresh();
-
+        scheduler.scheduleAllTasks();
+        
         return true;
     }
 

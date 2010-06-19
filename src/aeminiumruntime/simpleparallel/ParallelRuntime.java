@@ -43,7 +43,7 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
 				System.exit(1);
 			}
         }
-        scheduler.refresh();
+        scheduler.scheduleAllTasks();
         
         return true;
     }

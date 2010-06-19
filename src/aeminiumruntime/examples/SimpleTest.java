@@ -40,11 +40,7 @@ public class SimpleTest {
                 for (int i = 0; i < MAX_CALC; i++) {
                     if (i > max) max = i;
                     System.out.println("Calculating Maximum...");
-                    try {
-                        Thread.sleep(100);                        
-                    } catch (InterruptedException e) {
-                        // wait
-                    }
+
 
                 }
                 System.out.println("Maximum: " + max);
@@ -86,7 +82,6 @@ public class SimpleTest {
         rt.schedule(t5, deps5);
         rt.schedule(t4, deps4);
         rt.schedule(t2, deps2);
-        
         rt.shutdown();
     }
 }
