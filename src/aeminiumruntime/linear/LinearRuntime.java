@@ -21,7 +21,7 @@ public class LinearRuntime extends Runtime {
     private LinearTaskGraph graph;
     private LinearScheduler scheduler;
     private int idCounter;
-
+    
     @Override
     public void init() {
         graph = new LinearTaskGraph();
