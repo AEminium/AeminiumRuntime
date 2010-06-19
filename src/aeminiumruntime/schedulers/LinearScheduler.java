@@ -1,14 +1,15 @@
-package aeminiumruntime.simpleparallel.scheduler;
+package aeminiumruntime.schedulers;
 
 import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.TaskGraph;
 
-public class ParallelScheduler extends Thread {
+
+public class LinearScheduler extends Thread {
 
     TaskGraph graph;
     Boolean isOn;
 
-    public ParallelScheduler(TaskGraph graph) {
+    public LinearScheduler(TaskGraph graph) {
         this.graph = graph;
         isOn = true;
     }
@@ -25,9 +26,9 @@ public class ParallelScheduler extends Thread {
             synchronized (graph) {
                 if (graph.hasNext()) {
                     // Get Next
-                    Thread taskThread = createWorkerThread((RuntimeTask) graph.next());
-                    taskThread.setPriority(Thread.MIN_PRIORITY);
-                    taskThread.start();
+                    RuntimeTask task = (RuntimeTask) graph.next();
+                    task.execute();
+                    
                 } else {
                     willWait = true;
                 }
@@ -51,15 +52,5 @@ public class ParallelScheduler extends Thread {
             if (!graph.isDone()) return true;
         }
         return false;
-    }
-    
-
-    private Thread createWorkerThread(final RuntimeTask task) {
-        return new Thread() {
-            @Override
-            public void run() {
-                task.execute();
-            }
-        };
     }
 }

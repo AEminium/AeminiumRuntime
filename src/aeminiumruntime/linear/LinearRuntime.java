@@ -8,7 +8,7 @@ import aeminiumruntime.NonBlockingTask;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.Task;
-import aeminiumruntime.linear.scheduler.LinearScheduler;
+import aeminiumruntime.schedulers.LinearScheduler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;

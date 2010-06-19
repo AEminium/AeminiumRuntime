@@ -14,7 +14,7 @@ import aeminiumruntime.NonBlockingTask;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.Task;
-import aeminiumruntime.simpleparallel.scheduler.ParallelScheduler;
+import aeminiumruntime.schedulers.ParallelScheduler;
 
 public class ParallelRuntime extends Runtime {
 
