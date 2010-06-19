@@ -2,6 +2,8 @@ package aeminiumruntime.schedulers;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jsr166y.ForkJoinTask;
 
@@ -32,10 +34,10 @@ public class HybridForkJoinScheduler extends ForkJoinScheduler {
 	@Override
     public void scheduleTask(RuntimeTask task) {
         if (task instanceof BlockingTask) {
-        	System.out.println("Blocking");
+            Logger.getLogger(HybridForkJoinScheduler.class.getName()).log(Level.FINER, "Launching Blocking Task #" + task.getId());
         	iopool.execute(createWorkerTask(task));
         } else {
-        	System.out.println("Computational");
+            Logger.getLogger(HybridForkJoinScheduler.class.getName()).log(Level.FINER, "Launching Computational Task #" + task.getId());
         	ForkJoinTask<Object> fjtask = createThreadFromTask(task);
         	pool.execute(fjtask);
         }
