@@ -31,10 +31,11 @@ public class ParallelTask extends StatisticTask implements RuntimeTask {
         return this.body;
     }
 
-    public void execute() {
+    public Object execute() {
         this.started = true;
         this.body.execute();
         this.done = true;
+        return null;
     }
 
     public Collection<Hint> getHints() {

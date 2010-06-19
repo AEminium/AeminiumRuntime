@@ -14,18 +14,19 @@ import aeminiumruntime.NonBlockingTask;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.Task;
-import aeminiumruntime.schedulers.ParallelScheduler;
+import aeminiumruntime.schedulers.ForkJoinScheduler;
+import aeminiumruntime.schedulers.Scheduler;
 
 public class ParallelRuntime extends Runtime {
 
     private ParallelTaskGraph graph;
-    private ParallelScheduler scheduler;
+    private Scheduler scheduler;
     private int idCounter;
     
     @Override
     public void init() {
         graph = new ParallelTaskGraph();
-        scheduler = new ParallelScheduler(graph);
+        scheduler = new ForkJoinScheduler(graph);
         scheduler.start();
         idCounter = 0;
     }
