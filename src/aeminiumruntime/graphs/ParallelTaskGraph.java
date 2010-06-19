@@ -112,6 +112,26 @@ public class ParallelTaskGraph extends BaseTaskGraph {
 			return 0;
 		}
 	}
+
+	public void checkForCycles(RuntimeTask t) throws DependencyDeadlockException {
+		if (hasCycle(t.getId(), t.getId())) {
+			throw new DependencyDeadlockException(t.getId());
+		}
+	}
+
+	private boolean hasCycle(Integer where, Integer find) {
+		if (taskDependencies.containsKey(where)) {
+			for (Integer tid : taskDependencies.get(where)) {
+				if (tid == find) {
+					return true;
+				}
+				if (hasCycle(tid, find)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
     
     
 }

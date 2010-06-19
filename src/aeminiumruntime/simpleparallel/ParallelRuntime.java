@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import aeminiumruntime.*;
+import aeminiumruntime.graphs.DependencyDeadlockException;
 import aeminiumruntime.graphs.ParallelTaskGraph;
 import aeminiumruntime.schedulers.HybridForkJoinScheduler;
 import aeminiumruntime.schedulers.Scheduler;
@@ -35,8 +36,17 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
         }
 
         graph.add((RuntimeTask) task, rdeps);
+        if (debug) {
+        	try {
+				graph.checkForCycles((RuntimeTask) task);
+			} catch (DependencyDeadlockException e) {
+				e.printStackTrace();
+				scheduler.turnOff();
+				System.exit(1);
+			}
+        }
         scheduler.refresh();
-
+        
         return true;
     }
 

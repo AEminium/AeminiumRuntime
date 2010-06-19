@@ -9,6 +9,12 @@ public abstract class Runtime {
     public final static Collection<Task> NO_DEPS = null;
     public final static Collection<Hint> NO_HINTS = null;
     
+    protected boolean debug = false;
+    /* turn debug mode on */
+    public void startDebug() {
+    	debug = true;
+    }
+    
     /* initialize runtime */
     public abstract void init();
     /* add a task along with it's parent and dependencies */

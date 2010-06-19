@@ -81,7 +81,7 @@ public class SimpleTest {
         deps5.add(t2);
         deps5.add(t4);
         
-        rt.schedule(t3, null); // both null and Runtime.NO_DEPS work
+        rt.schedule(t3, null); // both null and 
         rt.schedule(t1, Runtime.NO_DEPS);
         rt.schedule(t5, deps5);
         rt.schedule(t4, deps4);

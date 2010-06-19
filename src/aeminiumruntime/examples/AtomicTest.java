@@ -11,10 +11,10 @@ import aeminiumruntime.Body;
 import aeminiumruntime.simpleparallel.ParallelRuntime;
 
 public class AtomicTest {
-    private static int MATRIX_SIZE = 8;
+    private static int MATRIX_SIZE = 4;
     private static int turn = 1;
     private static int[] score = {0,0};
-    private static int[] count = {8,8};
+    private static int[] count = {4,4};
     
     /* Object Store */
     private static int[][] matrix = new int[MATRIX_SIZE][MATRIX_SIZE];
@@ -49,7 +49,7 @@ public class AtomicTest {
                 	for(int j=0; j < MATRIX_SIZE; j++) {
                 		if ( mod2(j + i) ) {
                 			if (i < 2) matrix[i][j] = 1;
-                			if (i > 5) matrix[i][j] = 2;
+                			else matrix[i][j] = 2;
                 		}
                 	}   		
             	}
