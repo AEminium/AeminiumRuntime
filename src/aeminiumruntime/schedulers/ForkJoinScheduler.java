@@ -15,6 +15,7 @@ public class ForkJoinScheduler extends BaseScheduler {
     public ForkJoinScheduler(TaskGraph graph) {
         super(graph);
         pool = new ForkJoinPool();
+        pool.setAsyncMode(true);
     }
 
     @Override
