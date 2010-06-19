@@ -40,7 +40,7 @@ public class ParallelRuntime extends Runtime {
         }
 
         graph.add((RuntimeTask) task, rdeps);
-        // TODO scheduler.interrupt();
+        scheduler.interrupt();
 
         return true;
     }
