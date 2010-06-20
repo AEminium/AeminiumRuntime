@@ -1,18 +1,35 @@
 package aeminiumruntime;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 public abstract class Runtime {
     /* global constants used for the */
-	@SuppressWarnings("unchecked")
-    public final static Collection<Task> NO_DEPS = Collections.EMPTY_LIST;
-	@SuppressWarnings("unchecked")
-    public final static Collection<Hint> NO_HINTS = Collections.EMPTY_LIST;
+    public final static Collection<Task> NO_DEPS = new ArrayList<Task>() {
+		private static final long serialVersionUID = 1852797887380877437L;
+
+		@Override 
+		public String toString() {
+			return "NO_DEPS"; 
+		}
+	};
+    public final static Collection<Hint> NO_HINTS = new ArrayList<Hint>() {
+		private static final long serialVersionUID = -4192191055485289203L;
+
+		@Override 
+		public String toString() {
+			return "NO_HINTS"; 
+		}
+	};
     public final static Task NO_PARENT = new Task() {
 		@Override
 		public Collection<Hint> getHints() {
 			return null;
+		}
+		
+		@Override
+		public String toString() {
+			return "NO_PARENT";
 		}
 	};
 	
