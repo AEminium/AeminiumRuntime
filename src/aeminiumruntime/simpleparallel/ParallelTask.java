@@ -32,9 +32,9 @@ public class ParallelTask extends StatisticTask implements RuntimeTask {
         return this.body;
     }
 
-    public Object execute() {
+    public Object call() {
         this.started = true;
-        this.body.execute();
+        this.body.execute(this);
         this.done = true;
         return null;
     }

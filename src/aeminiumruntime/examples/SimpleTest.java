@@ -17,7 +17,7 @@ public class SimpleTest {
         rt.init();
 
         Body b1 = new Body() {
-            public void execute() {
+            public void execute(Task parent) {
                 int sum = 0;
                 for (int i = 0; i < MAX_CALC; i++) {
                     sum +=i;
@@ -27,7 +27,7 @@ public class SimpleTest {
         };
 
         Body b2 = new Body() {
-            public void execute() {
+            public void execute(Task parent) {
                 for (int i = 0; i < MAX_CALC/5; i++) {
                     System.out.println("Processing...");
                 }
@@ -35,7 +35,7 @@ public class SimpleTest {
         };
         
         Body b3 = new Body() {
-            public void execute() {
+            public void execute(Task parent) {
                 int max = 0;
                 for (int i = 0; i < MAX_CALC; i++) {
                     if (i > max) max = i;
@@ -48,13 +48,13 @@ public class SimpleTest {
         };
         
         Body b4 = new Body(){
-        	public void execute(){
+        	public void execute(Task parent){
         		Tests.power(2, 20);
         	}
         };
         
         Body b5 = new Body(){
-        	public void execute(){
+        	public void execute(Task parent){
         		Tests.matrixMultiplication();
         	}
         };

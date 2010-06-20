@@ -13,7 +13,7 @@ public class TaskCreationBenchmark implements IBenchmark {
 	public void run(IReporter reporter) {
 		Body body = new Body() {
 			@Override
-			public void execute() {
+			public void execute(Task parent) {
 				// DO NOTHING				
 			}
 		};

@@ -12,6 +12,6 @@ public class LinearScheduler extends BaseScheduler {
 
     @Override
     public void scheduleTask(RuntimeTask task) {
-        task.execute();
+        task.call();
     }
 }

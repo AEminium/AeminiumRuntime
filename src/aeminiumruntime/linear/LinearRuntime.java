@@ -56,9 +56,9 @@ public class LinearRuntime extends Runtime {
     }
 
     @Override
-    public BlockingTask createBlockingTask(Callable<Body> b) {
+    public BlockingTask createBlockingTask(Body b) {
         try {
-            return new LinearBlockingTask(b.call(), idCounter++);
+            return new LinearBlockingTask(b, idCounter++);
         } catch (Exception ex) {
             Logger.getLogger(LinearRuntime.class.getName()).log(Level.SEVERE, "Error creating Task.", ex);
             return null;
@@ -79,5 +79,10 @@ public class LinearRuntime extends Runtime {
     public AtomicTask createAtomicTask(Body b, DataGroup g) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+	@Override
+	public boolean schedule(Task task, Task parent, Collection<Task> deps) {
+		return schedule(task, deps);
+	}
 
 }

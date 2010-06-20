@@ -25,7 +25,7 @@ public class HybridForkJoinScheduler extends ForkJoinScheduler {
         return new Runnable() {
             @Override
             public void run() {
-                task.execute();
+                task.call();
                 scheduleAllTasks();
             }
         };

@@ -46,7 +46,7 @@ public class LinearTaskGraph implements IBenchmark {
 		return rt.createNonBlockingTask(new Body() {
 			
 			@Override
-			public void execute() {
+			public void execute(Task parent) {
 				// DO NOTHING
 			}
 		});

@@ -27,7 +27,7 @@ public class ForkJoinScheduler extends BaseScheduler {
     protected ForkJoinTask<Object> createThreadFromTask(final RuntimeTask task) {
         Callable<Object> threadWrapper = new Callable<Object>() {
             public Object call() {
-                Object result = task.execute();
+                Object result = task.call();
                 scheduleAllTasks();
                 return result;
             }

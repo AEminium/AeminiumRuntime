@@ -13,7 +13,7 @@ public class ParallelScheduler extends BaseScheduler {
         return new Thread() {
             @Override
             public void run() {
-                task.execute();
+                task.call();
                 scheduleAllTasks();
             }
         };

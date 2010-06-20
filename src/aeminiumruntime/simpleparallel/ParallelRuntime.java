@@ -58,9 +58,9 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
     }
 
     @Override
-    public BlockingTask createBlockingTask(Callable<Body> b) {
+    public BlockingTask createBlockingTask(Body b) {
         try {
-            return new ParallelBlockingTask(b.call(), idCounter++);
+            return new ParallelBlockingTask(b, idCounter++);
         } catch (Exception ex) {
             Logger.getLogger(ParallelRuntime.class.getName()).log(Level.SEVERE, "Error creating Task.", ex);
             return null;
@@ -86,5 +86,10 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
             return null;
         }
     }
+
+	@Override
+	public boolean schedule(Task task, Task parent, Collection<Task> deps) {
+		return schedule(task, deps);
+	}
 
 }

@@ -19,10 +19,10 @@ public class ParallelAtomicTask extends ParallelTask implements AtomicTask {
 	}
 
 	@Override
-	public Object execute() {
+	public Object call() {
 		Object result;
 		this.owner.lock();
-		result = super.execute();
+		result = super.call();
 		this.owner.unlock();
 		return result;
 	}

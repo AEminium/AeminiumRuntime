@@ -17,13 +17,13 @@ public class DeadlockTest {
         rt.startDebug(); /* required for cycle detection */
         
         Body b1 = new Body() {
-            public void execute() {
+            public void execute(Task parent) {
                 System.out.println("Task 1");
             }
         };
 
         Body b2 = new Body() {
-            public void execute() {
+            public void execute(Task parent) {
                 System.out.println("Task 2");
             }
         };

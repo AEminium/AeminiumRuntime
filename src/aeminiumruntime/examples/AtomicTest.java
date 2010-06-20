@@ -2,12 +2,11 @@ package aeminiumruntime.examples;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Callable;
 
+import aeminiumruntime.Body;
 import aeminiumruntime.DataGroup;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.Body;
 import aeminiumruntime.simpleparallel.ParallelRuntime;
 
 public class AtomicTest {
@@ -42,7 +41,7 @@ public class AtomicTest {
         rt.init();
 
         final Body b1 = new Body() {
-            public void execute() {
+            public void execute(Task parent) {
             	System.out.println("Defined matrix");
             	/* Sets the initial matrix */
             	for(int i=0; i < MATRIX_SIZE; i++) {
@@ -59,14 +58,14 @@ public class AtomicTest {
         
         final DataGroup d1 = rt.createDataGroup();
         
-        Task t1 = rt.createBlockingTask(new Callable<Body>() {
+        Task t1 = rt.createBlockingTask(new Body() {
+			
 			@Override
-			public Body call() throws Exception {
-				b1.execute();
-				return b1;
+			public void execute(Task parent) {
+				b1.execute(parent);
+				
 			}
-        	
-        });
+		});
         rt.schedule(t1, null);
         
         final Collection<Task> deps1 = new ArrayList<Task>();       
@@ -74,7 +73,7 @@ public class AtomicTest {
         
 
         Body manager = new Body() {
-        	public void execute() {
+        	public void execute(Task parent) {
         			if ( count[turn] <= 0 ) return;
         			
         			printMatrix();
@@ -82,7 +81,7 @@ public class AtomicTest {
         		    // Turn manager
         			final Collection<Task> waitFor = new ArrayList<Task>();
         			Task t2 = rt.createAtomicTask(new Body() {
-        	        	public void execute() {
+        	        	public void execute(Task parent) {
         	        		int k,l;
         	        		int op = (turn==1) ? 2 : 1;
         	        		
