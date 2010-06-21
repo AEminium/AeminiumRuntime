@@ -74,8 +74,7 @@ public class QGraph {
 					QAbstractTask parent = (QAbstractTask)task.getParent();
 					synchronized (parent) {
 						parent.deleteChildTask(task);
-						if ( !parent.hasChildren() ) {
-							System.out.println("no more children " + parent );
+						if ( !parent.hasChildren() && parent.getTaskState() == QTaskState.WAITING_FOR_CHILDREN) {
 							taskCompleted(parent);
 						}
 					}

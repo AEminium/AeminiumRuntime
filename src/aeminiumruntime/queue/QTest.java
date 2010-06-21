@@ -34,6 +34,15 @@ public class QTest {
 					public String toString() {return "t1.2";}
 				});
 				rt.schedule(t12, current, aeminiumruntime.Runtime.NO_DEPS);
+				Task t13 = rt.createNonBlockingTask(new Body() {
+					@Override
+					public void execute(Task parent) {
+						System.out.println("I'm 1.3");
+					}
+					@Override
+					public String toString() {return "t1.3";}
+				});
+				rt.schedule(t13, current, aeminiumruntime.Runtime.NO_DEPS);
 			}
 			@Override
 			public String toString() {return "t1";}
