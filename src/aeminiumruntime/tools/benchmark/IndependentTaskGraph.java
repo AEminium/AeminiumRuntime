@@ -28,7 +28,7 @@ public class IndependentTaskGraph implements IBenchmark {
 		long start = System.nanoTime();
 		for(int i = 0; i < count; i++ ) {
 			Task nextTask = createTask(rt);
-			rt.schedule(nextTask, Runtime.NO_DEPS);
+			rt.schedule(nextTask, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		}
 		long end = System.nanoTime();
 		String result = String.format("Run %10d tasks in %12d ns ==> %10d ns per task execution.", count, (end-start), ((end-start)/count));

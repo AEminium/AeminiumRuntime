@@ -47,13 +47,13 @@ public class DeadlockTest {
         
         Random r = new Random();
         if (r.nextBoolean()) {
-	        rt.schedule(t1, deps1); 
-	        rt.schedule(t2, deps2);
-	        rt.schedule(t3, deps3);
-	        rt.schedule(t4, deps4);
+	        rt.schedule(t1, Runtime.NO_PARENT, deps1); 
+	        rt.schedule(t2, Runtime.NO_PARENT, deps2);
+	        rt.schedule(t3, Runtime.NO_PARENT, deps3);
+	        rt.schedule(t4, Runtime.NO_PARENT, deps4);
         } else {
         	// this also returns a deadlock
-        	rt.schedule(t1, deps2);
+        	rt.schedule(t1, Runtime.NO_PARENT, deps2);
         }
         rt.shutdown();
     }

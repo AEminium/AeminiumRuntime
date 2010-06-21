@@ -2,15 +2,20 @@ package aeminiumruntime.schedulers;
 
 import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.TaskGraph;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ParallelScheduler extends BaseScheduler {
 
+	ExecutorService pool;
+	
     public ParallelScheduler(TaskGraph graph) {
         super(graph);
+        pool = Executors.newCachedThreadPool();
     }
 
-    private Thread createWorkerThread(final RuntimeTask task) {
-        return new Thread() {
+    private Runnable createWorkerTask(final RuntimeTask task) {
+        return new Runnable() {
             @Override
             public void run() {
                 task.call();
@@ -21,7 +26,6 @@ public class ParallelScheduler extends BaseScheduler {
 
     @Override
     public void scheduleTask(RuntimeTask task) {
-        Thread taskThread = createWorkerThread(task);
-        taskThread.start();  
+        pool.execute(createWorkerTask(task));
     }
 }

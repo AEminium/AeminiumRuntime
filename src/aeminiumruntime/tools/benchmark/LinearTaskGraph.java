@@ -29,11 +29,11 @@ public class LinearTaskGraph implements IBenchmark {
 		
 		long start = System.nanoTime();
 		Task previousTask = createTask(rt);
-		rt.schedule(previousTask, Runtime.NO_DEPS);
+		rt.schedule(previousTask,Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
 		for(int i = 0; i < count-1; i++ ) {
 			Task nextTask = createTask(rt);
-			rt.schedule(nextTask, Arrays.asList(previousTask));
+			rt.schedule(nextTask,Runtime.NO_PARENT, Arrays.asList(previousTask));
 			previousTask = nextTask;
 		}
 		long end = System.nanoTime();
