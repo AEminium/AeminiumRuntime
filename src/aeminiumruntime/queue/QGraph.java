@@ -1,12 +1,18 @@
 package aeminiumruntime.queue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import aeminiumruntime.Task;
 
 
 public class QGraph {
-	private final QTaskList waitingForDeps     = new QTaskList("waitingForDeps");
-	private final QTaskList running            = new QTaskList("running");
-	private final QTaskList waitingForChildren = new QTaskList("waitingForChildren");
+//	private final List<QAbstractTask>  waitingForDeps= new LinkedList<QAbstractTask>();
+//	private final List<QAbstractTask>  running = new LinkedList<QAbstractTask>();
+//	private final List<QAbstractTask>  waitingForChildren = new LinkedList<QAbstractTask>();
+	private final List<QAbstractTask>  waitingForDeps= new ArrayList<QAbstractTask>();
+	private final List<QAbstractTask>  running = new ArrayList<QAbstractTask>();
+	private final List<QAbstractTask>  waitingForChildren = new ArrayList<QAbstractTask>();
 	private final QScheduler scheduler;
 	
 	public QGraph(QScheduler scheduler ) {
@@ -18,23 +24,28 @@ public class QGraph {
 			synchronized (task) {
 				task.setGraph(this);
 				if ( task.getDependencies() == aeminiumruntime.Runtime.NO_DEPS ) {
-					running.addListItem(task);
+					running.add(task);
 					task.setTaskState(QTaskState.RUNNING);
 					scheduler.schedule(task);
 				} else {
+					List<Task> doneTasks = new ArrayList<Task>();
 					for ( Task t : task.getDependencies() ) {
 						synchronized (t) {
 							QAbstractTask at = (QAbstractTask)t;
 							if ( at.getTaskState() != QTaskState.FINISHED ) {
 								at.addDependent(task);
+							} else {
+								//task.removeDependency(at);
+								doneTasks.add(at);
 							}
 						}
 					}
+					task.removeDependency(doneTasks);
 					if ( task.getDependencies() != aeminiumruntime.Runtime.NO_DEPS ){
 						task.setTaskState(QTaskState.WAITING_FOR_DEPENDENCIES);
-						waitingForDeps.addListItem(task);
+						waitingForDeps.add(task);
 					} else {
-						running.addListItem(task);
+						running.add(task);
 						task.setTaskState(QTaskState.RUNNING);
 						scheduler.schedule(task);
 					}
@@ -49,9 +60,9 @@ public class QGraph {
 		assert ( task.getGraph() == this );
 		synchronized (this) {
 			synchronized (task) {
-				running.removeListItem(task);
+				running.remove(task);
 				if (task.hasChildren()) {
-					waitingForChildren.addListItem(task);
+					waitingForChildren.add(task);
 					task.setTaskState(QTaskState.WAITING_FOR_CHILDREN);
 				} else {
 					taskCompleted(task);
@@ -65,7 +76,7 @@ public class QGraph {
 		synchronized (this) {
 			synchronized (task) {
 				if ( task.getTaskState() == QTaskState.WAITING_FOR_CHILDREN ) {
-					waitingForChildren.removeListItem(task);
+					waitingForChildren.remove(task);
 				}
 				task.setTaskState(QTaskState.FINISHED);
 				if ( task.getParent() != aeminiumruntime.Runtime.NO_PARENT ) {
@@ -83,8 +94,9 @@ public class QGraph {
 						at.removeDependency(task);
 						if ( at.getDependencies() == aeminiumruntime.Runtime.NO_DEPS ) {
 							// schedule task
-							waitingForDeps.removeListItem(at);
-							running.addListItem(at);
+							//System.out.println(task + " -> " + at);
+							waitingForDeps.remove(at);
+							running.add(at);
 							at.setTaskState(QTaskState.RUNNING);
 							scheduler.schedule(at);
 						}

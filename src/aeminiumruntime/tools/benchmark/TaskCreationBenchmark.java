@@ -3,6 +3,7 @@ package aeminiumruntime.tools.benchmark;
 import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
+import aeminiumruntime.queue.QRuntime;
 import aeminiumruntime.simpleparallel.ParallelRuntime;
 
 public class TaskCreationBenchmark implements IBenchmark {
@@ -18,7 +19,8 @@ public class TaskCreationBenchmark implements IBenchmark {
 			}
 		};
 		
-		Runtime rt = new ParallelRuntime();
+		//Runtime rt = new ParallelRuntime();
+		Runtime rt = new QRuntime();
 		rt.init();
 
 		for ( int COUNT : COUNTS) {

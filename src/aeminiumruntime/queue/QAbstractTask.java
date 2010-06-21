@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
+import aeminiumruntime.Runtime;
 import aeminiumruntime.Body;
 import aeminiumruntime.Hint;
 import aeminiumruntime.Task;
 
-public class QAbstractTask implements QListItem, Task, Callable<Object> {
-	private QListItem prev = QTaskList.NO_ITEM;
-	private QListItem next = QTaskList.NO_ITEM;
-	private QTaskList list = QTaskList.NO_LIST;
+public class QAbstractTask implements Task, Callable<Object> {
 	private QTaskState state = QTaskState.WAITING_FOR_DEPENDENCIES;
-	private Collection<Task> dependencies = aeminiumruntime.Runtime.NO_DEPS;
+	private Collection<Task> dependencies = Runtime.NO_DEPS;
 	private Task parent = aeminiumruntime.Runtime.NO_PARENT;
 	private int childCount = 0;
 	private Body body;
@@ -30,6 +28,12 @@ public class QAbstractTask implements QListItem, Task, Callable<Object> {
 	
 	public void removeDependency(Task task) {
 		dependencies.remove(task);
+		if ( dependencies.isEmpty()) {
+			dependencies = aeminiumruntime.Runtime.NO_DEPS;
+		}
+	}
+	public void removeDependency(Collection<Task> tasks) {
+		dependencies.removeAll(tasks);
 		if ( dependencies.isEmpty()) {
 			dependencies = aeminiumruntime.Runtime.NO_DEPS;
 		}
@@ -71,36 +75,6 @@ public class QAbstractTask implements QListItem, Task, Callable<Object> {
 		childCount--;
 	}
 	
-	@Override
-	public QListItem getNextItem() {
-		return next;
-	}
-
-	@Override
-	public QListItem getPrevItem() {
-		return prev;
-	}
-
-	@Override
-	public void setNextItem(QListItem next) {
-		this.next = next;
-	}
-
-	@Override
-	public void setPrevItem(QListItem prev) {
-		this.prev = prev;
-	}
-
-	@Override
-	public QTaskList getTaskList() {
-		return list;
-	}
-
-	@Override
-	public void setTaskList(QTaskList list) {
-		this.list = list;		
-	}
-
 	@Override
 	public Collection<Hint> getHints() {
 		// TODO Auto-generated method stub

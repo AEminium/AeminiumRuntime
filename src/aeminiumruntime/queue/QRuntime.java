@@ -66,14 +66,15 @@ public class QRuntime extends Runtime {
 	public boolean schedule(Task task, Task parent, Collection<Task> deps) {
 		assert ( state == QRuntimeState.INITIALIZED );
 		assert ( task instanceof QAbstractTask );
+		QAbstractTask at = (QAbstractTask)task;
 		if ( deps != NO_DEPS ) {
-			((QAbstractTask)task).setDependencies(new ArrayList<Task>(deps));
+			at.setDependencies(new ArrayList<Task>(deps));
 		} else {
-			((QAbstractTask)task).setDependencies(NO_DEPS);
+			at.setDependencies(NO_DEPS);
 		}
-		((QAbstractTask)task).setParent(parent);
+		at.setParent(parent);
 		if ( parent != NO_PARENT ) {
-			((QAbstractTask)parent).addChildTask(task);
+			at.addChildTask(task);
 		}
 		return taskGraph.addTask(((QAbstractTask)task));
 	}
