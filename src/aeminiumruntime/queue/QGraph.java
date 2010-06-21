@@ -21,7 +21,7 @@ public class QGraph {
 				task.setGraph(this);
 				if ( task.getDependencies() == aeminiumruntime.Runtime.NO_DEPS ) {
 					running.addListItem(task);
-					task.setTaskState(QTaskState.RUNNIG);
+					task.setTaskState(QTaskState.RUNNING);
 					scheduler.schedule(task);
 				} else {
 					for ( Task t : task.getDependencies() ) {
@@ -37,7 +37,7 @@ public class QGraph {
 						waitingForDeps.addListItem(task);
 					} else {
 						running.addListItem(task);
-						task.setTaskState(QTaskState.RUNNIG);
+						task.setTaskState(QTaskState.RUNNING);
 						scheduler.schedule(task);
 					}
 				}
@@ -61,43 +61,44 @@ public class QGraph {
 			}
 		}
 	}
-	
+
 	// have to synchronize on task and this
 	public void taskCompleted(QAbstractTask task) {
-		if ( task.getTaskState() == QTaskState.WAITING_FOR_CHILDREN ) {
-			waitingForChildren.removeListItem(task);
-		}
-		task.setTaskState(QTaskState.FINISHED);
-		if ( task.getParent() != aeminiumruntime.Runtime.NO_PARENT ) {
-			QAbstractTask parent = (QAbstractTask)task.getParent();
-			synchronized (parent) {
-				parent.deleteChildTask(task);
-				if ( !parent.hasChildren() ) {
-					System.out.println("no more children " + parent );
-					taskCompleted(parent);
-				}
-			}
-		}
-		for ( Task t : task.getDependents() ) {
-			synchronized (t) {
-				QAbstractTask at = (QAbstractTask)t;
-				at.removeDependency(task);
-				if ( at.getDependencies() == aeminiumruntime.Runtime.NO_DEPS ) {
-					// schedule task
-					waitingForDeps.removeListItem(at);
-					running.addListItem(at);
-					at.setTaskState(QTaskState.RUNNIG);
-					scheduler.schedule(at);
-				}
-			}
-		}
-		
 		synchronized (this) {
-			if (waitingForChildren.isEmpty() && waitingForDeps.isEmpty() && running.isEmpty()) {
-				this.notifyAll();
+			synchronized (task) {
+				if ( task.getTaskState() == QTaskState.WAITING_FOR_CHILDREN ) {
+					waitingForChildren.removeListItem(task);
+				}
+				task.setTaskState(QTaskState.FINISHED);
+				if ( task.getParent() != aeminiumruntime.Runtime.NO_PARENT ) {
+					QAbstractTask parent = (QAbstractTask)task.getParent();
+					synchronized (parent) {
+						parent.deleteChildTask(task);
+						if ( !parent.hasChildren() ) {
+							System.out.println("no more children " + parent );
+							taskCompleted(parent);
+						}
+					}
+				}
+				for ( Task t : task.getDependents() ) {
+					synchronized (t) {
+						QAbstractTask at = (QAbstractTask)t;
+						at.removeDependency(task);
+						if ( at.getDependencies() == aeminiumruntime.Runtime.NO_DEPS ) {
+							// schedule task
+							waitingForDeps.removeListItem(at);
+							running.addListItem(at);
+							at.setTaskState(QTaskState.RUNNING);
+							scheduler.schedule(at);
+						}
+					}
+				}
+
+				if (waitingForChildren.isEmpty() && waitingForDeps.isEmpty() && running.isEmpty()) {
+					this.notifyAll();
+				}
 			}
 		}
-		
 	}
 	
 	public void waitUntilEmpty() {
