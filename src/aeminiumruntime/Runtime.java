@@ -42,9 +42,6 @@ public abstract class Runtime {
     
     /* initialize runtime */
     public abstract void init();
-    /* add a task along with it's dependencies */
-    @Deprecated
-    public abstract boolean schedule(Task task, Collection<Task> deps);
     /* add a task along with it's parent and dependencies */
     public abstract boolean schedule(Task task, Task parent, Collection<Task> deps);
     /* returns the current task object */

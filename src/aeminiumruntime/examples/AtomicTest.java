@@ -7,7 +7,7 @@ import aeminiumruntime.Body;
 import aeminiumruntime.DataGroup;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.simpleparallel.ParallelRuntime;
+import aeminiumruntime.launcher.RuntimeFactory;
 
 public class AtomicTest {
     private static int MATRIX_SIZE = 4;
@@ -37,7 +37,7 @@ public class AtomicTest {
     }
     
     public static void main(String[] args) {
-        final Runtime rt = new ParallelRuntime();
+        final Runtime rt = RuntimeFactory.getRuntime();
         rt.init();
 
         final Body b1 = new Body() {

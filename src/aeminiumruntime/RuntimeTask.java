@@ -1,12 +1,10 @@
 package aeminiumruntime;
 
-import java.util.concurrent.Callable;
-
 import aeminiumruntime.statistics.Statistics;
 
 
 
-public interface RuntimeTask extends Task, Callable<Object>{
+public interface RuntimeTask extends Task {
     public Statistics getStatistics();
     public int getId();
     public Body getBody();

@@ -9,7 +9,7 @@ import jsr166y.ForkJoinTask;
 
 import aeminiumruntime.BlockingTask;
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.TaskGraph;
+import aeminiumruntime.graphs.TaskGraph;
 
 public class HybridForkJoinScheduler extends ForkJoinScheduler {
 

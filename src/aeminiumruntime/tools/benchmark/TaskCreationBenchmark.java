@@ -4,7 +4,7 @@ import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
 import aeminiumruntime.queue.QRuntime;
-import aeminiumruntime.simpleparallel.ParallelRuntime;
+
 
 public class TaskCreationBenchmark implements IBenchmark {
 	private final String name = "TaskCreation";
@@ -18,8 +18,8 @@ public class TaskCreationBenchmark implements IBenchmark {
 				// DO NOTHING				
 			}
 		};
-		
-		//Runtime rt = new ParallelRuntime();
+
+		//Runtime rt = RuntimeFactory.getRuntime();
 		Runtime rt = new QRuntime();
 		rt.init();
 

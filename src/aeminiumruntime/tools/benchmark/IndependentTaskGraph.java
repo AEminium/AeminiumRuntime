@@ -4,7 +4,6 @@ import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
 import aeminiumruntime.queue.QRuntime;
-import aeminiumruntime.simpleparallel.ParallelRuntime;
 
 public class IndependentTaskGraph implements IBenchmark {
 	private final String name = "IndepenetTaskGraph";
@@ -23,8 +22,9 @@ public class IndependentTaskGraph implements IBenchmark {
 	}
 
 	private void runTest(IReporter reporter, int count) {
-		//Runtime rt = new ParallelRuntime();
+		//Runtime rt = RuntimeFactory.getRuntime();
 		Runtime rt = new QRuntime();
+
 		rt.init();
 		
 		long start = System.nanoTime();

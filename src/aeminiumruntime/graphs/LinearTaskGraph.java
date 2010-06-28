@@ -7,7 +7,7 @@ import aeminiumruntime.RuntimeTask;
 
 public class LinearTaskGraph extends BaseTaskGraph {
 
-    public synchronized boolean add(RuntimeTask task, Collection<RuntimeTask> deps) {
+    public synchronized boolean add(RuntimeTask task, RuntimeTask parent, Collection<RuntimeTask> deps) {
         readyList.add(task);
         return true;
     }
@@ -35,5 +35,9 @@ public class LinearTaskGraph extends BaseTaskGraph {
         return runningList.isEmpty() && readyList.isEmpty();
     }
     
-    
+    @Override
+    public void checkForCycles(RuntimeTask t)
+	throws DependencyDeadlockException {
+    	
+    }
 }

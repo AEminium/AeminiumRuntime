@@ -2,25 +2,23 @@ package aeminiumruntime.prioritizers;
 
 import java.util.List;
 
-import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.graphs.ParallelTaskGraph;
 
 public class SmartPrioritizer implements Prioritizer {
 
-	ParallelTaskGraph graph;
+	PrioritizableTaskGraph graph;
 	
-	public SmartPrioritizer(ParallelTaskGraph g) {
+	public SmartPrioritizer(PrioritizableTaskGraph g) {
 		graph = g;
 	}
 	
 	@Override
-	public RuntimeTask getNext(List<RuntimeTask> nextList) {
+	public <T> T getNext(List<T> nextList) { 
 		if (nextList.size() == 0) return null;
 		
-		RuntimeTask bestTask = null;
+		T bestTask = null;
 		int bestScore = 0;
 		int currentScore = 0;
-		for (RuntimeTask task: nextList) {
+		for (T task: nextList) {
 			currentScore = getScoreOf(task);
 			if (bestTask == null || currentScore > bestScore) {
 				bestTask = task;
@@ -30,7 +28,7 @@ public class SmartPrioritizer implements Prioritizer {
 		return bestTask;
 	}
 
-	private int getScoreOf(RuntimeTask bestTask) {
+	public <T> int getScoreOf(T bestTask) {
 		return this.graph.countDependencies(bestTask);
 	}
 

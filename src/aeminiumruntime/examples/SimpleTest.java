@@ -6,13 +6,13 @@ import java.util.Collection;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
 import aeminiumruntime.Body;
-import aeminiumruntime.simpleparallel.ParallelRuntime;
+import aeminiumruntime.launcher.RuntimeFactory;
 
 public class SimpleTest {
 	private static int MAX_CALC = 30;
 
 	public static void main(String[] args) {
-		final Runtime rt = new ParallelRuntime();
+        final Runtime rt = RuntimeFactory.getRuntime();
 		rt.init();
 
 		Body b1 = new Body() {

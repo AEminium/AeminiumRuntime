@@ -12,6 +12,7 @@ import aeminiumruntime.Task;
 public class QAbstractTask implements Task, Callable<Object> {
 	private QTaskState state = QTaskState.WAITING_FOR_DEPENDENCIES;
 	private Collection<Task> dependencies = Runtime.NO_DEPS;
+	
 	private Task parent = aeminiumruntime.Runtime.NO_PARENT;
 	private int childCount = 0;
 	private Body body;
@@ -103,7 +104,7 @@ public class QAbstractTask implements Task, Callable<Object> {
 	public Collection<Task> getDependents(){
 		return dependents;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Task<"+body.toString()+">" + childCount;

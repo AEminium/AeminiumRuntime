@@ -6,7 +6,7 @@ import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
 
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.TaskGraph;
+import aeminiumruntime.graphs.TaskGraph;
 
 public class ForkJoinScheduler extends BaseScheduler {
 

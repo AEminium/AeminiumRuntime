@@ -1,7 +1,8 @@
 package aeminiumruntime.schedulers;
 
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.TaskGraph;
+import aeminiumruntime.graphs.TaskGraph;
+
 
 public class EagerParallelScheduler extends BaseScheduler {
 

@@ -24,7 +24,7 @@ public class LinearTaskGraph implements IBenchmark {
 	}
 
 	private void runTest(IReporter reporter, int count) {
-		//Runtime rt = new ParallelRuntime();
+		//Runtime rt = RuntimeFactory.getRuntime();
 		Runtime rt = new QRuntime();
 		rt.init();
 		
@@ -55,6 +55,7 @@ public class LinearTaskGraph implements IBenchmark {
 			public String toString() {
 				return name;
 			}
+
 		});
 	}
 }

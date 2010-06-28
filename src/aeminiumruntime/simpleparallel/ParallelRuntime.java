@@ -8,32 +8,62 @@ import java.util.logging.Logger;
 import aeminiumruntime.*;
 import aeminiumruntime.graphs.DependencyDeadlockException;
 import aeminiumruntime.graphs.ParallelTaskGraph;
+import aeminiumruntime.graphs.TaskGraph;
 import aeminiumruntime.schedulers.HybridForkJoinScheduler;
 import aeminiumruntime.schedulers.Scheduler;
 
 public class ParallelRuntime extends aeminiumruntime.Runtime {
 
-    private ParallelTaskGraph graph;
+    private TaskGraph graph;
     private Scheduler scheduler;
     private int idCounter;
     
+    
+    public ParallelRuntime(boolean debug) {
+    	if (debug) {
+    		startDebug();
+    	}
+    }
+    
     @Override
     public void init() {
-        graph = new ParallelTaskGraph();
-        scheduler = new HybridForkJoinScheduler(graph);
         idCounter = 0;
+        if (graph == null) {
+        	graph = new ParallelTaskGraph();    	
+        }
+        if (scheduler == null) {
+        	scheduler = new HybridForkJoinScheduler(graph);	
+        }
+        
+    }
+    
+    public TaskGraph getGraph() {
+    	return graph;
+    }
+
+    public void setGraph(TaskGraph graph) {
+    	this.graph = graph;
+    }
+    
+    public void setScheduler(Scheduler s) {
+    	this.scheduler = s;
     }
 
     @Override
-    public boolean schedule(Task task, Collection<Task> deps) {
+    public boolean schedule(Task task, Task parent, Collection<Task> deps) {
 
         // TODO Stupid casting
         Collection<RuntimeTask> rdeps = new ArrayList<RuntimeTask>();
         if (deps != null) {
             for (Task t: deps) rdeps.add((RuntimeTask) t);
         }
+        
+        RuntimeTask rparent = null;
+        if (parent instanceof RuntimeTask) {
+        	rparent = (RuntimeTask) parent;
+        }
 
-        graph.add((RuntimeTask) task, rdeps);
+        graph.add((RuntimeTask) task, rparent, rdeps);
         if (debug) {
         	try {
 				graph.checkForCycles((RuntimeTask) task);
@@ -85,10 +115,4 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
             return null;
         }
     }
-
-	@Override
-	public boolean schedule(Task task, Task parent, Collection<Task> deps) {
-		return schedule(task, deps);
-	}
-
 }

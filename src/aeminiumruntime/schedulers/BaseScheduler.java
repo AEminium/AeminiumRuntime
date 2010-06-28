@@ -1,7 +1,7 @@
 package aeminiumruntime.schedulers;
 
 import aeminiumruntime.RuntimeTask;
-import aeminiumruntime.TaskGraph;
+import aeminiumruntime.graphs.TaskGraph;
 
 public abstract class BaseScheduler implements Scheduler {
 
@@ -13,7 +13,10 @@ public abstract class BaseScheduler implements Scheduler {
 
     public void scheduleAllTasks() {
     	while(hasTasksToRun()) {
-    		scheduleTask(getNextTask());
+    		RuntimeTask t = getNextTask();
+    		if (t != null) {
+    			scheduleTask(t);
+    		}
     	}
     }
 

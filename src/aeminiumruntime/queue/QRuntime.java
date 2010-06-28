@@ -55,14 +55,6 @@ public class QRuntime extends Runtime {
 	}
 
 	@Override
-	public boolean schedule(Task task, Collection<Task> deps) {
-		assert ( state == QRuntimeState.INITIALIZED );
-		assert ( task instanceof QAbstractTask );
-		((QAbstractTask)task).setDependencies(deps);
-		return taskGraph.addTask(((QAbstractTask)task));
-	}
-
-	@Override
 	public boolean schedule(Task task, Task parent, Collection<Task> deps) {
 		assert ( state == QRuntimeState.INITIALIZED );
 		assert ( task instanceof QAbstractTask );

@@ -7,12 +7,12 @@ import java.util.Random;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
 import aeminiumruntime.Body;
-import aeminiumruntime.simpleparallel.ParallelRuntime;
+import aeminiumruntime.launcher.RuntimeFactory;
 
 public class DeadlockTest {
     
     public static void main(String[] args) {
-        final Runtime rt = new ParallelRuntime();
+        final Runtime rt = RuntimeFactory.getRuntime();
         rt.init();
         rt.startDebug(); /* required for cycle detection */
         

@@ -31,21 +31,6 @@ public class LinearRuntime extends Runtime {
     }
 
     @Override
-    public boolean schedule(Task task, Collection<Task> deps) {
-
-        // TODO Stupid casting
-        Collection<RuntimeTask> rdeps = new ArrayList<RuntimeTask>();
-        if (deps != null) {
-            for (Task t: deps) rdeps.add((RuntimeTask) t);
-        }
-
-        graph.add((RuntimeTask) task, rdeps);
-        scheduler.scheduleAllTasks();
-        
-        return true;
-    }
-
-    @Override
     public void shutdown() {
     }
 
@@ -81,7 +66,22 @@ public class LinearRuntime extends Runtime {
 
 	@Override
 	public boolean schedule(Task task, Task parent, Collection<Task> deps) {
-		return schedule(task, deps);
+
+        // TODO Stupid casting
+        Collection<RuntimeTask> rdeps = new ArrayList<RuntimeTask>();
+        if (deps != null) {
+            for (Task t: deps) rdeps.add((RuntimeTask) t);
+        }
+        
+        RuntimeTask rparent = null;
+        if (parent instanceof RuntimeTask) {
+        	rparent = (RuntimeTask) parent;
+        }
+
+        graph.add((RuntimeTask) task, rparent, rdeps);
+        scheduler.scheduleAllTasks();
+        
+        return true;
 	}
 
 }
