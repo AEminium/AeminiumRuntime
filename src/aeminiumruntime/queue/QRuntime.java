@@ -74,7 +74,7 @@ public class QRuntime extends Runtime {
 		}
 		at.setParent(parent);
 		if ( parent != NO_PARENT ) {
-			at.addChildTask(task);
+			((QAbstractTask)parent).addChildTask(task);
 		}
 		return taskGraph.addTask(((QAbstractTask)task));
 	}

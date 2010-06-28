@@ -103,7 +103,7 @@ public class QAbstractTask implements Task, Callable<Object> {
 	public Collection<Task> getDependents(){
 		return dependents;
 	}
-
+	
 	@Override
 	public String toString() {
 		return "Task<"+body.toString()+">" + childCount;

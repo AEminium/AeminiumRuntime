@@ -1,18 +1,17 @@
 package aeminiumruntime.queue;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import aeminiumruntime.Task;
 
 
 public class QGraph {
-//	private final List<QAbstractTask>  waitingForDeps= new LinkedList<QAbstractTask>();
-//	private final List<QAbstractTask>  running = new LinkedList<QAbstractTask>();
-//	private final List<QAbstractTask>  waitingForChildren = new LinkedList<QAbstractTask>();
-	private final List<QAbstractTask>  waitingForDeps= new ArrayList<QAbstractTask>();
-	private final List<QAbstractTask>  running = new ArrayList<QAbstractTask>();
-	private final List<QAbstractTask>  waitingForChildren = new ArrayList<QAbstractTask>();
+	private final List<QAbstractTask>  waitingForDeps= new LinkedList<QAbstractTask>();
+	private final List<QAbstractTask>  running = new LinkedList<QAbstractTask>();
+	private final List<QAbstractTask>  waitingForChildren = new LinkedList<QAbstractTask>();
+
 	private final QScheduler scheduler;
 	
 	public QGraph(QScheduler scheduler ) {
@@ -93,8 +92,6 @@ public class QGraph {
 						QAbstractTask at = (QAbstractTask)t;
 						at.removeDependency(task);
 						if ( at.getDependencies() == aeminiumruntime.Runtime.NO_DEPS ) {
-							// schedule task
-							//System.out.println(task + " -> " + at);
 							waitingForDeps.remove(at);
 							running.add(at);
 							at.setTaskState(QTaskState.RUNNING);

@@ -7,7 +7,7 @@ import aeminiumruntime.BlockingTask;
 import aeminiumruntime.NonBlockingTask;
 
 public class QHybridScheduler implements QScheduler {
-	private ExecutorService blockingService = Executors.newCachedThreadPool();
+	private ExecutorService blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
 	private ExecutorService nonblockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 	
 	@Override
