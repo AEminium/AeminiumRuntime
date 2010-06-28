@@ -15,6 +15,7 @@ public class LinearTask extends StatisticTask implements RuntimeTask {
     private Body body;
     private boolean done;
     private boolean started;
+    private Object result;
 
     public LinearTask(Body b, int id) {
         this.statistics = new Statistics();
@@ -49,5 +50,15 @@ public class LinearTask extends StatisticTask implements RuntimeTask {
 
     public boolean hasStarted() {
         return this.started;
+    }
+
+    @Override
+    public void setResult(Object value) {
+    	this.result = value;
+    }
+    
+    @Override
+    public Object getResult() {
+    	return result;
     }
 }

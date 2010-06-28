@@ -28,6 +28,15 @@ public abstract class Runtime {
 		}
 		
 		@Override
+		public void setResult(Object value) {
+			
+		}
+
+		@Override
+		public Object getResult() {
+			return null;
+		}
+		@Override
 		public String toString() {
 			return "NO_PARENT";
 		}

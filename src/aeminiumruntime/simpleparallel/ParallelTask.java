@@ -14,7 +14,7 @@ public class ParallelTask extends StatisticTask implements RuntimeTask {
     private Body body;
     private boolean done;
     private boolean started;
-    
+    private Object result;
 
     public ParallelTask(Body b, int id) {
         this.statistics = new Statistics();
@@ -49,5 +49,15 @@ public class ParallelTask extends StatisticTask implements RuntimeTask {
 
     public boolean hasStarted() {
         return this.started;
+    }
+
+    @Override
+    public void setResult(Object value) {
+    	this.result = value;
+    }
+    
+    @Override
+    public Object getResult() {
+    	return result;
     }
 }

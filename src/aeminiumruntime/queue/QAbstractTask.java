@@ -18,6 +18,7 @@ public class QAbstractTask implements Task, Callable<Object> {
 	private Body body;
 	private QGraph graph;
 	private Collection<Task> dependents = new ArrayList<Task>();
+	private Object result;
 	
 	public QAbstractTask(Body body) {
 		this.body = body;
@@ -105,6 +106,16 @@ public class QAbstractTask implements Task, Callable<Object> {
 		return dependents;
 	}
 
+	@Override
+	public void setResult(Object value) {
+		this.result = value;
+	}
+	
+	@Override
+	public Object getResult() {
+		return result;
+	}
+	
 	@Override
 	public String toString() {
 		return "Task<"+body.toString()+">" + childCount;
