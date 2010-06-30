@@ -5,7 +5,8 @@ public class RTBench {
 	private static IBenchmark[] benchmarks = {
 		new TaskCreationBenchmark(),
 		new IndependentTaskGraph(),
-		new LinearTaskGraph()
+		new LinearTaskGraph(),
+		new FixedParallelMaxDependencies()
 	};
 	
 	public static void main(String[] args) {
