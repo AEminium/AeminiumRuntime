@@ -1,9 +1,6 @@
 package aeminiumruntime.tools.benchmark;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import aeminiumruntime.Body;
@@ -35,7 +32,7 @@ public class FixedParallelMaxDependencies implements IBenchmark {
 		
 		long start = System.nanoTime();
 		List<Task> previousTasks = createTasks(rt, taskCount, "Task-0");
-		scheduleTasks(rt, previousTasks, Collections.EMPTY_LIST);
+		scheduleTasks(rt, previousTasks, new ArrayList<Task>());
 		
 		for(int i = 1; i < count; i++ ) {
 			List<Task> nextTasks = createTasks(rt, taskCount, "Task-"+i);
