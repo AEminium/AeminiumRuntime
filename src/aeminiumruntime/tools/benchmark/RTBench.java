@@ -7,7 +7,8 @@ public class RTBench {
 		new IndependentTaskGraph(),
 		new LinearTaskGraph(),
 		new FixedParallelMaxDependencies(),
-		new ChildTaskBenchmark()
+		new ChildTaskBenchmark(),
+		new FibonacciBenchmark()
 	};
 	
 	public static void main(String[] args) {

@@ -3,6 +3,7 @@ package aeminiumruntime.tools.benchmark;
 import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
+import aeminiumruntime.launcher.RuntimeFactory;
 import aeminiumruntime.queue.QRuntime;
 
 public class ChildTaskBenchmark implements IBenchmark {
@@ -23,7 +24,8 @@ public class ChildTaskBenchmark implements IBenchmark {
 	}
 	
 	public void runTest(IReporter reporter, int level) {
-		Runtime rt = new QRuntime();
+		//Runtime rt = new QRuntime();
+		Runtime rt = RuntimeFactory.getRuntime(false);
 			long start = System.nanoTime();
 			rt.init();
 			
