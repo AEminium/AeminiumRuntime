@@ -98,6 +98,10 @@ public class QAbstractTask implements Task, Callable<Object> {
 		return graph;
 	}
 
+	public Body getBody() {
+		return body;
+	}
+	
 	public void addDependent(QAbstractTask task) {
 			dependents.add(task);
 	}
@@ -120,4 +124,12 @@ public class QAbstractTask implements Task, Callable<Object> {
 	public String toString() {
 		return "Task<"+body.toString()+">" + childCount;
 	}
- }
+ 
+	public void taskFinished() {
+		// nothing by default
+	}
+	
+	public void taskCompleted() {
+		// nothing by default
+	}
+}

@@ -60,6 +60,8 @@ public class QGraph {
 		synchronized (this) {
 			synchronized (task) {
 				running.remove(task);
+				// callback 
+				task.taskFinished();
 				if (task.hasChildren()) {
 					waitingForChildren.add(task);
 					task.setTaskState(QTaskState.WAITING_FOR_CHILDREN);
@@ -78,6 +80,8 @@ public class QGraph {
 					waitingForChildren.remove(task);
 				}
 				task.setTaskState(QTaskState.FINISHED);
+				// callback 
+				task.taskCompleted();
 				if ( task.getParent() != aeminiumruntime.Runtime.NO_PARENT ) {
 					QAbstractTask parent = (QAbstractTask)task.getParent();
 					synchronized (parent) {

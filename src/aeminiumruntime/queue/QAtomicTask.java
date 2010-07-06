@@ -17,5 +17,19 @@ public class QAtomicTask extends QAbstractTask implements AtomicTask {
 		return datagroup;
 	}
 
+	@Override
+	public Object call() throws Exception {
+		boolean locked = datagroup.trylock(this);
+		if ( locked ) {
+			getBody().execute(this);
+			getGraph().taskFinshed(this);
+		}
+		return null;
+	}
+
+	@Override 
+	public void taskCompleted() {
+		datagroup.unlock();
+	}
 
 }

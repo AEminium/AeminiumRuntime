@@ -38,7 +38,7 @@ public class QRuntime extends Runtime {
 	@Override
 	public DataGroup createDataGroup() {
 		assert( state == QRuntimeState.INITIALIZED);
-		return new QDataGroup();
+		return new QDataGroup(scheduler);
 	}
 
 	@Override
@@ -67,6 +67,7 @@ public class QRuntime extends Runtime {
 		at.setParent(parent);
 		if ( parent != NO_PARENT ) {
 			((QAbstractTask)parent).addChildTask(task);
+			at.setParent(parent);
 		}
 		return taskGraph.addTask(((QAbstractTask)task));
 	}
