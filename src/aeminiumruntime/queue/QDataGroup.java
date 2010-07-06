@@ -2,15 +2,12 @@ package aeminiumruntime.queue;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.xml.crypto.Data;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import aeminiumruntime.DataGroup;
 
 public class QDataGroup implements DataGroup {
-	private Lock lock = new ReentrantLock();
+	private boolean locked = false;
 	private List<QAbstractTask> waitQueue = new LinkedList<QAbstractTask>();
 	private QScheduler scheduler;
 	
@@ -20,17 +17,19 @@ public class QDataGroup implements DataGroup {
 	
 	public boolean trylock(QAbstractTask task) {
 		synchronized (this) {
-			boolean locked = lock.tryLock();			
-			if ( !locked ) {
+			if ( locked ) {
 				waitQueue.add(task);
+				return false;
+			} else {
+				locked = true;
+				return true;
 			}
-			return locked;
 		}
 	}
 	
 	public void unlock() {
 		synchronized (this) {
-			lock.unlock();
+			locked = false;
 			if (!waitQueue.isEmpty()) {
 				QAbstractTask head = waitQueue.remove(0);
 				scheduler.schedule(head);
