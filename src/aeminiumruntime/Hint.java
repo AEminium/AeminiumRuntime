@@ -3,16 +3,18 @@ package aeminiumruntime;
 /* interface for base hint */
 public class Hint {
 	private static Hint hintSingleton = new Hint();
+	private static Hint.Loops loopsHint = hintSingleton.new Loops();
+	private static Hint.Recursion recursionHint = hintSingleton.new Recursion();
 	
 	/* private protected constructor to prevent instantiation */
 	protected Hint() {}
 	
 	public static Hint createLoopsHint() {
-		return hintSingleton.new Loops();
+		return loopsHint;
 	}
 	
 	public static Hint createRecursionHint() {
-		return hintSingleton.new Recursion();
+		return recursionHint;
 	}
 	
 	public static Hint createStepsHint(long count) {
