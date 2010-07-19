@@ -6,6 +6,7 @@ import aeminiumruntime.Hint;
 
 
 public class HintCreation extends BaseTest {
+	
 	@Test
 	public void createLoopsHint() {
 		Hint loops = Hint.createLoopsHint();
