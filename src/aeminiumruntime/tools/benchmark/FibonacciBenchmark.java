@@ -34,14 +34,6 @@ public class FibonacciBenchmark implements IBenchmark {
 		rt.shutdown();	
 
 		long end = System.nanoTime();
-		long count;
-		if ( 2 < n ) {
-			count = (long)Math.pow(3, n-2)+1;
-		} else {
-			count = 1;
-		}
-		
-		//FIXME: compute correct count
 		
 		String result = String.format("Fib(%3d) =  %5d in %12d ns", n, root.getResult(), (end-start));
 		reporter.reportLn(result);

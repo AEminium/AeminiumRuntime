@@ -31,7 +31,7 @@ public class AtomicTaskWaiting extends BaseTest {
 				rt.schedule(rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Task current) {
-						System.out.println("Sub Task waiting for "+ (delay+1) + " ms");
+						getLogger().fine("Sub Task waiting for "+ (delay+1) + " ms");
 						try {
 							Thread.sleep(delay);
 						} catch (InterruptedException e) {
@@ -47,7 +47,7 @@ public class AtomicTaskWaiting extends BaseTest {
 				rt.schedule(rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Task current) {
-						System.out.println("Sub Task waiting for "+ (delay+2) + " ms");
+						getLogger().fine("Sub Task waiting for "+ (delay+2) + " ms");
 						try {
 							Thread.sleep(delay);
 						} catch (InterruptedException e) {
@@ -62,7 +62,7 @@ public class AtomicTaskWaiting extends BaseTest {
 
 				}, Runtime.NO_HINTS), current, Runtime.NO_DEPS);
 	
-				System.out.println("Task waiting for "+delay + " ms");
+				getLogger().fine("Task waiting for "+delay + " ms");
 				try {
 					Thread.sleep(delay);
 				} catch (InterruptedException e) {
