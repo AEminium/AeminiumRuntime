@@ -18,8 +18,7 @@ public class QHybridScheduler implements QScheduler {
 			nonblockingService.submit(task);
 		} else {
 			blockingService.submit(task);
-		}
-		
+		}		
 	}
 
 	@Override
