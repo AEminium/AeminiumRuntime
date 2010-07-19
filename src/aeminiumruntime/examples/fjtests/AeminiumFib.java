@@ -1,6 +1,7 @@
 package aeminiumruntime.examples.fjtests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import aeminiumruntime.Runtime;
@@ -10,44 +11,62 @@ import aeminiumruntime.launcher.RuntimeFactory;
 
 public class AeminiumFib {
 
-	private static int MAX_CALC = 47;
-    final static Runtime rt = RuntimeFactory.getDebugRuntime();
+	private static int MAX_CALC = 20;
+	private static int THRESHOLD = 12;
+    final static Runtime rt = RuntimeFactory.getRuntime();
 
-	public static Body createFibBody(final int n, final int[] solution,
-			final int solpos) {
+	public static Body createFibBody(final int n) {
 		return new Body() {
-			public void execute(Task p) {
-				if (n <= 1) {
+			
+			public int seqFib(int n) {
+				if (n <= 1) return 1;
+				else return (seqFib(n-1) + seqFib(n-2));
+			}
+			
+			public void execute(final Task currentTask) {
+				if (n <= THRESHOLD) {
 					Task base = rt.createNonBlockingTask(new Body() {
 						public void execute(Task p) {
-							solution[solpos] = 1;
+							currentTask.setResult(seqFib(n));
+						}
+						
+						public String toString() {
+							return "Base case.";
 						}
 					}, Runtime.NO_HINTS);
-					rt.schedule(base, Runtime.NO_PARENT, Runtime.NO_DEPS);
+					rt.schedule(base, currentTask, Runtime.NO_DEPS);
 				} else {
-					final int[] previous = { -1, -1 };
-					Collection<Task> branchesDeps = new ArrayList<Task>();
 
-					Task branch1 = rt.createNonBlockingTask(createFibBody(
-							n - 2, previous, 0), Runtime.NO_HINTS);
-					rt.schedule(branch1, Runtime.NO_PARENT, Runtime.NO_DEPS);
-					branchesDeps.add(branch1);
+					final Task branch1 = rt.createNonBlockingTask(createFibBody(
+							n - 2), Runtime.NO_HINTS);
+					rt.schedule(branch1, currentTask, Runtime.NO_DEPS);
 
-					Task branch2 = rt.createNonBlockingTask(createFibBody(
-							n - 1, previous, 1), Runtime.NO_HINTS);
-					rt.schedule(branch2, Runtime.NO_PARENT, Runtime.NO_DEPS);
-					branchesDeps.add(branch2);
+					final Task branch2 = rt.createNonBlockingTask(createFibBody(
+							n - 1), Runtime.NO_HINTS);
+					rt.schedule(branch2, currentTask, Runtime.NO_DEPS);
 
 					Task join = rt.createNonBlockingTask(new Body() {
 						public void execute(Task p) {
-							solution[solpos] = previous[0] + previous[1];
-							System.out.println(solution[solpos]);
+							int r1 = (Integer) branch1.getResult();
+							int r2 = (Integer) branch2.getResult();
+							currentTask.setResult(r1 + r2);
+							// System.out.println("Merging " + n + " -> " + currentTask.getResult());
+						}
+						
+						public String toString() {
+							return "Merge for n="+n;
 						}
 					}, Runtime.NO_HINTS);
-					rt.schedule(join, Runtime.NO_PARENT, branchesDeps);
+					rt.schedule(join, currentTask,  Arrays.asList(branch1, branch2));
 				}
 
 			}
+			
+			@Override
+			public String toString() {
+				return "Recursive for n=" + n;
+			}
+			
 		};
 	}
 
@@ -58,10 +77,8 @@ public class AeminiumFib {
 
 			@Override
 			public void execute(Task p) {
-				final int[] result = { -1 };
-				Task calc = rt.createNonBlockingTask(createFibBody(MAX_CALC,
-						result, 0), Runtime.NO_HINTS);
-				rt.schedule(calc, Runtime.NO_PARENT, Runtime.NO_DEPS);
+				final Task calc = rt.createNonBlockingTask(createFibBody(MAX_CALC), Runtime.NO_HINTS);
+				rt.schedule(calc, p, Runtime.NO_DEPS);
 
 				Collection<Task> printDeps = new ArrayList<Task>();
 				printDeps.add(calc);
@@ -69,11 +86,22 @@ public class AeminiumFib {
 				Task print = rt.createBlockingTask(new Body() {
 					@Override
 					public void execute(Task p) {
-						System.out.println(result[0]);
+						System.out.println("Final result:" + calc.getResult());
+					}
+					
+					@Override
+					public String toString() {
+						return "Final result";
 					}
 				}, Runtime.NO_HINTS);
-				rt.schedule(print, Runtime.NO_PARENT, printDeps);
+				rt.schedule(print, p, printDeps);
 			}
+
+			@Override
+			public String toString() {
+				return "Master Task";
+			}
+			
 		}, Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		rt.shutdown();

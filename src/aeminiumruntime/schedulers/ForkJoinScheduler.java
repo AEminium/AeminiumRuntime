@@ -36,6 +36,9 @@ public class ForkJoinScheduler extends BaseScheduler {
         return thread;
     }
 
-    
+    public synchronized void shutdown() {
+    	graph.waitForAllTasks();
+    	pool.shutdown();
+    }
     
 }

@@ -6,7 +6,6 @@ import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
 import aeminiumruntime.launcher.RuntimeFactory;
-import aeminiumruntime.queue.QRuntime;
 
 public class FibonacciBenchmark implements IBenchmark {
 	private final String name = "FibonacciBenchmark";
@@ -25,7 +24,6 @@ public class FibonacciBenchmark implements IBenchmark {
 	}
 	
 	public void runTest(IReporter reporter, int n) {
-		//Runtime rt = new QRuntime();
 		Runtime rt = RuntimeFactory.getRuntime(false);
 		long start = System.nanoTime();
 		rt.init();

@@ -14,4 +14,7 @@ public class LinearScheduler extends BaseScheduler {
     public void scheduleTask(RuntimeTask task) {
         task.call();
     }
+    
+    public void shutdown() {
+	}
 }

@@ -11,3 +11,4 @@ public class AdversialPrioritizer implements Prioritizer {
 	}
 
 }
+

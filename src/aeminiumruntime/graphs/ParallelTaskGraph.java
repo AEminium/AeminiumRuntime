@@ -15,15 +15,16 @@ import aeminiumruntime.prioritizers.SmartPrioritizer;
 
 public class ParallelTaskGraph implements TaskGraph, PrioritizableTaskGraph {
 
+	/* Structures */
+
 	HashMap<Integer, RuntimeTask> taskDictionary = new HashMap<Integer, RuntimeTask>();
 
-	HashMap<Integer, List<Integer>> taskDependencies = new HashMap<Integer, List<Integer>>();
-	HashMap<Integer, List<Integer>> dependentTasks = new HashMap<Integer, List<Integer>>();
-	
-	HashMap<Integer, List<Integer>> childTasks = new HashMap<Integer, List<Integer>>();
-	HashMap<Integer, Integer> parentTasks = new HashMap<Integer, Integer>();
+	HashMap<Integer, Integer> taskChildrenCount = new HashMap<Integer, Integer>();
+	HashMap<Integer, Integer> taskParent = new HashMap<Integer, Integer>();
 
-	
+	HashMap<Integer, List<Integer>> dependencies = new HashMap<Integer, List<Integer>>();
+	HashMap<Integer, List<Integer>> reverseDependencies = new HashMap<Integer, List<Integer>>();
+
 	List<Integer> readyQ = new ArrayList<Integer>();
 	List<Integer> runningQ = new ArrayList<Integer>();
 	List<Integer> holdingQ = new ArrayList<Integer>();
@@ -31,6 +32,8 @@ public class ParallelTaskGraph implements TaskGraph, PrioritizableTaskGraph {
 
 	Prioritizer prioritizer;
 	boolean debug;
+
+	Logger lg = Logger.getLogger(ParallelTaskGraph.class.getName());
 
 	public ParallelTaskGraph(Prioritizer p, boolean debug) {
 		this.prioritizer = (p != null) ? p : new SmartPrioritizer(this);
@@ -49,61 +52,67 @@ public class ParallelTaskGraph implements TaskGraph, PrioritizableTaskGraph {
 		this(null, false);
 	}
 
+	private synchronized void moveQueues(int key, List<Integer> from,
+			List<Integer> to) {
+		if (from != null) {
+			from.remove(new Integer(key));
+		}
+		to.add(key);
+	}
+
 	@Override
-	public boolean add(RuntimeTask task, RuntimeTask parent, Collection<RuntimeTask> deps) {
+	public synchronized boolean add(RuntimeTask task, RuntimeTask parent,
+			Collection<RuntimeTask> deps) {
 
-		int tid = task.getId();
-		addIfNotInDictionary(task);
-		
-		if (parent != null && parent != Runtime.NO_PARENT) {
-			addIfNotInDictionary(parent);
-			addOrAppend(parent.getId(), task.getId(), childTasks);
-			parentTasks.put(task.getId(), parent.getId());
-		}
-		
-		if (!taskDependencies.containsKey(tid)) {
-			List<Integer> depIds = new ArrayList<Integer>();
-			for (RuntimeTask t : deps) {
-				int dtid = addIfNotInDictionary(t);
-				if (!doneQ.contains(dtid)) {
-					depIds.add(dtid);
-				}
-				addOrAppend(dtid, task.getId(), dependentTasks);
+		synchronized (task) {
+			int key = createKey(task);
+			if (parent != null && parent != Runtime.NO_PARENT) {
+				int pk = parent.getId();
+				taskParent.put(key, pk);
+				int count = taskChildrenCount.get(pk);
+				taskChildrenCount.put(pk, count + 1);
 			}
-			
-			if (depIds.isEmpty()) {
-				appendToReady(task.getId());
-			} else {
-				taskDependencies.put(task.getId(), depIds);
+
+			boolean hasDeps = handleDeps(key, deps);
+
+			if (!hasDeps) {
+				moveQueues(key, null, readyQ);
+			}
+
+			task.getStatistics().setStartTime(System.nanoTime());
+		}
+
+		return false;
+	}
+
+	private void addOrAppend(HashMap<Integer, List<Integer>> map, int key,
+			int value) {
+		if (!map.containsKey(key)) {
+			map.put(key, new ArrayList<Integer>());
+		}
+		map.get(key).add(value);
+	}
+
+	private boolean handleDeps(int key, Collection<RuntimeTask> deps) {
+		boolean hasDeps = false;
+		for (RuntimeTask t : deps) {
+			int dk = createKey(t);
+			if (!doneQ.contains(dk)) {
+				addOrAppend(dependencies, key, dk);
+				addOrAppend(reverseDependencies, dk, key);
+				hasDeps = true;
 			}
 		}
-		
-		task.getStatistics().setStartTime(System.nanoTime());
-		return true;
-	}
-	
-	private int addIfNotInDictionary(RuntimeTask task) {
-		int tid = task.getId();
-		if (!taskDictionary.containsKey(tid)) {
-			taskDictionary.put(tid, task);
-		}
-		return tid;
+		return hasDeps;
 	}
 
-	private void appendToReady(int tid) {
-		if (!runningQ.contains(tid)) {
-			taskDependencies.remove(new Integer(tid));
-			taskDictionary.get(tid).getStatistics().setReadyTime(System.nanoTime());
-			readyQ.add(tid);
+	private int createKey(RuntimeTask task) {
+		int key = task.getId();
+		if (!taskDictionary.containsKey(key)) {
+			taskDictionary.put(key, task);
+			taskChildrenCount.put(key, 0);
 		}
-	}
-
-	private void addOrAppend(int key, int value,
-			HashMap<Integer, List<Integer>> store) {
-		if (!store.containsKey(key)) {
-			store.put(key, new ArrayList<Integer>());
-		}
-		store.get(key).add(value);
+		return key;
 	}
 
 	@Override
@@ -112,93 +121,113 @@ public class ParallelTaskGraph implements TaskGraph, PrioritizableTaskGraph {
 	}
 
 	@Override
-	public boolean hasNext() {
+	public synchronized boolean hasNext() {
 		updateGraph();
 		return !readyQ.isEmpty();
 	}
 
-	@Override
-	public RuntimeTask next() {
-		if (readyQ.isEmpty()) {
-			return null;
-		}
-		int tid = prioritizer.getNext(readyQ);
+	private synchronized void updateGraph() {
 
-		readyQ.remove(new Integer(tid));
-		runningQ.add(tid);
-
-		RuntimeTask task = taskDictionary.get(tid);
-		task.getStatistics().setRunningTime(System.nanoTime());
-		return task;
-	}
-
-	protected synchronized void updateGraph() {
+		// Identify completed tasks
 		List<Integer> tasksToBeRemoved = new ArrayList<Integer>();
-		for (int tid : runningQ) {
-			if (taskDictionary.get(tid).isDone()) {
-				tasksToBeRemoved.add(tid);
+		for (int key : runningQ) {
+			RuntimeTask task = taskDictionary.get(key);
+			synchronized (task) {
+				if (task.isDone()) {
+					tasksToBeRemoved.add(key);
+				}
 			}
+		}
 
+		// Act upon
+		for (int key : tasksToBeRemoved) {
+			synchronized (taskDictionary.get(key)) {
+				moveQueues(key, runningQ, holdingQ);
+				checkIfChildrenAreDone(key);
+			}
 		}
 		
-		for (Integer tid : tasksToBeRemoved) {
-			runningQ.remove(tid);
-			if (hasChildrenAlive(tid)) {
-				holdingQ.add(tid);
-			} else {
-				finishTask(tid);
-				doneQ.add(tid);
-			}
+		if (this.isDone()) {
+			this.notifyAll();
 		}
+		
 		if (debug) {
-			Logger lg = Logger.getLogger(ParallelTaskGraph.class.getName());
-            lg.log(Level.INFO, "Ready:" + readyQ);
-            lg.log(Level.INFO, "Running:" + runningQ);
-            lg.log(Level.INFO, "Holding:" + holdingQ);
-            lg.log(Level.INFO, "Done:" + doneQ);
-            lg.log(Level.INFO, "Dependencies:" + taskDependencies);	
+			lg.log(Level.FINEST,"ready:" + readyQ);
+			lg.log(Level.FINEST,"running:" + runningQ);
+			lg.log(Level.FINEST,"holding:" + holdingQ);
+			lg.log(Level.FINEST,"done:" + doneQ);
+			lg.log(Level.FINEST,".........");
 		}
-	}
-	
-	private boolean hasChildrenAlive(int tid) {
-		return childTasks.containsKey(tid);
+
 	}
 
-	private void finishTask(int tid) {
-		taskDictionary.get(tid).getStatistics().setOutTime(
-				System.nanoTime());
-		taskDictionary.get(tid).getStatistics().calcTime();
-		
-		if (dependentTasks.containsKey(tid)) {
-			for (int dId : dependentTasks.get(tid)) {
-				taskDependencies.get(dId).remove(new Integer(tid));
-				checkTaskForRunning(dId);
-			}
-			dependentTasks.remove(tid);
-		}
-		
-		if (parentTasks.containsKey(tid)) {
-			int pid = parentTasks.get(tid);
-			parentTasks.remove(tid);
-			childTasks.get(pid).remove(tid);
-			if ( childTasks.get(pid).isEmpty() ) {
-				childTasks.remove(pid);
-				holdingQ.remove(new Integer(pid));
-				doneQ.add(pid);
-				finishTask(pid);
-			}
-		}
-		
-		if (!this.debug) {
-			taskDictionary.remove(tid);
+	private void checkIfChildrenAreDone(int key) {
+		if (taskChildrenCount.get(key) == 0 && taskDictionary.get(key).isDone()) {
+			moveQueues(key, holdingQ, doneQ);
+			finishTask(key);
 		}
 	}
 
-	private void checkTaskForRunning(int tid) {
-		if (taskDependencies.get(tid).isEmpty()) {
-			taskDependencies.remove(tid);
-			appendToReady(tid);
+	private void finishTask(Integer key) {
+		RuntimeTask task = taskDictionary.get(key);
+		synchronized (task) {
+			task.getStatistics().setOutTime(System.nanoTime());
+			task.getStatistics().calcTime();
+
+			// Releases dependent tasks
+			if (reverseDependencies.containsKey(key)) {
+				for (int dk : reverseDependencies.get(key)) {
+					dependencies.get(dk).remove(key);
+					checkTaskForRunning(dk);
+				}
+				reverseDependencies.remove(key);
+			}
+
+			// Releases parent.
+			synchronized (taskParent) {
+				if (taskParent.containsKey(key)) {
+					int pk = taskParent.get(key);
+					synchronized (taskDictionary.get(pk)) {
+						int count = taskChildrenCount.get(pk);
+						taskChildrenCount.put(pk, count - 1);
+						checkIfChildrenAreDone(pk);
+					}
+				}
+			}
+
+			taskChildrenCount.remove(key);
+			taskDictionary.remove(key);
+
 		}
+	}
+
+	private void checkTaskForRunning(int key) {
+		synchronized (taskDictionary.get(key)) {
+			if (dependencies.get(key).isEmpty()) {
+				dependencies.remove(new Integer(key));
+				moveQueues(key, null, readyQ);
+			}
+		}
+	}
+
+	@Override
+	public synchronized RuntimeTask next() {
+		synchronized (readyQ) {
+			if (readyQ.isEmpty()) {
+				return null;
+			}
+
+			ArrayList<Integer> readyClone = new ArrayList<Integer>(readyQ);
+			int key = prioritizer.getNext(readyClone);
+			RuntimeTask task = taskDictionary.get(key);
+
+			synchronized (task) {
+				moveQueues(key, readyQ, runningQ);
+			}
+			task.getStatistics().setRunningTime(System.nanoTime());
+			return task;
+		}
+
 	}
 
 	@Override
@@ -206,14 +235,16 @@ public class ParallelTaskGraph implements TaskGraph, PrioritizableTaskGraph {
 	}
 
 	@Override
-	public <T> int countDependencies(T tid) {
-		if (dependentTasks.containsKey(tid)) {
-			return dependentTasks.get(tid).size();
+	public <T> int countDependencies(T task) {
+		// Returns tasks that depend on this one.
+		if (reverseDependencies.containsKey(task)) {
+			return reverseDependencies.get(task).size();
 		} else {
 			return 0;
 		}
 	}
 
+	@Override
 	public void checkForCycles(RuntimeTask t)
 			throws DependencyDeadlockException {
 		if (hasCycle(t.getId(), t.getId())) {
@@ -222,8 +253,8 @@ public class ParallelTaskGraph implements TaskGraph, PrioritizableTaskGraph {
 	}
 
 	private boolean hasCycle(Integer where, Integer find) {
-		if (taskDependencies.containsKey(where)) {
-			for (Integer tid : taskDependencies.get(where)) {
+		if (dependencies.containsKey(where)) {
+			for (Integer tid : dependencies.get(where)) {
 				if (tid == find) {
 					return true;
 				}
@@ -233,6 +264,17 @@ public class ParallelTaskGraph implements TaskGraph, PrioritizableTaskGraph {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public synchronized void waitForAllTasks() {
+		while (!isDone()) {
+			try {
+				this.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

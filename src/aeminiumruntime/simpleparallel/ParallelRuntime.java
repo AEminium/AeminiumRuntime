@@ -67,8 +67,9 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
         if (debug) {
         	try {
 				graph.checkForCycles((RuntimeTask) task);
-			} catch (DependencyDeadlockException e) {
-				e.printStackTrace();
+			} catch (DependencyDeadlockException ex) {
+				Logger.getLogger(ParallelRuntime.class.getName()).log(Level.SEVERE, "Scheduling of task " + 
+						task + "caused a deadlock in dependencies.", ex.getMessage());
 				System.exit(1);
 			}
         }
@@ -79,6 +80,7 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
 
     @Override
     public void shutdown() {
+    	scheduler.shutdown();
     }
 
     @Override

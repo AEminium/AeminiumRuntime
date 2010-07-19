@@ -43,4 +43,10 @@ public class HybridForkJoinScheduler extends ForkJoinScheduler {
         }
     }
 	
+	
+	public synchronized void shutdown() {
+    	graph.waitForAllTasks();
+    	pool.shutdown();
+    	iopool.shutdown();
+    }
 }

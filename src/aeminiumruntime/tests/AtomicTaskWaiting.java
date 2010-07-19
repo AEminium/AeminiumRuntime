@@ -59,6 +59,7 @@ public class AtomicTaskWaiting extends BaseTest {
 					public String toString() {
 						return ""+(delay+2);
 					}
+
 				}, Runtime.NO_HINTS), current, Runtime.NO_DEPS);
 	
 				System.out.println("Task waiting for "+delay + " ms");

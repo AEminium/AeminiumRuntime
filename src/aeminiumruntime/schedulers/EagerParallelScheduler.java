@@ -25,4 +25,8 @@ public class EagerParallelScheduler extends BaseScheduler {
         Thread taskThread = createWorkerThread(task);
         taskThread.start();  
     }
+
+	@Override
+	public void shutdown() {
+	}
 }

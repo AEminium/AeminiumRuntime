@@ -1,16 +1,15 @@
 package aeminiumruntime.tests;
 
-
 import org.junit.Before;
 import aeminiumruntime.Runtime;
-import aeminiumruntime.queue.QRuntime;
+import aeminiumruntime.launcher.RuntimeFactory;
 
 public abstract class BaseTest {
 	private Runtime rt;
 	
 	@Before
 	public void setUp() throws Exception {
-		rt = new QRuntime();
+		rt = RuntimeFactory.getRuntime();
 	}
 
 	protected Runtime getRuntime() {

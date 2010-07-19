@@ -11,6 +11,7 @@ import aeminiumruntime.linear.LinearRuntime;
 import aeminiumruntime.prioritizers.AdversialPrioritizer;
 import aeminiumruntime.prioritizers.LinearPrioritizer;
 import aeminiumruntime.prioritizers.Prioritizer;
+import aeminiumruntime.queue.QRuntime;
 import aeminiumruntime.schedulers.EagerParallelScheduler;
 import aeminiumruntime.schedulers.ForkJoinScheduler;
 import aeminiumruntime.schedulers.HybridForkJoinScheduler;
@@ -38,12 +39,17 @@ public class RuntimeFactory {
 	public static Runtime getRuntime(boolean debug) {
 		return new ParallelRuntime(debug);
 	}
+	
+	public static Runtime getQueueRuntime() {
+		return new QRuntime();
+	}
+	
 	public static Runtime getRuntime() {
-		return getParallelRuntime(false, SCH_HYBRID, PRI_SMART);
+		return getParallelRuntime(false, SchedulerType.HYBRID, PrioritizerType.SMART);
 	}
 	
 	public static Runtime getDebugRuntime() {
-		return getParallelRuntime(true, SCH_HYBRID, PRI_SMART);
+		return getParallelRuntime(true, SchedulerType.PARALLEL, PrioritizerType.SMART);
 	}
 	
 	/* Dynamic loading, but static one should be faster */
@@ -69,23 +75,42 @@ public class RuntimeFactory {
 		return rt;
 	}
 
-	public static Runtime getParallelRuntime(boolean debug, int schedulerMode, int prioritizerMode) {
+	public static Runtime getParallelRuntime(boolean debug, SchedulerType schedulerMode, PrioritizerType prioritizerMode) {
 		ParallelRuntime rt = new ParallelRuntime(debug);
 		Prioritizer p;
-		if (prioritizerMode == PRI_LINEAR) p = new LinearPrioritizer();
-		if (prioritizerMode == PRI_SMART) p = null; /* Null uses SmartPriotizer with graph as first argument*/
-		else p = new AdversialPrioritizer();
+		switch (prioritizerMode) {
+			case LINEAR:
+				p = new LinearPrioritizer();
+				break;
+			case ADVERSIAL:
+				p = new AdversialPrioritizer();
+				break;
+			default:
+				/* Null uses SmartPriotizer with graph as first argument*/
+				p = null;
+		}
 		
 		TaskGraph graph = new ParallelTaskGraph(p, debug);
 		rt.setGraph(graph);
 		
 		Scheduler s;
-		if (schedulerMode == SCH_LINEAR) s = new LinearScheduler(graph);
-		else if (schedulerMode == SCH_EAGER) s = new EagerParallelScheduler(graph);
-		else if (schedulerMode == SCH_PARALLEL) s = new ParallelScheduler(graph);
-		else if (schedulerMode == SCH_FORKJOIN) s = new ForkJoinScheduler(graph);
-		else if (schedulerMode == SCH_HYBRID) s = new HybridForkJoinScheduler(graph);
-		else s = new HybridForkJoinScheduler(graph);
+		
+		switch(schedulerMode) {
+			case LINEAR:
+				s = new LinearScheduler(graph);
+				break;
+			case EAGER:
+				s = new EagerParallelScheduler(graph);
+				break;
+			case FORKJOIN:
+				s = new ForkJoinScheduler(graph);
+				break;
+			case HYBRID:
+				s = new HybridForkJoinScheduler(graph);
+				break;
+			default:
+				s = new ParallelScheduler(graph);
+		}
 		
 		rt.setScheduler(s);
 		return rt;

@@ -29,4 +29,9 @@ public class ParallelScheduler extends BaseScheduler {
     public void scheduleTask(RuntimeTask task) {
         pool.execute(createWorkerTask(task));
     }
+    
+    public synchronized void shutdown() {
+    	graph.waitForAllTasks();
+    	pool.shutdown();
+    }
 }
