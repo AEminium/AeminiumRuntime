@@ -22,19 +22,19 @@ public class AeminiumFib {
 						public void execute(Task p) {
 							solution[solpos] = 1;
 						}
-					});
+					}, Runtime.NO_HINTS);
 					rt.schedule(base, Runtime.NO_PARENT, Runtime.NO_DEPS);
 				} else {
 					final int[] previous = { -1, -1 };
 					Collection<Task> branchesDeps = new ArrayList<Task>();
 
 					Task branch1 = rt.createNonBlockingTask(createFibBody(
-							n - 2, previous, 0));
+							n - 2, previous, 0), Runtime.NO_HINTS);
 					rt.schedule(branch1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 					branchesDeps.add(branch1);
 
 					Task branch2 = rt.createNonBlockingTask(createFibBody(
-							n - 1, previous, 1));
+							n - 1, previous, 1), Runtime.NO_HINTS);
 					rt.schedule(branch2, Runtime.NO_PARENT, Runtime.NO_DEPS);
 					branchesDeps.add(branch2);
 
@@ -43,7 +43,7 @@ public class AeminiumFib {
 							solution[solpos] = previous[0] + previous[1];
 							System.out.println(solution[solpos]);
 						}
-					});
+					}, Runtime.NO_HINTS);
 					rt.schedule(join, Runtime.NO_PARENT, branchesDeps);
 				}
 
@@ -60,7 +60,7 @@ public class AeminiumFib {
 			public void execute(Task p) {
 				final int[] result = { -1 };
 				Task calc = rt.createNonBlockingTask(createFibBody(MAX_CALC,
-						result, 0));
+						result, 0), Runtime.NO_HINTS);
 				rt.schedule(calc, Runtime.NO_PARENT, Runtime.NO_DEPS);
 
 				Collection<Task> printDeps = new ArrayList<Task>();
@@ -71,10 +71,10 @@ public class AeminiumFib {
 					public void execute(Task p) {
 						System.out.println(result[0]);
 					}
-				});
+				}, Runtime.NO_HINTS);
 				rt.schedule(print, Runtime.NO_PARENT, printDeps);
 			}
-		});
+		}, Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		rt.shutdown();
 	}

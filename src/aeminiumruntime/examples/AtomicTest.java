@@ -65,7 +65,7 @@ public class AtomicTest {
 				b1.execute(parent);
 				
 			}
-		});
+		}, Runtime.NO_HINTS);
         rt.schedule(t1, Runtime.NO_PARENT, null);
         
         final Collection<Task> deps1 = new ArrayList<Task>();       
@@ -117,14 +117,14 @@ public class AtomicTest {
         	                	}
         	        		}
         	        	}
-        			},d1);
+        			},d1, Runtime.NO_HINTS);
         			rt.schedule(t2, Runtime.NO_PARENT,null);
         			waitFor.add(t2);
-        			rt.schedule( rt.createNonBlockingTask(this), Runtime.NO_PARENT,waitFor);
+        			rt.schedule( rt.createNonBlockingTask(this, Runtime.NO_HINTS), Runtime.NO_PARENT,waitFor);
         	}
         };
         
-        Task t2 = rt.createNonBlockingTask(manager);
+        Task t2 = rt.createNonBlockingTask(manager, Runtime.NO_HINTS);
         rt.schedule(t2, Runtime.NO_PARENT, deps1);
  
         rt.shutdown();

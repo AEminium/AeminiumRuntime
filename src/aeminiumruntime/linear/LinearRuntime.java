@@ -1,20 +1,21 @@
 package aeminiumruntime.linear;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import aeminiumruntime.AtomicTask;
 import aeminiumruntime.BlockingTask;
 import aeminiumruntime.Body;
 import aeminiumruntime.DataGroup;
+import aeminiumruntime.Hint;
 import aeminiumruntime.NonBlockingTask;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.RuntimeTask;
 import aeminiumruntime.Task;
 import aeminiumruntime.graphs.LinearTaskGraph;
 import aeminiumruntime.schedulers.LinearScheduler;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 public class LinearRuntime extends Runtime {
@@ -40,7 +41,7 @@ public class LinearRuntime extends Runtime {
     }
 
     @Override
-    public BlockingTask createBlockingTask(Body b) {
+    public BlockingTask createBlockingTask(Body b, Collection<Hint> hints) {
         try {
             return new LinearBlockingTask(b, idCounter++);
         } catch (Exception ex) {
@@ -50,7 +51,7 @@ public class LinearRuntime extends Runtime {
     }
 
     @Override
-    public NonBlockingTask createNonBlockingTask(Body b) {
+    public NonBlockingTask createNonBlockingTask(Body b, Collection<Hint> hints) {
         try {
             return new LinearNonBlockingTask(b, idCounter++);
         } catch (Exception ex) {
@@ -60,7 +61,7 @@ public class LinearRuntime extends Runtime {
     }
 
     @Override
-    public AtomicTask createAtomicTask(Body b, DataGroup g) {
+    public AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hint> hints) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

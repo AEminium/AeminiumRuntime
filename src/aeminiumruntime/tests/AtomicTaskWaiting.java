@@ -43,7 +43,7 @@ public class AtomicTaskWaiting extends BaseTest {
 					public String toString() {
 						return ""+(delay+1);
 					}
-				}), current, Runtime.NO_DEPS);
+				}, Runtime.NO_HINTS), current, Runtime.NO_DEPS);
 				rt.schedule(rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Task current) {
@@ -59,7 +59,7 @@ public class AtomicTaskWaiting extends BaseTest {
 					public String toString() {
 						return ""+(delay+2);
 					}
-				}), current, Runtime.NO_DEPS);
+				}, Runtime.NO_HINTS), current, Runtime.NO_DEPS);
 	
 				System.out.println("Task waiting for "+delay + " ms");
 				try {
@@ -74,6 +74,6 @@ public class AtomicTaskWaiting extends BaseTest {
 			public String toString() {
 				return ""+delay;
 			}
-		} , group);
+		} , group, Runtime.NO_HINTS);
 	}
 }

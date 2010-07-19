@@ -28,10 +28,10 @@ public class DeadlockTest {
             }
         };
         
-        Task t1 = rt.createNonBlockingTask(b1);
-        Task t2 = rt.createNonBlockingTask(b2);
-        Task t3= rt.createNonBlockingTask(b2);
-        Task t4 = rt.createNonBlockingTask(b2);
+        Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
+        Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
+        Task t3= rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
+        Task t4 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
         
         //ex: deps2 == task2 dependencies 
         Collection<Task> deps1 = new ArrayList<Task>();

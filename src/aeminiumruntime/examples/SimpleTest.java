@@ -58,11 +58,11 @@ public class SimpleTest {
 			}
 		};
 
-		Task t1 = rt.createNonBlockingTask(b1);
-		Task t2 = rt.createNonBlockingTask(b2);
-		Task t3 = rt.createNonBlockingTask(b3);
-		Task t4 = rt.createNonBlockingTask(b4);
-		Task t5 = rt.createNonBlockingTask(b5);
+		Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
+		Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
+		Task t3 = rt.createNonBlockingTask(b3, Runtime.NO_HINTS);
+		Task t4 = rt.createNonBlockingTask(b4, Runtime.NO_HINTS);
+		Task t5 = rt.createNonBlockingTask(b5, Runtime.NO_HINTS);
 
 		// ex: deps2 == task2 dependencies
 		Collection<Task> deps2 = new ArrayList<Task>();

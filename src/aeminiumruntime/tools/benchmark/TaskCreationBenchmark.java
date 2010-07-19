@@ -27,7 +27,7 @@ public class TaskCreationBenchmark implements IBenchmark {
 			long start = System.nanoTime();
 			for (int i = 0; i < COUNT; i++) {
 				@SuppressWarnings("unused")
-				Task t = rt.createNonBlockingTask(body);
+				Task t = rt.createNonBlockingTask(body, Runtime.NO_HINTS);
 			}
 			long end = System.nanoTime();
 

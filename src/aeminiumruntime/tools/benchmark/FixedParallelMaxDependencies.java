@@ -74,6 +74,6 @@ public class FixedParallelMaxDependencies implements IBenchmark {
 				return name;
 			}
 
-		});
+		}, Runtime.NO_HINTS);
 	}
 }

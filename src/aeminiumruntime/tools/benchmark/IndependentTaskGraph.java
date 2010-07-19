@@ -45,6 +45,6 @@ public class IndependentTaskGraph implements IBenchmark {
 			public void execute(Task parent) {
 				// DO NOTHING
 			}
-		});
+		}, Runtime.NO_HINTS);
 	}
 }

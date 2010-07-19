@@ -23,7 +23,7 @@ public class QTest {
 					}
 					@Override
 					public String toString() {return "t1.1";}
-				});
+				}, Runtime.NO_HINTS);
 				rt.schedule(t11, current, aeminiumruntime.Runtime.NO_DEPS);
 				Task t12 = rt.createNonBlockingTask(new Body() {
 					@Override
@@ -32,7 +32,7 @@ public class QTest {
 					}
 					@Override
 					public String toString() {return "t1.2";}
-				});
+				}, Runtime.NO_HINTS);
 				rt.schedule(t12, current, aeminiumruntime.Runtime.NO_DEPS);
 				Task t13 = rt.createNonBlockingTask(new Body() {
 					@Override
@@ -41,12 +41,12 @@ public class QTest {
 					}
 					@Override
 					public String toString() {return "t1.3";}
-				});
+				}, Runtime.NO_HINTS);
 				rt.schedule(t13, current, aeminiumruntime.Runtime.NO_DEPS);
 			}
 			@Override
 			public String toString() {return "t1";}
-		});
+		}, Runtime.NO_HINTS);
 		
 		Task t2 = rt.createNonBlockingTask(new Body() {
 			@Override
@@ -56,7 +56,7 @@ public class QTest {
 			@Override
 			public String toString() {return "t2";}
 
-		});
+		}, Runtime.NO_HINTS);
 		
 		rt.schedule(t2, Runtime.NO_PARENT, Arrays.asList(t1));
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);

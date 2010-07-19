@@ -12,7 +12,6 @@ public class QAtomicTask extends QAbstractTask implements AtomicTask {
 		this.datagroup = (QDataGroup)datagroup;
 	}
 
-	@Override
 	public DataGroup getDataGroup() {
 		return datagroup;
 	}

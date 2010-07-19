@@ -13,7 +13,6 @@ public class ParallelAtomicTask extends ParallelTask implements AtomicTask {
         this.owner = owner;
     }
 
-	@Override
 	public DataGroup getDataGroup() {
 		return this.owner;
 	}

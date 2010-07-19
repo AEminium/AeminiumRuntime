@@ -52,6 +52,6 @@ public class ChildTaskBenchmark implements IBenchmark {
 					}
 				}
 			}
-		});
+		}, Runtime.NO_HINTS);
 	}
 }

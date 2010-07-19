@@ -56,6 +56,6 @@ public class LinearTaskGraph implements IBenchmark {
 				return name;
 			}
 
-		});
+		}, Runtime.NO_HINTS);
 	}
 }

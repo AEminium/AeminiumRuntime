@@ -87,7 +87,7 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
     }
 
     @Override
-    public BlockingTask createBlockingTask(Body b) {
+    public BlockingTask createBlockingTask(Body b, Collection<Hint> hints) {
         try {
             return new ParallelBlockingTask(b, idCounter++);
         } catch (Exception ex) {
@@ -97,7 +97,7 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
     }
 
     @Override
-    public NonBlockingTask createNonBlockingTask(Body b) {
+    public NonBlockingTask createNonBlockingTask(Body b, Collection<Hint> hints) {
         try {
             return new ParallelNonBlockingTask(b, idCounter++);
         } catch (Exception ex) {
@@ -107,7 +107,7 @@ public class ParallelRuntime extends aeminiumruntime.Runtime {
     }
 
     @Override
-    public AtomicTask createAtomicTask(Body b, DataGroup g) {
+    public AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hint> hints) {
         try {
             return new ParallelAtomicTask(b, idCounter++, (ParallelDataGroup) g);
         } catch (Exception ex) {

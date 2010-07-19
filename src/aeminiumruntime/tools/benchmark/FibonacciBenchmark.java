@@ -69,7 +69,7 @@ public class FibonacciBenchmark implements IBenchmark {
 						public void execute(Task mergeTask) {
 							current.setResult(((Integer)f1.getResult()) + ((Integer)f2.getResult()));
 						}
-					});
+					}, Runtime.NO_HINTS);
 					rt.schedule(add, current, Arrays.asList(f1, f2));
 				} else {
 					current.setResult(new Integer(1));
@@ -80,6 +80,6 @@ public class FibonacciBenchmark implements IBenchmark {
 			public String toString() {
 				return "Fib("+n+")";
 			}
-		});
+		}, Runtime.NO_HINTS);
 	}
 }

@@ -59,9 +59,9 @@ public abstract class Runtime {
     /* create a new data group object */
     public abstract DataGroup createDataGroup();
     /* create a new Blocking task */
-    public abstract BlockingTask createBlockingTask(Body b);
+    public abstract BlockingTask createBlockingTask(Body b, Collection<Hint> hints);
     /* create a new NonBlocking task */
-    public abstract NonBlockingTask createNonBlockingTask(Body b);
+    public abstract NonBlockingTask createNonBlockingTask(Body b, Collection<Hint> hints);
     /* create a new Atomic task */
-    public abstract AtomicTask createAtomicTask(Body b, DataGroup g);
+    public abstract AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hint> hints);
 }

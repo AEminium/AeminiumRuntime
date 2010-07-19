@@ -7,6 +7,7 @@ import aeminiumruntime.AtomicTask;
 import aeminiumruntime.BlockingTask;
 import aeminiumruntime.Body;
 import aeminiumruntime.DataGroup;
+import aeminiumruntime.Hint;
 import aeminiumruntime.NonBlockingTask;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
@@ -24,13 +25,13 @@ public class QRuntime extends Runtime {
 	private QRuntimeState state = QRuntimeState.UNINITIALIZED; 
 	
 	@Override
-	public AtomicTask createAtomicTask(Body b, DataGroup g) {
+	public AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hint> hints) {
 		assert( state == QRuntimeState.INITIALIZED);
 		return new QAtomicTask(b, g);
 	}
 
 	@Override
-	public BlockingTask createBlockingTask(Body b) {
+	public BlockingTask createBlockingTask(Body b, Collection<Hint> hints) {
 		assert( state == QRuntimeState.INITIALIZED);
 		return new QBlockingTask(b);
 	}
@@ -42,7 +43,7 @@ public class QRuntime extends Runtime {
 	}
 
 	@Override
-	public NonBlockingTask createNonBlockingTask(Body b) {
+	public NonBlockingTask createNonBlockingTask(Body b, Collection<Hint> hints) {
 		return new QNonBlockingTask(b);
 	}
 
