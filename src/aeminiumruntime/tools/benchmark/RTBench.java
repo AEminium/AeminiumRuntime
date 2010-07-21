@@ -1,8 +1,10 @@
 package aeminiumruntime.tools.benchmark;
 
+import aeminiumruntime.implementations.Factory;
+
 public class RTBench {
 	
-	private static IBenchmark[] benchmarks = {
+	private static Benchmark[] benchmarks = {
 		new TaskCreationBenchmark(),
 		new IndependentTaskGraph(),
 		new LinearTaskGraph(),
@@ -15,12 +17,13 @@ public class RTBench {
 		System.out.println("===============================================================");
 		System.out.println("==              AEminium Runtime Benchmark                   ==");
 		System.out.println("===============================================================");
+		String version = "default";
 		
-		IReporter reporter = new StringBuilderReporter();
+		Reporter reporter = new StringBuilderReporter();
 		
-		for ( IBenchmark benchmark : benchmarks ) {
+		for ( Benchmark benchmark : benchmarks ) {
 			reporter.startBenchmark(benchmark.getName());
-			benchmark.run(reporter);
+			benchmark.run(version, Factory.getFlagsFromEnvironment(), reporter);
 			reporter.stopBenchmark(benchmark.getName());
 			reporter.flush();
 		}
@@ -28,7 +31,7 @@ public class RTBench {
 		reporter.flush();
 	}
 	
-	private static void reportVMStats(IReporter reporter) {
+	private static void reportVMStats(Reporter reporter) {
 		reporter.reportLn(String.format("Memory (TOTAL/MAX/FREE) (%d,%d,%d)", Runtime.getRuntime().totalMemory(),
 																 			  Runtime.getRuntime().maxMemory(),
 																 			  Runtime.getRuntime().freeMemory()));

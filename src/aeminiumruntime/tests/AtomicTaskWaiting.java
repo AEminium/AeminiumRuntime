@@ -8,7 +8,8 @@ import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
 
 public class AtomicTaskWaiting extends BaseTest {
-	@Test(timeout=5000)
+	//@Test(timeout=5000)
+	@Test
 	public void runAtomicTaskWaitingTest() {
 		Runtime rt = getRuntime();
 		rt.init();

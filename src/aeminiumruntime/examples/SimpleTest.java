@@ -3,16 +3,16 @@ package aeminiumruntime.examples;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.Body;
-import aeminiumruntime.launcher.RuntimeFactory;
+import aeminiumruntime.implementations.Factory;
 
 public class SimpleTest {
 	private static int MAX_CALC = 30;
 
 	public static void main(String[] args) {
-        final Runtime rt = RuntimeFactory.getRuntime();
+        final Runtime rt = Factory.getRuntime();
 		rt.init();
 
 		Body b1 = new Body() {

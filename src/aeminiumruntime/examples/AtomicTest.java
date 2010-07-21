@@ -4,14 +4,14 @@ import aeminiumruntime.Body;
 import aeminiumruntime.DataGroup;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.launcher.RuntimeFactory;
+import aeminiumruntime.implementations.Factory;
 
 public class AtomicTest {
 	
 	private static int MAX_ITEMS = 100;
     
     public static void main(String[] args) {
-        final Runtime rt = RuntimeFactory.getRuntime();
+        final Runtime rt = Factory.getRuntime();
         rt.init();
         
         

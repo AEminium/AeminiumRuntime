@@ -1,11 +1,14 @@
 package aeminiumruntime.tools.benchmark;
 
+import java.util.EnumSet;
+
 import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.queue.QRuntime;
+import aeminiumruntime.implementations.Factory;
+import aeminiumruntime.implementations.Flag;
 
-public class IndependentTaskGraph implements IBenchmark {
+public class IndependentTaskGraph implements Benchmark {
 	private final String name = "IndepenetTaskGraph";
 	private final int[] COUNTS = {100, 1000, 10000, 100000};
 	
@@ -15,15 +18,15 @@ public class IndependentTaskGraph implements IBenchmark {
 	}
 
 	@Override
-	public void run(IReporter reporter) {
+	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
 		for (int COUNT : COUNTS) {
-			runTest(reporter, COUNT);
+			runTest(version, flags, reporter, COUNT);
+			reporter.flush();
 		}
 	}
 
-	private void runTest(IReporter reporter, int count) {
-		//Runtime rt = RuntimeFactory.getRuntime();
-		Runtime rt = new QRuntime();
+	private void runTest(String version, EnumSet<Flag> flags, Reporter reporter, int count) {
+		Runtime rt = Factory.getRuntime(version, flags);
 
 		rt.init();
 		

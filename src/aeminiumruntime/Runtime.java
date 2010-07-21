@@ -3,7 +3,7 @@ package aeminiumruntime;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public abstract class Runtime {
+public interface Runtime {
     /* global constants used for the */
     public final static Collection<Task> NO_DEPS = new ArrayList<Task>() {
 		private static final long serialVersionUID = 1852797887380877437L;
@@ -23,11 +23,6 @@ public abstract class Runtime {
 	};
     public final static Task NO_PARENT = new Task() {
 		@Override
-		public Collection<Hint> getHints() {
-			return null;
-		}
-		
-		@Override
 		public void setResult(Object value) {
 			
 		}
@@ -42,26 +37,19 @@ public abstract class Runtime {
 		}
 	};
 	
-	
-    protected boolean debug = false;
-    /* turn debug mode on */
-    public void startDebug() {
-    	debug = true;
-    }
-    
     /* initialize runtime */
-    public abstract void init();
+    public void init() throws RuntimeError;
     /* add a task along with it's parent and dependencies */
-    public abstract boolean schedule(Task task, Task parent, Collection<Task> deps);
+    public void schedule(Task task, Task parent, Collection<Task> deps) throws RuntimeError;
     /* returns the current task object */
-    public abstract void shutdown();
+    public void shutdown() throws RuntimeError;
 
     /* create a new data group object */
-    public abstract DataGroup createDataGroup();
+    public DataGroup createDataGroup() throws RuntimeError;
     /* create a new Blocking task */
-    public abstract BlockingTask createBlockingTask(Body b, Collection<Hint> hints);
+    public BlockingTask createBlockingTask(Body b, Collection<Hint> hints) throws RuntimeError;
     /* create a new NonBlocking task */
-    public abstract NonBlockingTask createNonBlockingTask(Body b, Collection<Hint> hints);
+    public NonBlockingTask createNonBlockingTask(Body b, Collection<Hint> hints) throws RuntimeError;
     /* create a new Atomic task */
-    public abstract AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hint> hints);
+    public AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hint> hints) throws RuntimeError;
 }

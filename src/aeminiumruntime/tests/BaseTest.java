@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import org.junit.Before;
 
 import aeminiumruntime.Runtime;
-import aeminiumruntime.launcher.RuntimeFactory;
+import aeminiumruntime.implementations.Factory;
 
 public abstract class BaseTest {
 	private Runtime rt;
@@ -19,7 +19,7 @@ public abstract class BaseTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		rt = RuntimeFactory.getRuntime();
+		rt = Factory.getRuntime("default", Factory.getFlagsFromEnvironment());
 	}
 
 	protected Runtime getRuntime() {

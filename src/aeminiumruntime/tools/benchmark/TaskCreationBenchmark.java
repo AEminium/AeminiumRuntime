@@ -1,17 +1,20 @@
 package aeminiumruntime.tools.benchmark;
 
+import java.util.EnumSet;
+
 import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.queue.QRuntime;
+import aeminiumruntime.implementations.Factory;
+import aeminiumruntime.implementations.Flag;
 
 
-public class TaskCreationBenchmark implements IBenchmark {
+public class TaskCreationBenchmark implements Benchmark {
 	private final String name = "TaskCreation";
 	private final int[] COUNTS = { 100, 1000, 10000, 100000, 1000000};
 	
 	@Override
-	public void run(IReporter reporter) {
+	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
 		Body body = new Body() {
 			@Override
 			public void execute(Task parent) {
@@ -19,8 +22,7 @@ public class TaskCreationBenchmark implements IBenchmark {
 			}
 		};
 
-		//Runtime rt = RuntimeFactory.getRuntime();
-		Runtime rt = new QRuntime();
+		Runtime rt = Factory.getRuntime(version, flags);
 		rt.init();
 
 		for ( int COUNT : COUNTS) {

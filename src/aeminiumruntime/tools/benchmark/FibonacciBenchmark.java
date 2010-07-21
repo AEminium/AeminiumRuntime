@@ -1,15 +1,17 @@
 package aeminiumruntime.tools.benchmark;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 
 import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.launcher.RuntimeFactory;
+import aeminiumruntime.implementations.Factory;
+import aeminiumruntime.implementations.Flag;
 
-public class FibonacciBenchmark implements IBenchmark {
+public class FibonacciBenchmark implements Benchmark {
 	private final String name = "FibonacciBenchmark";
-	private int[] input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+	private int[] input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
 	
 	@Override
 	public String getName() {
@@ -17,14 +19,14 @@ public class FibonacciBenchmark implements IBenchmark {
 	}
 
 	@Override
-	public void run(IReporter reporter) {
+	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
 		for (int level : input) {
-			runTest(reporter, level);
+			runTest(version, flags, reporter, level);
 		}
 	}
 	
-	public void runTest(IReporter reporter, int n) {
-		Runtime rt = RuntimeFactory.getRuntime(false);
+	public void runTest(String version, EnumSet<Flag> flags, Reporter reporter, int n) {
+		Runtime rt = Factory.getRuntime(version, flags);
 		long start = System.nanoTime();
 		rt.init();
 

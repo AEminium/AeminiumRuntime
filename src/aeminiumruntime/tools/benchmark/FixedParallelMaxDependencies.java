@@ -1,14 +1,16 @@
 package aeminiumruntime.tools.benchmark;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.queue.QRuntime;
+import aeminiumruntime.implementations.Factory;
+import aeminiumruntime.implementations.Flag;
 
-public class FixedParallelMaxDependencies implements IBenchmark {
+public class FixedParallelMaxDependencies implements Benchmark {
 	private final String name = "FixedParallelMaxDependencies";
 	private final int[] COUNTS = {100, 1000, 10000};
 	private final int taskCount = 16;
@@ -19,15 +21,14 @@ public class FixedParallelMaxDependencies implements IBenchmark {
 	}
 
 	@Override
-	public void run(IReporter reporter) {
+	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
 		for (int COUNT : COUNTS) {
-			runTest(reporter, COUNT);
+			runTest(version, flags, reporter, COUNT);
 		}
 	}
 
-	private void runTest(IReporter reporter, int count) {
-		//Runtime rt = RuntimeFactory.getRuntime();
-		Runtime rt = new QRuntime();
+	private void runTest(String version, EnumSet<Flag> flags, Reporter reporter, int count) {
+		Runtime rt = Factory.getRuntime(version, flags);
 		rt.init();
 		
 		long start = System.nanoTime();

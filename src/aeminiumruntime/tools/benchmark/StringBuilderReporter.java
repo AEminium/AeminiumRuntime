@@ -1,6 +1,6 @@
 package aeminiumruntime.tools.benchmark;
 
-public class StringBuilderReporter implements IReporter {
+public class StringBuilderReporter implements Reporter {
 	final private StringBuilder sb = new StringBuilder();
 	final private String EOL = System.getProperty("line.separator");
 	

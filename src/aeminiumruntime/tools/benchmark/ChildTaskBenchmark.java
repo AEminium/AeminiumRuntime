@@ -1,11 +1,14 @@
 package aeminiumruntime.tools.benchmark;
 
+import java.util.EnumSet;
+
 import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.launcher.RuntimeFactory;
+import aeminiumruntime.implementations.Factory;
+import aeminiumruntime.implementations.Flag;
 
-public class ChildTaskBenchmark implements IBenchmark {
+public class ChildTaskBenchmark implements Benchmark {
 	private final String name = "ChildTaskBenchmark";
 	private int[] levels = {1, 2, 3, 4, 5, 6, 7, 8};
 	private int fanout = 4;
@@ -16,14 +19,14 @@ public class ChildTaskBenchmark implements IBenchmark {
 	}
 
 	@Override
-	public void run(IReporter reporter) {
+	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
 		for (int level : levels) {
-			runTest(reporter, level);
+			runTest(version, flags, reporter, level);
 		}
 	}
 	
-	public void runTest(IReporter reporter, int level) {
-		Runtime rt = RuntimeFactory.getRuntime(false);
+	public void runTest(String version, EnumSet<Flag> flags, Reporter reporter, int level) {
+		Runtime rt = Factory.getRuntime(version, flags);
 			long start = System.nanoTime();
 			rt.init();
 			

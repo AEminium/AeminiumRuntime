@@ -1,19 +1,21 @@
+
+
 package aeminiumruntime.examples.fjtests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import aeminiumruntime.Body;
 import aeminiumruntime.Runtime;
 import aeminiumruntime.Task;
-import aeminiumruntime.Body;
-import aeminiumruntime.launcher.RuntimeFactory;
+import aeminiumruntime.implementations.Factory;
 
 public class AeminiumFib {
 
 	private static int MAX_CALC = 20;
 	private static int THRESHOLD = 12;
-    final static Runtime rt = RuntimeFactory.getRuntime();
+    final static Runtime rt = Factory.getRuntime();
 
 	public static Body createFibBody(final int n) {
 		return new Body() {
