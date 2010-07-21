@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
 import aeminium.runtime.NonBlockingTask;
-import aeminium.runtime.implementations.Flag;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
@@ -16,7 +16,7 @@ public class HybridForkJoinThreadPoolScheduler<T extends RuntimeTask> extends Ab
 	private ExecutorService blockingService;
 	private ForkJoinPool fjpool;
 	
-	public HybridForkJoinThreadPoolScheduler(EnumSet<Flag> flags) {
+	public HybridForkJoinThreadPoolScheduler(EnumSet<Flags> flags) {
 		super(flags);
         
 	}

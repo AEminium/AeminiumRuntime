@@ -7,7 +7,7 @@ import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.implementations.Flag;
+import aeminium.runtime.implementations.Flags;
 
 public class FibonacciBenchmark implements Benchmark {
 	private final String name = "FibonacciBenchmark";
@@ -19,13 +19,13 @@ public class FibonacciBenchmark implements Benchmark {
 	}
 
 	@Override
-	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
+	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		for (int level : input) {
 			runTest(version, flags, reporter, level);
 		}
 	}
 	
-	public void runTest(String version, EnumSet<Flag> flags, Reporter reporter, int n) {
+	public void runTest(String version, EnumSet<Flags> flags, Reporter reporter, int n) {
 		Runtime rt = Factory.getRuntime(version, flags);
 		long start = System.nanoTime();
 		rt.init();

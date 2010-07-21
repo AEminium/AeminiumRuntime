@@ -11,7 +11,7 @@ import aeminium.runtime.CyclicDependencyError;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.graph.AbstractGraph;
-import aeminium.runtime.implementations.Flag;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskDescription;
@@ -25,9 +25,9 @@ public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
 	private final boolean checkForCycles;
 	private final ImplicitTask[] ita = new ImplicitTask[0];
 	
-	public ImplicitGraph(EnumSet<Flag> flags, RuntimePrioritizer<T> prioritizer) {
+	public ImplicitGraph(EnumSet<Flags> flags, RuntimePrioritizer<T> prioritizer) {
 		super(flags, prioritizer);
-		if ( flags.contains(Flag.CHECK_FOR_CYCLES)) {
+		if ( flags.contains(Flags.CHECK_FOR_CYCLES)) {
 			checkForCycles = true;
 		} else {
 			checkForCycles = false;

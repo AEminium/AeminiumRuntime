@@ -3,18 +3,18 @@ package aeminium.runtime.task;
 import java.util.Collection;
 
 import aeminium.runtime.Body;
-import aeminium.runtime.Hint;
+import aeminium.runtime.Hints;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.statistics.Statistics;
 
 public abstract class AbstractTask implements RuntimeTask {
 	private Object result;
 	protected final Body body;
-	protected final Collection<Hint> hints;
+	protected final Collection<Hints> hints;
 	protected final RuntimeGraph<RuntimeTask> graph;
 	protected Statistics statistics;
 	
-	public AbstractTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hint> hints) {
+	public AbstractTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hints> hints) {
 		this.body = body;
 		this.graph = graph;
 		this.hints = hints;
@@ -31,7 +31,7 @@ public abstract class AbstractTask implements RuntimeTask {
 		return body;
 	}
 	
-	public Collection<Hint> getHints() {
+	public Collection<Hints> getHints() {
 		return hints;
 	}
 	

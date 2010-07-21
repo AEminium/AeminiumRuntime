@@ -1,7 +1,8 @@
 package aeminium.runtime.implementations;
 
-public enum Flag {
+public enum Flags {
 	DEBUG,
+	TRACE,
 	STATISTICS,
 	CHECK_FOR_CYCLES;
 }

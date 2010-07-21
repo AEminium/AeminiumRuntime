@@ -1,18 +1,28 @@
 package aeminium.runtime.scheduler.hybridthreadpools;
 
+import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.NonBlockingTask;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
+import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
-public class HybridThreadPoolsScheduler<T extends RuntimeTask> implements RuntimeScheduler<T>, RuntimePrioritizer<T> {
+public class HybridThreadPoolsScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements RuntimeScheduler<T>, RuntimePrioritizer<T> {
+	
+	public HybridThreadPoolsScheduler(EnumSet<Flags> flags) {
+		super(flags);
+	}
+
 	private ExecutorService blockingService;
 	private ExecutorService nonblockingService; 
 
+	
+	
 	public void init() {
 		blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*10);
 		nonblockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());

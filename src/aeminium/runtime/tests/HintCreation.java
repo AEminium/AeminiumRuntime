@@ -2,28 +2,28 @@ package aeminium.runtime.tests;
 
 import org.junit.Test;
 
-import aeminium.runtime.Hint;
+import aeminium.runtime.Hints;
 
 
 public class HintCreation extends BaseTest {
 	
 	@Test
 	public void createLoopsHint() {
-		Hint loops = Hint.createLoopsHint();
-		assert( loops instanceof Hint.Loops);
+		Hints loops = Hints.createLoopsHint();
+		assert( loops instanceof Hints.Loops);
 	}
 
 	@Test
 	public void createRecursionHint() {
-		Hint recursion = Hint.createRecursionHint();
-		assert( recursion instanceof Hint.Recursion);
+		Hints recursion = Hints.createRecursionHint();
+		assert( recursion instanceof Hints.Recursion);
 	}
 
 	@Test
 	public void createStepsHint() {
-		Hint steps = Hint.createStepsHint(0xdeadbeef);
-		assert( steps instanceof Hint.Steps);
-		assert( ((Hint.Steps)steps).getStepCount() == 0xdeadbeef );
+		Hints steps = Hints.createStepsHint(0xdeadbeef);
+		assert( steps instanceof Hints.Steps);
+		assert( ((Hints.Steps)steps).getStepCount() == 0xdeadbeef );
 	}
 
 }

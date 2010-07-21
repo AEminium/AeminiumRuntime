@@ -13,7 +13,7 @@ public interface Runtime {
 			return "NO_DEPS"; 
 		}
 	};
-    public final static Collection<Hint> NO_HINTS = new ArrayList<Hint>() {
+    public final static Collection<Hints> NO_HINTS = new ArrayList<Hints>() {
 		private static final long serialVersionUID = -4192191055485289203L;
 
 		@Override 
@@ -47,9 +47,9 @@ public interface Runtime {
     /* create a new data group object */
     public DataGroup createDataGroup() throws RuntimeError;
     /* create a new Blocking task */
-    public BlockingTask createBlockingTask(Body b, Collection<Hint> hints) throws RuntimeError;
+    public BlockingTask createBlockingTask(Body b, Collection<Hints> hints) throws RuntimeError;
     /* create a new NonBlocking task */
-    public NonBlockingTask createNonBlockingTask(Body b, Collection<Hint> hints) throws RuntimeError;
+    public NonBlockingTask createNonBlockingTask(Body b, Collection<Hints> hints) throws RuntimeError;
     /* create a new Atomic task */
-    public AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hint> hints) throws RuntimeError;
+    public AtomicTask createAtomicTask(Body b, DataGroup g, Collection<Hints> hints) throws RuntimeError;
 }

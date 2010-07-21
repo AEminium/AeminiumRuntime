@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
-import aeminium.runtime.Hint;
+import aeminium.runtime.Hints;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
@@ -35,23 +35,23 @@ public abstract class ImplicitTask extends AbstractTask {
 			
 			@SuppressWarnings("unchecked")
 			@Override
-			public RuntimeAtomicTask<T> createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, Collection<Hint> hints) {
+			public RuntimeAtomicTask<T> createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, Collection<Hints> hints) {
 				return new ImplicitAtomicTask<T>((RuntimeGraph<RuntimeTask>) graph, body, (RuntimeDataGroup<T>) datagroup, hints);
 			}
 
 			@Override
-			public BlockingTask createBockingTask(Body body, Collection<Hint> hints) {
+			public BlockingTask createBockingTask(Body body, Collection<Hints> hints) {
 				return new ImplicitBlockingTask((RuntimeGraph<RuntimeTask>) graph, body, hints);
 			}
 
 			@Override
-			public NonBlockingTask createNonBockingTask(Body body, Collection<Hint> hints) {
+			public NonBlockingTask createNonBockingTask(Body body, Collection<Hints> hints) {
 				return  new ImplicitNonBlockingTask((RuntimeGraph<RuntimeTask>) graph, body, hints);
 			}
 		};
 	}
 	
-	public ImplicitTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hint> hints) {
+	public ImplicitTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hints> hints) {
 		super(graph, body, hints);
 	}
 
@@ -108,7 +108,7 @@ public abstract class ImplicitTask extends AbstractTask {
 		childCount--;
 	}
 
-	public Collection<Hint> getHints() {
+	public Collection<Hints> getHints() {
 		// TODO Auto-generated method stub
 		return null;
 	}

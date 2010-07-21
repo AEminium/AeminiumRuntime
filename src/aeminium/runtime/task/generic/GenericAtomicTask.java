@@ -3,7 +3,7 @@ package aeminium.runtime.task.generic;
 import java.util.Collection;
 
 import aeminium.runtime.Body;
-import aeminium.runtime.Hint;
+import aeminium.runtime.Hints;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.task.AbstractTask;
@@ -14,7 +14,7 @@ public class GenericAtomicTask<T extends RuntimeTask> extends AbstractTask imple
 		RuntimeAtomicTask<T> {
 	private final RuntimeDataGroup<T> datagroup;
 	
-	public GenericAtomicTask(RuntimeGraph<RuntimeTask> graph, Body body, RuntimeDataGroup<T> datagroup, Collection<Hint> hints) {
+	public GenericAtomicTask(RuntimeGraph<RuntimeTask> graph, Body body, RuntimeDataGroup<T> datagroup, Collection<Hints> hints) {
 		super(graph, body, hints);
 		this.datagroup = datagroup;
 	}

@@ -2,19 +2,27 @@ package aeminium.runtime.graph.generic;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
-import aeminium.runtime.Hint;
+import aeminium.runtime.CyclicDependencyError;
+import aeminium.runtime.Hints;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.graph.RuntimeGraph;
-import aeminium.runtime.implementations.Flag;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.RuntimeAtomicTask;
@@ -94,7 +102,7 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 		childCount--;
 	}
 
-	public Collection<Hint> getHints() {
+	public Collection<Hints> getHints() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -119,7 +127,7 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 	
 	@Override
 	public String toString() {
-		return "Wrapper<Task<"+body.toString()+">>" + childCount;
+		return "Wrapper<"+task+">" + childCount;
 	}
  
 	@Override
@@ -127,10 +135,6 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 		task.getBody().execute(task);
 		graph.taskFinished(this);
 		return null;
-	}
-	
-	public void taskFinished() {
-		// nothing by default
 	}
 	
 	public void taskCompleted() {
@@ -187,10 +191,34 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	private final List<RuntimeTaskWrapper<T>>  running = new LinkedList<RuntimeTaskWrapper<T>>();
 	private final List<RuntimeTaskWrapper<T>>  waitingForChildren = new LinkedList<RuntimeTaskWrapper<T>>();
 	private final Map<T, RuntimeTaskWrapper<T>> wrapperMapping = new HashMap<T, RuntimeTaskWrapper<T>>();
+	private final boolean checkForCycles;
+	private final RuntimeTask[] rta = new RuntimeTask[0];
+	private Logger log = Logger.getLogger(GenericGraph.class.getCanonicalName());
 	
-	
-	public GenericGraph(EnumSet<Flag> flags, RuntimePrioritizer<T> prioritizer) {
+	public GenericGraph(EnumSet<Flags> flags, RuntimePrioritizer<T> prioritizer) {
 		super(flags, prioritizer);
+		if ( flags.contains(Flags.CHECK_FOR_CYCLES)) {
+			checkForCycles = true;
+		} else {
+			checkForCycles = false;
+		}
+		
+		log.setLevel(Level.OFF);
+		if (flags.contains(Flags.DEBUG)) {
+			log.setLevel(Level.WARNING);
+		}
+		if ( flags.contains(Flags.TRACE)) {
+			log.setLevel(Level.ALL);
+		}
+		Handler conHdlr = new ConsoleHandler();
+		conHdlr.setFormatter(new Formatter() {
+			public String format(LogRecord record) {
+				return record.getLevel() + "  :  "
+				+ record.getMessage() + "\n";
+			}
+		});
+		log.setUseParentHandlers(false);
+		log.addHandler(conHdlr);
 	}
 	
 	@Override
@@ -203,31 +231,72 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	
 	@Override
 	public void addTask(T task, Task parent, Collection<T> deps) {
-		RuntimeTaskWrapper<T> wrapper = null;
+		createWrapperMapping(task);
+		addWrapperTask(wrapperMapping.get(task), parent, deps);
+	}
+	
+	protected RuntimeTaskWrapper<T> wrapTask(T task) {
 		if ( task instanceof RuntimeAtomicTask<?> ) {
-			wrapper = new AtomicTaskWrapper(this, (RuntimeAtomicTask) task);
+			return new AtomicTaskWrapper(this, (RuntimeAtomicTask) task);
 		} else if ( task instanceof RuntimeBlockingTask ) {
-			wrapper = new BlockingTaskWrapper(this, (RuntimeBlockingTask) task);
+			return new BlockingTaskWrapper(this, (RuntimeBlockingTask) task);
 		} else {
-			wrapper = new NonBlockingTaskWrapper(this, (RuntimeNonBlockingTask) task);
+			return new NonBlockingTaskWrapper(this, (RuntimeNonBlockingTask) task);
 		}
-		wrapperMapping.put(task, wrapper);
-		addWrapperTask(wrapper, parent, deps);
+	}
+	
+	protected void createWrapperMapping(T t) {
+		synchronized (wrapperMapping) {
+			if ( !wrapperMapping.containsKey(t)) {
+				wrapperMapping.put(t, wrapTask(t));
+			}
+		}
+	}
+	
+	protected void checkForCycles(RuntimeTaskWrapper<T> task, Collection<Task> deps) {
+		if ( deps == Runtime.NO_DEPS ) {
+			return;
+		}
+		for ( Task t : deps ) {
+			checkPath(task, (RuntimeTaskWrapper<T>)t);
+		}
+	}
+	
+	protected void checkPath(RuntimeTaskWrapper<T> task, RuntimeTaskWrapper<T> dep) {
+		if ( task == dep ) {
+			throw new CyclicDependencyError("Found Cycle for task: " + task);
+		} else {
+			Collection<Task> nextDeps;
+			synchronized (dep) {
+				 nextDeps = Collections.unmodifiableList((List<? extends Task>) dep.getDependencies());
+			}
+			checkForCycles(task, nextDeps);
+		}
 	}
 	
 	protected void addWrapperTask(RuntimeTaskWrapper<T> task, Task parent, Collection<T> deps) {
 		// setup dependendecies
 		if ( deps != Runtime.NO_DEPS ) {
-			task.setDependencies(new ArrayList<Task>(deps));
+			Collection<Task> dep = new ArrayList<Task>(1);
+			for ( Task t : deps ) {
+				createWrapperMapping((T)t);
+				dep.add(wrapperMapping.get(t));
+			}
+			task.setDependencies(dep);
 		} else {
 			task.setDependencies(Runtime.NO_DEPS);
 		}
 		
 		if ( parent != Runtime.NO_PARENT ) {
-			((RuntimeTaskWrapper<T>)wrapperMapping.get(parent)).addChildTask(task);
+			createWrapperMapping((T)parent);
 			task.setParent(wrapperMapping.get(parent));
 		} else {
 			task.setParent(Runtime.NO_PARENT);
+		}
+		
+		if ( checkForCycles ) {
+			Collection<Task> taskDeps = Collections.unmodifiableList((List<? extends Task>) task.getDependencies());
+			checkForCycles(task, taskDeps);
 		}
 		
 		synchronized (this) {
@@ -240,9 +309,9 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 					List<Task> doneTasks = new ArrayList<Task>();
 					for ( Task t : task.getDependencies() ) {
 						synchronized (t) {
-							RuntimeTaskWrapper<RuntimeTask> at = (RuntimeTaskWrapper<RuntimeTask>)t;
+							RuntimeTaskWrapper<T> at = (RuntimeTaskWrapper<T>)t;
 							if ( at.getTaskState() != ImplicitTaskState.FINISHED ) {
-								at.addDependent((RuntimeTaskWrapper<RuntimeTask>)task);
+								at.addDependent((T)task);
 							} else {
 								doneTasks.add(at);
 							}
@@ -263,18 +332,16 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	}
 	
 	// task finished to run 
-	public void taskFinished(T task_p) {
-		RuntimeTaskWrapper<T> task = (RuntimeTaskWrapper<T>)task_p;
+	public void taskFinished(T task) {
+		RuntimeTaskWrapper<T> wtask = (RuntimeTaskWrapper<T>)task;
 		synchronized (this) {
-			synchronized (task) {
-				running.remove(task);
-				// callback 
-				task.taskFinished();
-				if (task.hasChildren()) {
-					waitingForChildren.add(task);
-					task.setTaskState(ImplicitTaskState.WAITING_FOR_CHILDREN);
+			synchronized (wtask) {
+				running.remove(wtask);
+				if (wtask.hasChildren()) {
+					waitingForChildren.add(wtask);
+					wtask.setTaskState(ImplicitTaskState.WAITING_FOR_CHILDREN);
 				} else {
-					taskCompleted(task);
+					taskCompleted(wtask);
 				}
 			}
 		}
@@ -310,14 +377,16 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 							running.add(at);
 							at.setTaskState(ImplicitTaskState.RUNNING);
 							readyTasks.add(at);
-							//prioritizer.scheduleTasks(at);
 						}
 					}
 				}
-				if ( !readyTasks.isEmpty() ) {
-					prioritizer.scheduleTasks((T[])readyTasks.toArray());
-				}
+				prioritizer.scheduleTasks((T[]) readyTasks.toArray(rta));
 
+				//TODO: we should drop mapping but then we would get into trouble
+				//      of another task gets scheduled which depends on this one. If 
+				//      it is not in the mapping we don't know it is already finished
+				//      or has not yet been scheduled.
+				
 				if (waitingForChildren.isEmpty() && waitingForDeps.isEmpty() && running.isEmpty()) {
 					this.notifyAll();
 				}

@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
-import aeminium.runtime.Hint;
+import aeminium.runtime.Hints;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.RuntimeGraph;
@@ -15,7 +15,7 @@ import aeminium.runtime.task.TaskFactory;
 
 public abstract class GenericTask extends AbstractTask {
 
-	public GenericTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hint> hints) {
+	public GenericTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hints> hints) {
 		super(graph, body, hints);
 	}
 	
@@ -28,20 +28,24 @@ public abstract class GenericTask extends AbstractTask {
 			
 			@SuppressWarnings("unchecked")
 			@Override
-			public RuntimeAtomicTask<T> createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, Collection<Hint> hints) {
+			public RuntimeAtomicTask<T> createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, Collection<Hints> hints) {
 				return new GenericAtomicTask<T>((RuntimeGraph<RuntimeTask>) graph, body, (RuntimeDataGroup<T>) datagroup, hints);
 			}
 
 			@Override
-			public BlockingTask createBockingTask(Body body, Collection<Hint> hints) {
+			public BlockingTask createBockingTask(Body body, Collection<Hints> hints) {
 				return new GenericBlockingTask((RuntimeGraph<RuntimeTask>) graph, body, hints);
 			}
 
 			@Override
-			public NonBlockingTask createNonBockingTask(Body body, Collection<Hint> hints) {
+			public NonBlockingTask createNonBockingTask(Body body, Collection<Hints> hints) {
 				return  new GenericNonBlockingTask((RuntimeGraph<RuntimeTask>) graph, body, hints);
 			}
 		};
 	}
 
+	@Override
+	public String toString() {
+		return "GenericTask<"+body+">";
+	}
 }

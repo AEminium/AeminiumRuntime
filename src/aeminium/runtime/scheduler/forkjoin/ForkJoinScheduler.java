@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
-import aeminium.runtime.implementations.Flag;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
@@ -13,7 +13,7 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 
     private ForkJoinPool pool = null;
     
-    public ForkJoinScheduler(EnumSet<Flag> flags) {
+    public ForkJoinScheduler(EnumSet<Flags> flags) {
     	super(flags);
         
     }

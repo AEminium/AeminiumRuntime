@@ -6,7 +6,7 @@ import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.implementations.Flag;
+import aeminium.runtime.implementations.Flags;
 
 
 public class TaskCreationBenchmark implements Benchmark {
@@ -14,7 +14,7 @@ public class TaskCreationBenchmark implements Benchmark {
 	private final int[] COUNTS = { 100, 1000, 10000, 100000, 1000000};
 	
 	@Override
-	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
+	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		Body body = new Body() {
 			@Override
 			public void execute(Task parent) {

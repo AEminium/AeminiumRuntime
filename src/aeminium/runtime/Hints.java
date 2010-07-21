@@ -1,40 +1,40 @@
 package aeminium.runtime;
 
 /* interface for base hint */
-public class Hint {
-	private static Hint hintSingleton = new Hint();
-	private static Hint.Loops loopsHint = hintSingleton.new Loops();
-	private static Hint.Recursion recursionHint = hintSingleton.new Recursion();
+public class Hints {
+	private static Hints hintSingleton = new Hints();
+	private static Hints.Loops loopsHint = hintSingleton.new Loops();
+	private static Hints.Recursion recursionHint = hintSingleton.new Recursion();
 	
 	/* private protected constructor to prevent instantiation */
-	protected Hint() {}
+	protected Hints() {}
 	
-	public static Hint createLoopsHint() {
+	public static Hints createLoopsHint() {
 		return loopsHint;
 	}
 	
-	public static Hint createRecursionHint() {
+	public static Hints createRecursionHint() {
 		return recursionHint;
 	}
 	
-	public static Hint createStepsHint(long count) {
+	public static Hints createStepsHint(long count) {
 		return hintSingleton.new Steps(count);
 	}
 	
 	/* task contains loops */
-	public class Loops extends Hint {
+	public class Loops extends Hints {
 		/* private protected constructor to prevent instantiation from outside */
 		protected Loops() {}
 	};
 
 	/* task contains recursion */
-	public class Recursion extends Hint  {
+	public class Recursion extends Hints  {
 		/* private protected constructor to prevent instantiation from outside */
 		protected Recursion() {}
 	};
 
 	/* estimated virtual execution steps */
-	public class Steps extends Hint {
+	public class Steps extends Hints {
 		private long stepCount = 0;
 	
 		/* private protected constructor to prevent instantiation from outside */

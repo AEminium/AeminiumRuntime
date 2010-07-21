@@ -6,7 +6,7 @@ import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.implementations.Flag;
+import aeminium.runtime.implementations.Flags;
 
 public class IndependentTaskGraph implements Benchmark {
 	private final String name = "IndepenetTaskGraph";
@@ -18,14 +18,14 @@ public class IndependentTaskGraph implements Benchmark {
 	}
 
 	@Override
-	public void run(String version, EnumSet<Flag> flags, Reporter reporter) {
+	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		for (int COUNT : COUNTS) {
 			runTest(version, flags, reporter, COUNT);
 			reporter.flush();
 		}
 	}
 
-	private void runTest(String version, EnumSet<Flag> flags, Reporter reporter, int count) {
+	private void runTest(String version, EnumSet<Flags> flags, Reporter reporter, int count) {
 		Runtime rt = Factory.getRuntime(version, flags);
 
 		rt.init();

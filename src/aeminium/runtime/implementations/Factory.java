@@ -38,7 +38,7 @@ public class Factory {
 			return description;
 		}
 		
-		public abstract AbstractRuntime instanciate(EnumSet<Flag> flags);
+		public abstract AbstractRuntime instanciate(EnumSet<Flags> flags);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -48,8 +48,8 @@ public class Factory {
 		
 		final ImplementationDeclaration<ImplicitTask> ImplicitGraphWithHybridThreadPoolSchedulerNoPrioritizer = f.new ImplementationDeclaration<ImplicitTask>("ImplicitGraphWithHybridThreadPoolSchedulerNoPrioritizer", "ImplicitGraphWithHybridThreadPoolSchedulerNoPrioritizer") {
 			@Override
-			public AbstractRuntime instanciate(EnumSet<Flag> flags) {
-				HybridThreadPoolsScheduler<ImplicitTask> scheduler = new HybridThreadPoolsScheduler<ImplicitTask>();
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
+				HybridThreadPoolsScheduler<ImplicitTask> scheduler = new HybridThreadPoolsScheduler<ImplicitTask>(flags);
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(flags, scheduler);
 				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
 				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(graph);
@@ -64,7 +64,7 @@ public class Factory {
 
 		final ImplementationDeclaration<ImplicitTask> ImplicitGraphWithForkJoinPoolSchedulerNoPrioritizer = f.new ImplementationDeclaration<ImplicitTask>("ImplicitGraphWithForkJoinPoolSchedulerNoPrioritizer", "ImplicitGraphWithForkJoinPoolSchedulerNoPrioritizer") {
 			@Override
-			public AbstractRuntime instanciate(EnumSet<Flag> flags) {
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
 				ForkJoinScheduler<ImplicitTask> scheduler = new ForkJoinScheduler<ImplicitTask>(flags);
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(flags, scheduler);
 				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
@@ -80,7 +80,7 @@ public class Factory {
 		
 		final ImplementationDeclaration<ImplicitTask> ImplicitGraphLinearSchedulerlNoPrioritizer = f.new ImplementationDeclaration<ImplicitTask>("ImplicitGraphLinearSchedulerlNoPrioritizer", "ImplicitGraphLinearSchedulerlNoPrioritizer") {
 			@Override
-			public AbstractRuntime instanciate(EnumSet<Flag> flags) {
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
 				LinearScheduler<ImplicitTask> scheduler = new LinearScheduler<ImplicitTask>(flags);
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(flags, scheduler);
 				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
@@ -95,24 +95,24 @@ public class Factory {
 		database.put(ImplicitGraphLinearSchedulerlNoPrioritizer.getName(), ImplicitGraphLinearSchedulerlNoPrioritizer);
 
 		// TODO: still has some bugs
-//		final ImplementationDeclaration<ImplicitTask> GenericGraphLinearSchedulerlNoPrioritizer = f.new ImplementationDeclaration<ImplicitTask>("GenericGraphLinearSchedulerlNoPrioritizer", "GenericGraphLinearSchedulerlNoPrioritizer") {
-//			@Override
-//			public AbstractRuntime instanciate(EnumSet<Flag> flags) {
-//				LinearScheduler<RuntimeTask> scheduler = new LinearScheduler<RuntimeTask>(flags);
-//				GenericGraph<RuntimeTask> graph = new GenericGraph<RuntimeTask>(flags, scheduler);
-//				DataGroupFactory<RuntimeTask> dgFactory = FifoDataGroup.createFactory(scheduler);
-//				TaskFactory<RuntimeTask> taskFactory = GenericTask.createFactory(graph);
-//				return new GenericRuntime<RuntimeTask>(scheduler, 
-//															   scheduler, 
-//															   graph,
-//															   dgFactory,
-//															   taskFactory);
-//			}
-//		};
-//		database.put(GenericGraphLinearSchedulerlNoPrioritizer.getName(), GenericGraphLinearSchedulerlNoPrioritizer);
+		final ImplementationDeclaration<ImplicitTask> GenericGraphHybridThreadPoolSchedulerNoPrioritizer  = f.new ImplementationDeclaration<ImplicitTask>("GenericGraphHybridThreadPoolSchedulerNoPrioritizer", "GenericGraphHybridThreadPoolSchedulerNoPrioritizer") {
+			@Override
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
+				HybridThreadPoolsScheduler<RuntimeTask> scheduler = new HybridThreadPoolsScheduler<RuntimeTask>(flags);
+				GenericGraph<RuntimeTask> graph = new GenericGraph<RuntimeTask>(flags, scheduler);
+				DataGroupFactory<RuntimeTask> dgFactory = FifoDataGroup.createFactory(scheduler);
+				TaskFactory<RuntimeTask> taskFactory = GenericTask.createFactory(graph);
+				return new GenericRuntime<RuntimeTask>(scheduler, 
+															   scheduler, 
+															   graph,
+															   dgFactory,
+															   taskFactory);
+			}
+		};
+		database.put(GenericGraphHybridThreadPoolSchedulerNoPrioritizer.getName(), GenericGraphHybridThreadPoolSchedulerNoPrioritizer);
 		
 	
-		database.put("default", ImplicitGraphWithHybridThreadPoolSchedulerNoPrioritizer);
+		database.put("default", GenericGraphHybridThreadPoolSchedulerNoPrioritizer);
 	}
 	
 	/**
@@ -130,9 +130,7 @@ public class Factory {
 	 * @return
 	 */
 	public static Runtime getRuntime() {
-		EnumSet<Flag> flags =  EnumSet.of(Flag.DEBUG);
-		flags.clear();
-		return getRuntime("default", flags);
+		return getRuntime("default", getFlagsFromEnvironment());
 	}
 	
 	/**
@@ -144,7 +142,7 @@ public class Factory {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static Runtime getRuntime(String name, EnumSet<Flag> flags) {
+	public static Runtime getRuntime(String name, EnumSet<Flags> flags) {
 		if ( database.containsKey(name)) {
 			return database.get(name).instanciate(flags);
 		} else {
@@ -157,11 +155,11 @@ public class Factory {
 	 * 
 	 * @return
 	 */
-	public static EnumSet<Flag> getFlagsFromEnvironment() {
-		EnumSet<Flag> flags = EnumSet.of(Flag.DEBUG);
+	public static EnumSet<Flags> getFlagsFromEnvironment() {
+		EnumSet<Flags> flags = EnumSet.of(Flags.DEBUG);
 		flags.clear();
 		
-		for ( Flag f : Flag.values() ) {
+		for ( Flags f : Flags.values() ) {
 			Map<String, String> env = System.getenv();
 			if ( env.containsKey(RT_PREFIX + f.name())) {
 				flags.add(f);
