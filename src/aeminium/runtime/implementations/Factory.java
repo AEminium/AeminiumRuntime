@@ -10,6 +10,7 @@ import aeminium.runtime.datagroup.DataGroupFactory;
 import aeminium.runtime.datagroup.fifo.FifoDataGroup;
 import aeminium.runtime.graph.generic.GenericGraph;
 import aeminium.runtime.graph.implicit.ImplicitGraph;
+import aeminium.runtime.implementations.generic.GenericRuntime;
 import aeminium.runtime.scheduler.forkjoin.ForkJoinScheduler;
 import aeminium.runtime.scheduler.hybridthreadpools.HybridThreadPoolsScheduler;
 import aeminium.runtime.scheduler.linear.LinearScheduler;

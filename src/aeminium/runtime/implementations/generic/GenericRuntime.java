@@ -1,4 +1,4 @@
-package aeminium.runtime.implementations;
+package aeminium.runtime.implementations.generic;
 
 import java.util.Collection;
 
@@ -12,6 +12,7 @@ import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.DataGroupFactory;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.RuntimeGraph;
+import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
