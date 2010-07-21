@@ -1,0 +1,16 @@
+package aeminium.runtime.task;
+
+import java.util.Collection;
+
+import aeminium.runtime.AtomicTask;
+import aeminium.runtime.BlockingTask;
+import aeminium.runtime.Body;
+import aeminium.runtime.Hint;
+import aeminium.runtime.NonBlockingTask;
+import aeminium.runtime.datagroup.RuntimeDataGroup;
+
+public interface TaskFactory<T extends RuntimeTask> {
+	public BlockingTask createBockingTask(Body body, Collection<Hint> hints);
+	public NonBlockingTask createNonBockingTask(Body body, Collection<Hint> hints);
+	public RuntimeAtomicTask<T> createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, Collection<Hint> hints);
+}
