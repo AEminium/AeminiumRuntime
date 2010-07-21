@@ -14,7 +14,7 @@ public abstract class BaseTest {
 	
 	public BaseTest() {
 		log = Logger.getLogger(this.getClass().getName());
-		log.setLevel(Level.FINE);
+		log.setLevel(Level.WARNING);
 	}
 	
 	@Before

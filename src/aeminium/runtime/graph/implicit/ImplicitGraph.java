@@ -13,6 +13,7 @@ import aeminium.runtime.Task;
 import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Flag;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
+import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskDescription;
 import aeminium.runtime.task.implicit.ImplicitTask;
 import aeminium.runtime.task.implicit.ImplicitTaskState;
@@ -22,6 +23,7 @@ public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
 	private final List<T>  running = new LinkedList<T>();
 	private final List<T>  waitingForChildren = new LinkedList<T>();
 	private final boolean checkForCycles;
+	private final ImplicitTask[] ita = new ImplicitTask[0];
 	
 	public ImplicitGraph(EnumSet<Flag> flags, RuntimePrioritizer<T> prioritizer) {
 		super(flags, prioritizer);
@@ -42,10 +44,8 @@ public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
 	
 	@Override
 	public void addTask(T task, Task parent, Collection<T> deps) {
-	
 		synchronized (this) {
  			synchronized (task) {
-
  				// setup dependendecies
  				if ( deps != Runtime.NO_DEPS ) {
  					task.setDependencies(new ArrayList<Task>(deps));
@@ -113,7 +113,6 @@ public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
 			}
 			checkForCycles(task, nextDeps);
 		}
-		
 	}
 	
 	// task finished to run 
@@ -142,7 +141,8 @@ public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
 				// callback 
 				task.taskCompleted();
 				if ( task.getParent() != aeminium.runtime.Runtime.NO_PARENT ) {
-					ImplicitTask parent = (ImplicitTask)task.getParent();
+					@SuppressWarnings("unchecked")
+					T parent = (T)task.getParent();
 					synchronized (parent) {
 						parent.deleteChildTask(task);
 						if ( !parent.hasChildren() && parent.getTaskState() == ImplicitTaskState.WAITING_FOR_CHILDREN) {
@@ -150,22 +150,24 @@ public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
 						}
 					}
 				}
+				ArrayList<T> readyTasks = new ArrayList<T>(10);
 				for ( Task t : task.getDependents() ) {
 					synchronized (t) {
 						@SuppressWarnings("unchecked")
 						T at = (T)t;
 						at.removeDependency(task);
-						if ( at.getDependencies() == aeminium.runtime.Runtime.NO_DEPS ) {
+						if ( at.getDependencies() == Runtime.NO_DEPS ) {
 							waitingForDeps.remove(at);
 							running.add(at);
 							at.setTaskState(ImplicitTaskState.RUNNING);
-							prioritizer.scheduleTasks(at);
+							//prioritizer.scheduleTasks(at);
+							readyTasks.add(at);
 						}
 					}
 				}
 
 				// trigger prioritize in case he was caching some tasks
-				prioritizer.scheduleTasks();
+				prioritizer.scheduleTasks((T[]) readyTasks.toArray(ita));
 				
 				// wake up waiting threads 
 				if (waitingForChildren.isEmpty() && waitingForDeps.isEmpty() && running.isEmpty()) {

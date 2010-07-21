@@ -8,7 +8,7 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 
 public class AtomicTaskWaiting extends BaseTest {
-	//@Test(timeout=5000)
+	
 	@Test
 	public void runAtomicTaskWaitingTest() {
 		Runtime rt = getRuntime();
@@ -32,7 +32,7 @@ public class AtomicTaskWaiting extends BaseTest {
 				rt.schedule(rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Task current) {
-						getLogger().fine("Sub Task waiting for "+ (delay+1) + " ms");
+						getLogger().info("Sub Task waiting for "+ (delay+1) + " ms");
 						try {
 							Thread.sleep(delay);
 						} catch (InterruptedException e) {
@@ -48,7 +48,7 @@ public class AtomicTaskWaiting extends BaseTest {
 				rt.schedule(rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Task current) {
-						getLogger().fine("Sub Task waiting for "+ (delay+2) + " ms");
+						getLogger().info("Sub Task waiting for "+ (delay+2) + " ms");
 						try {
 							Thread.sleep(delay);
 						} catch (InterruptedException e) {
@@ -63,7 +63,7 @@ public class AtomicTaskWaiting extends BaseTest {
 
 				}, Runtime.NO_HINTS), current, Runtime.NO_DEPS);
 	
-				getLogger().fine("Task waiting for "+delay + " ms");
+				getLogger().info("Task waiting for "+delay + " ms");
 				try {
 					Thread.sleep(delay);
 				} catch (InterruptedException e) {

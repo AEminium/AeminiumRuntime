@@ -20,13 +20,8 @@ public class HybridThreadPoolsScheduler<T extends RuntimeTask> implements Runtim
 	
 	@Override
 	public void scheduleTasks(T ... tasks) {
-		if ( tasks.length == 1 ) {
-			// optimize case of single
-			scheduleTask(tasks[0]);
-		} else {
-			for ( int i = 0; i < tasks.length; i++ ) {
-				scheduleTask(tasks[i]);
-			}
+		for ( int i = 0; i < tasks.length; i++ ) {
+			scheduleTask(tasks[i]);
 		}
 	}
 
