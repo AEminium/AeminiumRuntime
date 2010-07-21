@@ -33,6 +33,14 @@ public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
 	}
 	
 	@Override
+	public void init() {
+	}
+	
+	@Override
+	public void shutdown() {
+	}
+	
+	@Override
 	public void addTask(T task, Task parent, Collection<T> deps) {
 	
 		synchronized (this) {

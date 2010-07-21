@@ -13,13 +13,19 @@ import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
 public class HybridForkJoinThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
-	private final ExecutorService blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
-	private final ForkJoinPool fjpool;
+	private ExecutorService blockingService;
+	private ForkJoinPool fjpool;
 	
 	public HybridForkJoinThreadPoolScheduler(EnumSet<Flag> flags) {
 		super(flags);
-        fjpool = new ForkJoinPool();
+        
+	}
+	
+	@Override
+	public void init() {
+		fjpool = new ForkJoinPool();
         fjpool.setAsyncMode(true);
+        blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
 	}
 	
 	@Override
@@ -37,7 +43,13 @@ public class HybridForkJoinThreadPoolScheduler<T extends RuntimeTask> extends Ab
 
 	@Override
 	public void shutdown() {
-		blockingService.shutdown();
+		if ( fjpool != null ) {
+			fjpool.shutdown();
+			fjpool = null;
+		}
+		if ( blockingService != null ) {
+			blockingService.shutdown();
+			blockingService = null;
+		}
 	}
-
 }

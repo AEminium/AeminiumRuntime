@@ -11,14 +11,19 @@ import aeminium.runtime.task.RuntimeTask;
 
 public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<T>{
 
-    private final ForkJoinPool pool;
+    private ForkJoinPool pool = null;
     
     public ForkJoinScheduler(EnumSet<Flag> flags) {
     	super(flags);
-        pool = new ForkJoinPool();
-        pool.setAsyncMode(true);
+        
     }
 
+    @Override
+    public void init() {
+    	pool = new ForkJoinPool();
+        pool.setAsyncMode(true);
+    }
+    
 	@Override
 	public void scheduleTasks(T... tasks) {
 		if ( tasks.length == 1 ) {
@@ -31,8 +36,11 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 		
 	}
 	
-    public synchronized void shutdown() {
-    	pool.shutdown();
+	public void shutdown() {
+		if ( pool != null ) {
+			pool.shutdown();
+			pool = null;
+		}
     }
 
 

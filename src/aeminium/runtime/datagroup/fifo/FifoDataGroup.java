@@ -21,6 +21,10 @@ public class FifoDataGroup<T extends RuntimeTask> implements RuntimeDataGroup<T>
 	@SuppressWarnings("unchecked")
 	public static <T extends RuntimeTask> DataGroupFactory<T> createFactory(RuntimeScheduler<T> scheduler) {
 		return (DataGroupFactory<T>) new DataGroupFactory<RuntimeTask>() {
+			@Override 
+			public void init() {}
+			@Override 
+			public void shutdown() {}
 			@Override
 			public DataGroup createDataGroup(RuntimeScheduler<RuntimeTask> scheduler) {
 				return new FifoDataGroup<RuntimeTask>(scheduler);

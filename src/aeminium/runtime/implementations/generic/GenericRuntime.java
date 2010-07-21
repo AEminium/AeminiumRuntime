@@ -73,6 +73,11 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@Override
 	public void init() {
 		assert( state == GenericRuntimeState.UNINITIALIZED);
+		graph.init();
+		prioritizer.init();
+		scheduler.init();
+		taskFactory.init();
+		dataGroupFactory.init();
 		state = GenericRuntimeState.INITIALIZED;
 		assert ( state == GenericRuntimeState.INITIALIZED );
 	}
@@ -93,7 +98,11 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		state = GenericRuntimeState.SHUTTING_DOWN;
 		
 		graph.waitToEmpty();
+		graph.shutdown();
 		scheduler.shutdown();
+		prioritizer.shutdown();
+		taskFactory.shutdown();
+		dataGroupFactory.shutdown();
 		
 		state = GenericRuntimeState.UNINITIALIZED;
 		assert ( state == GenericRuntimeState.UNINITIALIZED );

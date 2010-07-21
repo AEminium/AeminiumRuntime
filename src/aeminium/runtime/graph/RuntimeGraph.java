@@ -7,6 +7,10 @@ import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskDescription;
 
 public interface RuntimeGraph <T extends RuntimeTask> {
+
+	public void init();
+	
+	public void shutdown();
 	
 	/**
 	 * Add a new task to the graph.
@@ -24,12 +28,10 @@ public interface RuntimeGraph <T extends RuntimeTask> {
 	 */
 	public abstract void taskFinished(T task);
 	
-	
 	/**
 	 * Method to wait until all task have completed.
 	 */
 	public abstract void waitToEmpty();
-
 	
 	public abstract TaskDescription<T> getTaskDescription(T task);
 }

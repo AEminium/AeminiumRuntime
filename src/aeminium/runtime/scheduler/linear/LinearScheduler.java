@@ -13,6 +13,11 @@ public class LinearScheduler<T extends RuntimeTask> extends AbstractScheduler<T>
 	}
 
 	@Override
+	public void init() {
+		
+	}
+	
+	@Override
 	public void scheduleTasks(T... tasks) {
 		for ( int i = 0 ; i < tasks.length ; i++ ) {
 			try {

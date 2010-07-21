@@ -194,6 +194,14 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	}
 	
 	@Override
+	public void init() {
+	}
+	
+	@Override
+	public void shutdown() {
+	}
+	
+	@Override
 	public void addTask(T task, Task parent, Collection<T> deps) {
 		RuntimeTaskWrapper<T> wrapper = null;
 		if ( task instanceof RuntimeAtomicTask<?> ) {

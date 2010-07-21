@@ -3,6 +3,8 @@ package aeminium.runtime.scheduler;
 import aeminium.runtime.task.RuntimeTask;
 
 public interface RuntimeScheduler <T extends RuntimeTask> {	
+	public void init();
+	
 	/**
 	 * Schedules task in the order they have been passed in.
 	 * 

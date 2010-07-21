@@ -28,6 +28,11 @@ public abstract class ImplicitTask extends AbstractTask {
 
 	public static <T extends RuntimeTask> TaskFactory<T> createFactory(final RuntimeGraph<T> graph) {
 		return new TaskFactory<T>() {
+			@Override 
+			public void init() {}
+			@Override 
+			public void shutdown() {}
+			
 			@SuppressWarnings("unchecked")
 			@Override
 			public RuntimeAtomicTask<T> createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, Collection<Hint> hints) {
