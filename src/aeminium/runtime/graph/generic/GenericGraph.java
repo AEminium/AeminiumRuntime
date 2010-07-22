@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import aeminium.runtime.CyclicDependencyError;
 import aeminium.runtime.Hints;
 import aeminium.runtime.Runtime;
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.AbstractGraph;
@@ -30,17 +31,19 @@ import aeminium.runtime.task.RuntimeBlockingTask;
 import aeminium.runtime.task.RuntimeNonBlockingTask;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskDescription;
+import aeminium.runtime.task.implicit.ImplicitTaskState;
 
 enum WrapperTaskState {
+	UNSCHEDULED,
 	WAITING_FOR_DEPENDENCIES,
 	RUNNING,
 	WAITING_FOR_CHILDREN,
-	FINISHED
+	COMPLETED
 }
 
 abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 
-	private WrapperTaskState state = WrapperTaskState.WAITING_FOR_DEPENDENCIES;
+	private WrapperTaskState state = WrapperTaskState.UNSCHEDULED;
 	private Collection<Task> dependencies = Runtime.NO_DEPS;
 	
 	private Task parent = aeminium.runtime.Runtime.NO_PARENT;
@@ -291,6 +294,10 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	protected void addWrapperTask(RuntimeTaskWrapper<T> task, Task parent, Collection<T> deps) {
 		synchronized (this) {
  			synchronized (task) {
+ 				if ( task.getTaskState() != WrapperTaskState.UNSCHEDULED ) {
+ 					throw new RuntimeError("Task '" + task + "' has already been scheduled");
+ 				}
+ 				
  				// setup dependendecies
  				if ( deps != Runtime.NO_DEPS ) {
  					Collection<Task> dep = new ArrayList<Task>(deps.size());
@@ -325,7 +332,7 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 					for ( Task t : task.getDependencies() ) {
 						synchronized (t) {
 							RuntimeTaskWrapper<T> at = (RuntimeTaskWrapper<T>)t;
-							if ( at.getTaskState() != WrapperTaskState.FINISHED ) {
+							if ( at.getTaskState() != WrapperTaskState.COMPLETED ) {
 								at.addDependent(task);
 							} else {
 								doneTasks.add(at);
@@ -370,7 +377,7 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 				if ( task.getTaskState() == WrapperTaskState.WAITING_FOR_CHILDREN ) {
 					waitingForChildren.remove(task);
 				}
-				task.setTaskState(WrapperTaskState.FINISHED);
+				task.setTaskState(WrapperTaskState.COMPLETED);
 				// callback 
 				task.taskCompleted();
 				if ( task.getParent() != aeminium.runtime.Runtime.NO_PARENT ) {

@@ -20,7 +20,7 @@ import aeminium.runtime.task.TaskFactory;
 
 public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 
-	private ImplicitTaskState state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
+	private ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
 	private Collection<Task> dependencies = Runtime.NO_DEPS;
 	
 	private Task parent = aeminium.runtime.Runtime.NO_PARENT;

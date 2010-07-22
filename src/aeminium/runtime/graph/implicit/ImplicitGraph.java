@@ -9,6 +9,7 @@ import java.util.List;
 
 import aeminium.runtime.CyclicDependencyError;
 import aeminium.runtime.Runtime;
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Flags;
@@ -45,7 +46,11 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	public void addTask(T task, Task parent, Collection<T> deps) {
 		synchronized (this) {
  			synchronized (task) {
- 				// setup dependendecies
+ 				// setup dependencies
+ 				if ( task.getTaskState() != ImplicitTaskState.UNSCHEDULED ) {
+ 					throw new RuntimeError("Task '" + task + "' has already been scheduled");
+ 				}
+ 				
  				if ( deps != Runtime.NO_DEPS ) {
  					task.setDependencies(new ArrayList<Task>(deps));
  				} else {
@@ -72,7 +77,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 					for ( Task t : task.getDependencies() ) {
 						synchronized (t) {
 							T at = (T)t;
-							if ( at.getTaskState() != ImplicitTaskState.FINISHED ) {
+							if ( at.getTaskState() != ImplicitTaskState.COMPLETED ) {
 								at.addDependent(task);
 							} else {
 								doneTasks.add(at);
@@ -136,7 +141,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 				if ( task.getTaskState() == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
 					waitingForChildren.remove(task);
 				}
-				task.setTaskState(ImplicitTaskState.FINISHED);
+				task.setTaskState(ImplicitTaskState.COMPLETED);
 				// callback 
 				task.taskCompleted();
 				if ( task.getParent() != aeminium.runtime.Runtime.NO_PARENT ) {
