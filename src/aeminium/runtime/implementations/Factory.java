@@ -112,8 +112,8 @@ public class Factory {
 		database.put(GenericGraphHybridThreadPoolSchedulerNoPrioritizer.getName(), GenericGraphHybridThreadPoolSchedulerNoPrioritizer);
 		
 	
-		database.put("default", GenericGraphHybridThreadPoolSchedulerNoPrioritizer);
-		//database.put("default", ImplicitGraphWithHybridThreadPoolSchedulerNoPrioritizer);
+		//database.put("default", GenericGraphHybridThreadPoolSchedulerNoPrioritizer);
+		database.put("default", ImplicitGraphWithHybridThreadPoolSchedulerNoPrioritizer);
 	}
 	
 	/**

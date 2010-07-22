@@ -47,9 +47,4 @@ public class LinearDependencies extends BaseTest {
 		
 		rt.shutdown();
 	}
-	
-	@Test
-	public void fibTest() {
-		AeminiumFib.main(null);
-	}
 }

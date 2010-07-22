@@ -1,6 +1,8 @@
 package aeminium.runtime.task;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;
@@ -14,7 +16,7 @@ public abstract class AbstractTask implements RuntimeTask {
 	protected final RuntimeGraph<RuntimeTask> graph;
 	protected Statistics statistics;
 	protected boolean completed = false;
-	protected Object data;
+	protected Map<String, Object> data;
 	
 	public AbstractTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hints> hints) {
 		this.body = body;
@@ -70,12 +72,20 @@ public abstract class AbstractTask implements RuntimeTask {
 		completed = true;
 	}
 	
-	public void setData(Object data) {
-		this.data = data;
+	@Override
+	public void setData(String key, Object value) {
+		if ( data == null) {
+			this.data = new HashMap<String, Object>();
+		}
+		this.data.put(key, value);
 	}
 	
-	public Object getData() {
-		return data;
+	public Object getData(String key) {
+		if (data == null) {
+			return null;
+		} else {
+			return data.get(key);
+		}
 	}
 	
 	@Override

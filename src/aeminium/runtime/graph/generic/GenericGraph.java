@@ -53,7 +53,7 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 	public RuntimeTaskWrapper(RuntimeGraph<T> graph, T task) {
 		super((RuntimeGraph<RuntimeTask>)graph, task.getBody(), task.getHints());
 		this.task = task;
-		task.setData(this);
+		task.setData(GenericGraph.TASK_DATA_KEY, this);
 	}
 	
 	public T getTask() {
@@ -206,6 +206,7 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	private final boolean checkForCycles;
 	private final RuntimeTask[] rta = new RuntimeTask[0];
 	private Logger log = Logger.getLogger(GenericGraph.class.getCanonicalName());
+	public final static String TASK_DATA_KEY = GenericGraph.class.getCanonicalName();
 	
 	public GenericGraph(EnumSet<Flags> flags, RuntimePrioritizer<T> prioritizer) {
 		super(flags, prioritizer);
@@ -347,7 +348,7 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	
 	// task finished to run 
 	public void taskFinished(T task) {
-		RuntimeTaskWrapper<T> wtask = (RuntimeTaskWrapper<T>)task.getData();
+		RuntimeTaskWrapper<T> wtask = (RuntimeTaskWrapper<T>)task.getData(TASK_DATA_KEY);
 		synchronized (this) {
 			synchronized (wtask) {
 				log.info("task finished ==> " + wtask);
