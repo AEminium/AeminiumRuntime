@@ -9,16 +9,16 @@ import aeminium.runtime.Hints;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.statistics.Statistics;
 
-public abstract class AbstractTask implements RuntimeTask {
+public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
 	private Object result;
 	protected final Body body;
 	protected final Collection<Hints> hints;
-	protected final RuntimeGraph<RuntimeTask> graph;
+	protected final RuntimeGraph<T> graph;
 	protected Statistics statistics;
 	protected boolean completed = false;
 	protected Map<String, Object> data;
 	
-	public AbstractTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hints> hints) {
+	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints) {
 		this.body = body;
 		this.graph = graph;
 		this.hints = hints;
@@ -27,7 +27,7 @@ public abstract class AbstractTask implements RuntimeTask {
 	@Override
 	public Object call() throws Exception {
 		body.execute(this);
-		graph.taskFinished(this);
+		graph.taskFinished((T) this);
 		return null;		
 	}
 	
@@ -60,8 +60,8 @@ public abstract class AbstractTask implements RuntimeTask {
 	}
 	
 	@Override
-	public TaskDescription<RuntimeTask> getDescription() {
-		return graph.getTaskDescription(this);
+	public TaskDescription<T> getDescription() {
+		return graph.getTaskDescription((T) this);
 	}
 
 	public boolean isCompleted() {

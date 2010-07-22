@@ -8,11 +8,9 @@ import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.task.RuntimeNonBlockingTask;
 import aeminium.runtime.task.RuntimeTask;
 
-public class GenericNonBlockingTask extends GenericTask implements
-		RuntimeNonBlockingTask {
+public class GenericNonBlockingTask extends GenericTask implements RuntimeNonBlockingTask {
 
-	public GenericNonBlockingTask(RuntimeGraph<RuntimeTask> graph, Body body,
-			Collection<Hints> hints) {
+	public GenericNonBlockingTask(RuntimeGraph<GenericTask> graph, Body body, Collection<Hints> hints) {
 		super(graph, body, hints);
 		// TODO Auto-generated constructor stub
 	}

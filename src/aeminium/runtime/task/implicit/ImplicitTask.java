@@ -13,10 +13,9 @@ import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.RuntimeAtomicTask;
-import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
 
-public abstract class ImplicitTask extends AbstractTask {
+public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 
 	private ImplicitTaskState state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
 	private Collection<Task> dependencies = Runtime.NO_DEPS;
@@ -26,8 +25,8 @@ public abstract class ImplicitTask extends AbstractTask {
 	private Collection<Task> dependents = new ArrayList<Task>();
 	private Object result;
 
-	public static <T extends ImplicitTask> TaskFactory<T> createFactory(final RuntimeGraph<T> graph) {
-		return new TaskFactory<T>() {
+	public static TaskFactory<ImplicitTask> createFactory(final RuntimeGraph<ImplicitTask> graph) {
+		return new TaskFactory<ImplicitTask>() {
 			@Override 
 			public void init() {}
 			@Override 
@@ -35,23 +34,23 @@ public abstract class ImplicitTask extends AbstractTask {
 			
 			@SuppressWarnings("unchecked")
 			@Override
-			public RuntimeAtomicTask<T> createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, Collection<Hints> hints) {
-				return new ImplicitAtomicTask<T>((RuntimeGraph<RuntimeTask>) graph, body, (RuntimeDataGroup<T>) datagroup, hints);
+			public RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
+				return new ImplicitAtomicTask((RuntimeGraph<ImplicitTask>) graph, body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints);
 			}
 
 			@Override
 			public BlockingTask createBockingTask(Body body, Collection<Hints> hints) {
-				return new ImplicitBlockingTask((RuntimeGraph<RuntimeTask>) graph, body, hints);
+				return new ImplicitBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints);
 			}
 
 			@Override
 			public NonBlockingTask createNonBockingTask(Body body, Collection<Hints> hints) {
-				return  new ImplicitNonBlockingTask((RuntimeGraph<RuntimeTask>) graph, body, hints);
+				return  new ImplicitNonBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints);
 			}
 		};
 	}
 	
-	public ImplicitTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hints> hints) {
+	public ImplicitTask(RuntimeGraph<ImplicitTask> graph, Body body, Collection<Hints> hints) {
 		super(graph, body, hints);
 	}
 
