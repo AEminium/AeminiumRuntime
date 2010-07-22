@@ -1,6 +1,10 @@
 package aeminium.runtime.tests;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -14,7 +18,16 @@ public abstract class BaseTest {
 	
 	public BaseTest() {
 		log = Logger.getLogger(this.getClass().getName());
-		log.setLevel(Level.WARNING);
+		Handler conHdlr = new ConsoleHandler();
+		conHdlr.setFormatter(new Formatter() {
+			public String format(LogRecord record) {
+				return "TEST " + record.getLevel() + "  :  "
+				+ record.getMessage() + "\n";
+			}
+		});
+		log.setUseParentHandlers(false);
+		log.addHandler(conHdlr);
+		log.setLevel(Level.INFO);
 	}
 	
 	@Before

@@ -1,5 +1,7 @@
 package aeminium.runtime.tests;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import aeminium.runtime.Body;
@@ -29,7 +31,7 @@ public class AtomicTaskWaiting extends BaseTest {
 			@Override
 			public void execute(Task current) {
 				// let's create some sub tasks
-				rt.schedule(rt.createNonBlockingTask(new Body() {
+				Task t1 = rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Task current) {
 						getLogger().info("Sub Task waiting for "+ (delay+1) + " ms");
@@ -44,8 +46,10 @@ public class AtomicTaskWaiting extends BaseTest {
 					public String toString() {
 						return ""+(delay+1);
 					}
-				}, Runtime.NO_HINTS), current, Runtime.NO_DEPS);
-				rt.schedule(rt.createNonBlockingTask(new Body() {
+				}, Runtime.NO_HINTS);
+				rt.schedule(t1, current, Runtime.NO_DEPS);
+				
+				Task t2 = rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Task current) {
 						getLogger().info("Sub Task waiting for "+ (delay+2) + " ms");
@@ -61,7 +65,8 @@ public class AtomicTaskWaiting extends BaseTest {
 						return ""+(delay+2);
 					}
 
-				}, Runtime.NO_HINTS), current, Runtime.NO_DEPS);
+				}, Runtime.NO_HINTS);
+				rt.schedule(t2, current, Arrays.asList(t1));
 	
 				getLogger().info("Task waiting for "+delay + " ms");
 				try {

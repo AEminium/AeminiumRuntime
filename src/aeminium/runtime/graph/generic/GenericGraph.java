@@ -4,16 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import aeminium.runtime.CyclicDependencyError;
 import aeminium.runtime.Hints;
@@ -31,6 +23,7 @@ import aeminium.runtime.task.RuntimeBlockingTask;
 import aeminium.runtime.task.RuntimeNonBlockingTask;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskDescription;
+import aeminium.runtime.task.implicit.ImplicitTask;
 import aeminium.runtime.task.implicit.ImplicitTaskState;
 
 enum WrapperTaskState {
@@ -49,14 +42,12 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 	private Task parent = aeminium.runtime.Runtime.NO_PARENT;
 	private int childCount = 0;
 	private Collection<RuntimeTaskWrapper<T>> dependents = new ArrayList<RuntimeTaskWrapper<T>>();
-	private Object result;
 	protected T task;
 	
 
 	public RuntimeTaskWrapper(RuntimeGraph<T> graph, T task, EnumSet<Flags> flags) {
 		super((RuntimeGraph<RuntimeTask>)graph, task.getBody(), task.getHints(), flags);
 		this.task = task;
-		task.setData(GenericGraph.TASK_DATA_KEY, this);
 	}
 	
 	public T getTask() {
@@ -118,8 +109,7 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 	}
 
 	public Collection<Hints> getHints() {
-		// TODO Auto-generated method stub
-		return null;
+		return Runtime.NO_HINTS;
 	}
 
 	public void addDependent(RuntimeTaskWrapper<T> task) {
@@ -130,15 +120,6 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 		return dependents;
 	}
 
-	@Override
-	public void setResult(Object value) {
-		this.result = value;
-	}
-	
-	@Override
-	public Object getResult() {
-		return result;
-	}
 	
 	@Override
 	public String toString() {
@@ -165,17 +146,12 @@ class AtomicTaskWrapper<T extends RuntimeAtomicTask> extends RuntimeTaskWrapper<
 	
 	@Override
 	public Object call() throws Exception {
-		boolean locked = task.getDataGroup().trylock(this);
-		if ( locked ) {
-			task.getBody().execute(task);
-			graph.taskFinished(this);
-		}
-		return null;
+		throw new RuntimeError("RuntimeTaskWrapper should never been executed.");
 	}
 
 	@Override 
 	public void taskCompleted() {
-		task.getDataGroup().unlock();
+		throw new RuntimeError("RuntimeTaskWrapper should never been executed.");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -184,7 +160,6 @@ class AtomicTaskWrapper<T extends RuntimeAtomicTask> extends RuntimeTaskWrapper<
 		return task.getDataGroup();
 	}
 }
-
 
 class BlockingTaskWrapper<T extends RuntimeBlockingTask> extends RuntimeTaskWrapper<T> implements RuntimeBlockingTask {
 	
@@ -205,11 +180,9 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	private final List<RuntimeTaskWrapper<T>>  waitingForDeps= new LinkedList<RuntimeTaskWrapper<T>>();
 	private final List<RuntimeTaskWrapper<T>>  running = new LinkedList<RuntimeTaskWrapper<T>>();
 	private final List<RuntimeTaskWrapper<T>>  waitingForChildren = new LinkedList<RuntimeTaskWrapper<T>>();
-	private final Map<T, RuntimeTaskWrapper<T>> wrapperMapping = new HashMap<T, RuntimeTaskWrapper<T>>();
 	private final boolean checkForCycles;
 	private final RuntimeTask[] rta = new RuntimeTask[0];
-	private Logger log = Logger.getLogger(GenericGraph.class.getCanonicalName());
-	public final static String TASK_DATA_KEY = GenericGraph.class.getCanonicalName();
+	protected final String TASK_KEY = GenericGraph.class.getCanonicalName();
 	
 	public GenericGraph(RuntimePrioritizer<T> prioritizer, EnumSet<Flags> flags) {
 		super(prioritizer, flags);
@@ -218,23 +191,6 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 		} else {
 			checkForCycles = false;
 		}
-		
-		log.setLevel(Level.OFF);
-		if (flags.contains(Flags.DEBUG)) {
-			log.setLevel(Level.WARNING);
-		}
-		if ( flags.contains(Flags.TRACE)) {
-			log.setLevel(Level.ALL);
-		}
-		Handler conHdlr = new ConsoleHandler();
-		conHdlr.setFormatter(new Formatter() {
-			public String format(LogRecord record) {
-				return record.getLevel() + "  :  "
-				+ record.getMessage() + "\n";
-			}
-		});
-		log.setUseParentHandlers(false);
-		log.addHandler(conHdlr);
 	}
 	
 	@Override
@@ -245,27 +201,92 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	public void shutdown() {
 	}
 	
+	public RuntimeTaskWrapper<T> wrapTask(T task) {
+		RuntimeTaskWrapper<T> wtask;
+		
+		if ( task instanceof RuntimeNonBlockingTask ) {
+			wtask =  new NonBlockingTaskWrapper(this, (RuntimeNonBlockingTask) task, flags);
+		} else if ( task instanceof RuntimeBlockingTask ) {
+			wtask =  new BlockingTaskWrapper(this, (RuntimeBlockingTask) task, flags);
+		} else {
+			wtask =  new AtomicTaskWrapper(this, (RuntimeAtomicTask) task, flags);
+		}
+		
+		task.setData(TASK_KEY, wtask);
+		return wtask;
+	}
+	
 	@Override
 	public void addTask(T task, Task parent, Collection<T> deps) {
-		createWrapperMapping(task);
-		addWrapperTask(wrapperMapping.get(task), parent, deps);
-	}
-	
-	protected RuntimeTaskWrapper<T> wrapTask(T task) {
-		if ( task instanceof RuntimeAtomicTask<?> ) {
-			return new AtomicTaskWrapper(this, (RuntimeAtomicTask) task, flags);
-		} else if ( task instanceof RuntimeBlockingTask ) {
-			return new BlockingTaskWrapper(this, (RuntimeBlockingTask) task, flags);
-		} else {
-			return new NonBlockingTaskWrapper(this, (RuntimeNonBlockingTask) task, flags);
-		}
-	}
-	
-	protected void createWrapperMapping(T t) {
-		synchronized (wrapperMapping) {
-			if ( !wrapperMapping.containsKey(t)) {
-				wrapperMapping.put(t, wrapTask(t));
-				log.info("add wrapper for ==> " + t);
+		synchronized (this) {
+ 			synchronized (task) {
+ 				RuntimeTaskWrapper<T> wtask = (RuntimeTaskWrapper<T>) task.getData(TASK_KEY);
+ 				if ( wtask == null ) {
+ 					wtask = wrapTask(task);
+ 				}
+ 				
+ 				// setup dependencies
+ 				if ( wtask.getTaskState() != WrapperTaskState.UNSCHEDULED ) {
+ 					throw new RuntimeError("Task '" + task + "' has already been scheduled");
+ 				}
+ 				
+ 				if ( deps != Runtime.NO_DEPS ) {
+ 					ArrayList<Task> wdeps = new ArrayList<Task>(deps.size());
+ 					for( T t : deps ) {
+ 						RuntimeTaskWrapper<T> dep = (RuntimeTaskWrapper<T>) t.getData(TASK_KEY);
+ 						if ( dep == null ) {
+ 							dep = wrapTask(t);
+ 						}
+ 						wdeps.add(dep);
+ 					}
+ 					wtask.setDependencies(wdeps);
+ 				} else {
+ 					wtask.setDependencies(Runtime.NO_DEPS);
+ 				}
+ 				
+ 				if ( parent != Runtime.NO_PARENT ) {
+ 					RuntimeTaskWrapper<T> wparent = (RuntimeTaskWrapper<T>) ((T)parent).getData(TASK_KEY);
+ 					if ( parent == null) {
+ 						wparent = wrapTask((T) parent);
+ 					}
+ 					wparent.addChildTask(wtask);
+ 					wtask.setParent(wparent);
+ 				} else {
+ 					wtask.setParent(Runtime.NO_PARENT);
+ 				}
+ 				
+ 				if ( checkForCycles ) {
+ 					Collection<Task> taskDeps = Collections.unmodifiableList((List<? extends Task>) wtask.getDependencies());
+ 					checkForCycles(wtask, taskDeps);
+ 				}
+ 				
+ 				
+ 				if ( wtask.getDependencies() == Runtime.NO_DEPS ) {
+					running.add(wtask);
+					wtask.setTaskState(WrapperTaskState.RUNNING);
+					prioritizer.scheduleTasks(wtask.getTask());
+				} else {
+					List<Task> doneTasks = new ArrayList<Task>();
+					for ( Task t : wtask.getDependencies() ) {
+						synchronized (t) {
+							RuntimeTaskWrapper<T> at = (RuntimeTaskWrapper<T>)t;
+							if ( at.getTaskState() != WrapperTaskState.COMPLETED ) {
+								at.addDependent(wtask);
+							} else {
+								doneTasks.add(at);
+							}
+						}
+					}
+					wtask.removeDependency(doneTasks);
+					if ( wtask.getDependencies() != aeminium.runtime.Runtime.NO_DEPS ){
+						wtask.setTaskState(WrapperTaskState.WAITING_FOR_DEPENDENCIES);
+						waitingForDeps.add(wtask);
+					} else {
+						running.add(wtask);
+						wtask.setTaskState(WrapperTaskState.RUNNING);
+						prioritizer.scheduleTasks(wtask.getTask());
+					}
+				}
 			}
 		}
 	}
@@ -291,74 +312,11 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 		}
 	}
 	
-	protected void addWrapperTask(RuntimeTaskWrapper<T> task, Task parent, Collection<T> deps) {
-		synchronized (this) {
- 			synchronized (task) {
- 				if ( task.getTaskState() != WrapperTaskState.UNSCHEDULED ) {
- 					throw new RuntimeError("Task '" + task + "' has already been scheduled");
- 				}
- 				
- 				// setup dependendecies
- 				if ( deps != Runtime.NO_DEPS ) {
- 					Collection<Task> dep = new ArrayList<Task>(deps.size());
- 					for ( T t : deps ) {
- 						createWrapperMapping(t);
- 						dep.add(wrapperMapping.get(t));
- 					}
- 					task.setDependencies(dep);
- 				} else {
- 					task.setDependencies(Runtime.NO_DEPS);
- 				}
- 				
- 				if ( parent != Runtime.NO_PARENT ) { 					
- 					createWrapperMapping((T)parent);
- 					task.setParent(wrapperMapping.get(parent));
- 					wrapperMapping.get(parent).addChildTask(task);
- 				} else {
- 					task.setParent(Runtime.NO_PARENT);
- 				}
- 				
- 				if ( checkForCycles ) {
- 					Collection<Task> taskDeps = Collections.unmodifiableList((List<? extends Task>) task.getDependencies());
- 					checkForCycles(task, taskDeps);
- 				}
- 				
-				if ( task.getDependencies() == aeminium.runtime.Runtime.NO_DEPS ) {
-					running.add(task);
-					task.setTaskState(WrapperTaskState.RUNNING);
-					prioritizer.scheduleTasks(task.getTask());
-				} else {
-					List<Task> doneTasks = new ArrayList<Task>();
-					for ( Task t : task.getDependencies() ) {
-						synchronized (t) {
-							RuntimeTaskWrapper<T> at = (RuntimeTaskWrapper<T>)t;
-							if ( at.getTaskState() != WrapperTaskState.COMPLETED ) {
-								at.addDependent(task);
-							} else {
-								doneTasks.add(at);
-							}
-						}
-					}
-					task.removeDependency(doneTasks);
-					if ( task.getDependencies() != aeminium.runtime.Runtime.NO_DEPS ){
-						task.setTaskState(WrapperTaskState.WAITING_FOR_DEPENDENCIES);
-						waitingForDeps.add(task);
-					} else {
-						running.add(task);
-						task.setTaskState(WrapperTaskState.RUNNING);
-						prioritizer.scheduleTasks(task.getTask());
-					}
-				}
-			}
-		}
-	}
-	
 	// task finished to run 
 	public void taskFinished(T task) {
-		RuntimeTaskWrapper<T> wtask = (RuntimeTaskWrapper<T>)task.getData(TASK_DATA_KEY);
-		synchronized (this) {
-			synchronized (wtask) {
-				log.info("task finished ==> " + wtask);
+		RuntimeTaskWrapper<T> wtask = (RuntimeTaskWrapper<T>) task.getData(TASK_KEY);
+		synchronized (this) { 
+			synchronized (task) {
 				running.remove(wtask);
 				if (wtask.hasChildren()) {
 					waitingForChildren.add(wtask);
@@ -371,48 +329,57 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	}
 
 	// have to synchronize on task and this
-	protected void taskCompleted(RuntimeTaskWrapper<T> task) {
+	protected void taskCompleted(RuntimeTaskWrapper<T> wtask) {
 		synchronized (this) {
-			synchronized (task) {
-				if ( task.getTaskState() == WrapperTaskState.WAITING_FOR_CHILDREN ) {
-					waitingForChildren.remove(task);
+			synchronized (wtask) {
+				if ( wtask.getTaskState() == WrapperTaskState.WAITING_FOR_CHILDREN ) {
+					waitingForChildren.remove(wtask);
 				}
-				task.setTaskState(WrapperTaskState.COMPLETED);
+				wtask.setTaskState(WrapperTaskState.COMPLETED);
 				// callback 
-				task.taskCompleted();
-				if ( task.getParent() != aeminium.runtime.Runtime.NO_PARENT ) {
-					RuntimeTaskWrapper<T> parent = (RuntimeTaskWrapper<T>)task.getParent();
-					synchronized (parent) {
-						parent.deleteChildTask(task);
-						if ( !parent.hasChildren() && parent.getTaskState() == WrapperTaskState.WAITING_FOR_CHILDREN) {
-							taskCompleted(parent);
+				wtask.getTask().taskCompleted();
+				if ( wtask.getParent() != Runtime.NO_PARENT ) {
+					@SuppressWarnings("unchecked")
+					RuntimeTaskWrapper<T> wparent = (RuntimeTaskWrapper<T>)wtask.getParent();
+					synchronized (wparent) {
+						wparent.deleteChildTask(wtask);
+						if ( !wparent.hasChildren() && wparent.getTaskState() == WrapperTaskState.WAITING_FOR_CHILDREN) {
+							taskCompleted(wparent);
 						}
 					}
 				}
-				List<T> readyTasks = new ArrayList<T>();
-				for ( Task t : task.getDependents() ) {
+				ArrayList<T> readyTasks = new ArrayList<T>(10);
+				for ( Task t : wtask.getDependents() ) {
 					synchronized (t) {
 						@SuppressWarnings("unchecked")
-						RuntimeTaskWrapper<T> at = (RuntimeTaskWrapper<T>)t;
-						at.removeDependency(task);
-						if ( at.getDependencies() == aeminium.runtime.Runtime.NO_DEPS ) {
-							waitingForDeps.remove(at);
-							running.add(at);
-							at.setTaskState(WrapperTaskState.RUNNING);
-							readyTasks.add(at.getTask());
+						RuntimeTaskWrapper<T> wt = (RuntimeTaskWrapper<T>)t;
+						wt.removeDependency(wtask);
+						if ( wt.getDependencies() == Runtime.NO_DEPS ) {
+							waitingForDeps.remove(wt);
+							running.add(wt);
+							wt.setTaskState(WrapperTaskState.RUNNING);
+							//prioritizer.scheduleTasks(at);
+							readyTasks.add(wt.getTask());
 						}
 					}
 				}
+
+				// trigger prioritize in case he was caching some tasks
 				prioritizer.scheduleTasks((T[]) readyTasks.toArray(rta));
-				log.info("schedule tasks ==> " + readyTasks);
 				
-				//TODO: we should drop mapping but then we would get into trouble
-				//      of another task gets scheduled which depends on this one. If 
-				//      it is not in the mapping we don't know it is already finished
-				//      or has not yet been scheduled.
-				
+				// wake up waiting threads 
 				if (waitingForChildren.isEmpty() && waitingForDeps.isEmpty() && running.isEmpty()) {
 					this.notifyAll();
+				} else {
+//					if ( waitingForChildren.isEmpty() == false ) {
+//						System.out.println("waitingForChildren " + waitingForChildren);
+//					}
+//					if ( waitingForDeps.isEmpty() == false ) {
+//						System.out.println("waitingForDeps " + waitingForDeps);
+//					}
+//					if ( running.isEmpty() == false ) {
+//						System.out.println("running " + running);
+//					}
 				}
 			}
 		}
@@ -432,7 +399,10 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 
 	@Override
 	public TaskDescription<T> getTaskDescription(T task) {
-		RuntimeTaskWrapper<T> wrapper = (RuntimeTaskWrapper<T>)task;
-		return TaskDescription.create(task, wrapper.getDependencies().size(), wrapper.getDependents().size());
+		RuntimeTaskWrapper<T> wtask = (RuntimeTaskWrapper<T>)task.getData(TASK_KEY);
+		if ( wtask == null ) {
+			throw new RuntimeError("Cannot get task description for a task that has not been scheduled.");
+		}
+		return TaskDescription.create(task, wtask.getDependencies().size(), wtask.getDependents().size());
 	}
 }

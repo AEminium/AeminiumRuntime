@@ -22,6 +22,7 @@ public class LinearTaskGraph implements Benchmark {
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		for (int COUNT : COUNTS) {
 			runTest(version, flags, reporter, COUNT);
+			reporter.flush();
 		}
 	}
 

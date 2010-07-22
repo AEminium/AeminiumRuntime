@@ -99,7 +99,7 @@ public class Factory {
 		database.put(ImplicitGraphLinearSchedulerlNoPrioritizer.getName(), ImplicitGraphLinearSchedulerlNoPrioritizer);
 
 		// TODO: still has some bugs
-		final RuntimeConfiguration<ImplicitTask> GenericGraph_LinearScheduler_None_ImplicitTask_FifoDataGroup  = f.new RuntimeConfiguration<ImplicitTask>("GenericGraph.LinearScheduler.None.ImplicitTask.FifoDataGroup", "GenericGraph.LinearScheduler.None.ImplicitTask.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup  = f.new RuntimeConfiguration<ImplicitTask>("GenericGraph.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup", "GenericGraph.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
 				HybridThreadPoolsScheduler<GenericTask> scheduler = new HybridThreadPoolsScheduler<GenericTask>(flags);
@@ -113,9 +113,10 @@ public class Factory {
 															   taskFactory);
 			}
 		};
-		database.put(GenericGraph_LinearScheduler_None_ImplicitTask_FifoDataGroup.getName(), GenericGraph_LinearScheduler_None_ImplicitTask_FifoDataGroup);
+		database.put(GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup.getName(), GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
 		
-		database.put("default", ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
+		//database.put("default", ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
+		database.put("default", GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
 	}
 	
 	/**

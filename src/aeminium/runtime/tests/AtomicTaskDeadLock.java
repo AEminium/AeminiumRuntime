@@ -10,8 +10,8 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 
 public class AtomicTaskDeadLock  extends BaseTest {
-	@Test(timeout=2000, expected=Exception.class)
-	public void createAtomicTaskDeadLock() {
+	@Test(expected=Exception.class, timeout=2000)
+	public void SUPPOSED_TO_FAIL___createAtomicTaskDeadLock() {
 		Runtime rt = getRuntime();
 		rt.init();
 
@@ -29,9 +29,9 @@ public class AtomicTaskDeadLock  extends BaseTest {
 			
 			@Override
 			public void execute(Task current) {
-				getLogger().fine("Atomic Task for data group : " + dg1);
+				getLogger().info("Atomic Task for data group : " + dg1);
 				try {
-					Thread.sleep(200);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -46,7 +46,7 @@ public class AtomicTaskDeadLock  extends BaseTest {
 			
 			@Override
 			public void execute(Task current) {
-				getLogger().fine("Atomic Sub-Task for data group : " + dg);				
+				getLogger().info("Atomic Sub-Task for data group : " + dg);				
 			}
 		},  dg, Runtime.NO_HINTS);
 	}

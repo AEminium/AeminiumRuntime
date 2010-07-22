@@ -22,6 +22,7 @@ public class ChildTaskBenchmark implements Benchmark {
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		for (int level : levels) {
 			runTest(version, flags, reporter, level);
+			reporter.flush();
 		}
 	}
 	

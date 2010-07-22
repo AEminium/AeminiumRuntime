@@ -3,7 +3,6 @@ package aeminium.runtime.tests;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.junit.Assert;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.CyclicDependencyError;
@@ -12,7 +11,7 @@ import aeminium.runtime.Task;
 
 public class Deadlocks extends BaseTest {
 
-	@Test(expected=CyclicDependencyError.class, timeout=1000)
+	@Test(expected=CyclicDependencyError.class, timeout=2000)
 	public void testRoundDeadlock() {
 		Runtime rt = getRuntime();
 		rt.init();
@@ -30,7 +29,7 @@ public class Deadlocks extends BaseTest {
 		rt.shutdown();
 	}
 
-	@Test(expected=CyclicDependencyError.class, timeout=1000)
+	@Test(expected=CyclicDependencyError.class, timeout=2000)
 	public void testSelfDeadlock() {
 		Runtime rt = getRuntime();
 		rt.init();
@@ -45,6 +44,10 @@ public class Deadlocks extends BaseTest {
 		return new Body() {
 			public void execute(Task parent) {
 				System.out.println("Task " + i);
+			}
+			
+			public String toString() {
+				return "" + i;
 			}
 		};
 	}

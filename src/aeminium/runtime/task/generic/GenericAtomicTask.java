@@ -11,7 +11,7 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.RuntimeAtomicTask;
 
-public class GenericAtomicTask extends AbstractTask implements 	RuntimeAtomicTask<GenericTask> {
+public class GenericAtomicTask extends GenericTask implements RuntimeAtomicTask<GenericTask> {
 	private final RuntimeDataGroup<GenericTask> datagroup;
 	
 	public GenericAtomicTask(RuntimeGraph<GenericTask> graph, Body body, RuntimeDataGroup<GenericTask> datagroup, Collection<Hints> hints, EnumSet<Flags> flags) {
@@ -24,4 +24,18 @@ public class GenericAtomicTask extends AbstractTask implements 	RuntimeAtomicTas
 		return datagroup;
 	}
 
+	@Override
+	public Object call() throws Exception {
+		boolean locked = datagroup.trylock(this);
+		if ( locked ) {
+			getBody().execute(this);
+			graph.taskFinished(this);
+		}
+		return null;
+	}
+
+	@Override 
+	public void taskCompleted() {
+		datagroup.unlock();
+	}
 }
