@@ -19,7 +19,7 @@ public abstract class GenericTask extends AbstractTask {
 		super(graph, body, hints);
 	}
 	
-	public static <T extends RuntimeTask> TaskFactory<T> createFactory(final RuntimeGraph<T> graph) {
+	public static <T extends GenericTask> TaskFactory<T> createFactory(final RuntimeGraph<T> graph) {
 		return new TaskFactory<T>() {
 			@Override 
 			public void init() {}

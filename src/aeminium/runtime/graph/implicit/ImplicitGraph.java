@@ -13,12 +13,11 @@ import aeminium.runtime.Task;
 import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
-import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskDescription;
 import aeminium.runtime.task.implicit.ImplicitTask;
 import aeminium.runtime.task.implicit.ImplicitTaskState;
 
-public class ImplicitGraph<T extends  ImplicitTask> extends AbstractGraph<T> {
+public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	private final List<T>  waitingForDeps= new LinkedList<T>();
 	private final List<T>  running = new LinkedList<T>();
 	private final List<T>  waitingForChildren = new LinkedList<T>();

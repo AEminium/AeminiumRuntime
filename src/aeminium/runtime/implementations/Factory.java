@@ -98,11 +98,11 @@ public class Factory {
 		final ImplementationDeclaration<ImplicitTask> GenericGraphHybridThreadPoolSchedulerNoPrioritizer  = f.new ImplementationDeclaration<ImplicitTask>("GenericGraphHybridThreadPoolSchedulerNoPrioritizer", "GenericGraphHybridThreadPoolSchedulerNoPrioritizer") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
-				HybridThreadPoolsScheduler<RuntimeTask> scheduler = new HybridThreadPoolsScheduler<RuntimeTask>(flags);
-				GenericGraph<RuntimeTask> graph = new GenericGraph<RuntimeTask>(flags, scheduler);
-				DataGroupFactory<RuntimeTask> dgFactory = FifoDataGroup.createFactory(scheduler);
-				TaskFactory<RuntimeTask> taskFactory = GenericTask.createFactory(graph);
-				return new GenericRuntime<RuntimeTask>(scheduler, 
+				HybridThreadPoolsScheduler<GenericTask> scheduler = new HybridThreadPoolsScheduler<GenericTask>(flags);
+				GenericGraph<GenericTask> graph = new GenericGraph<GenericTask>(flags, scheduler);
+				DataGroupFactory<GenericTask> dgFactory = FifoDataGroup.createFactory(scheduler);
+				TaskFactory<GenericTask> taskFactory = GenericTask.createFactory(graph);
+				return new GenericRuntime<GenericTask>(scheduler, 
 															   scheduler, 
 															   graph,
 															   dgFactory,

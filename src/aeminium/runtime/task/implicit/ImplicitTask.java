@@ -26,7 +26,7 @@ public abstract class ImplicitTask extends AbstractTask {
 	private Collection<Task> dependents = new ArrayList<Task>();
 	private Object result;
 
-	public static <T extends RuntimeTask> TaskFactory<T> createFactory(final RuntimeGraph<T> graph) {
+	public static <T extends ImplicitTask> TaskFactory<T> createFactory(final RuntimeGraph<T> graph) {
 		return new TaskFactory<T>() {
 			@Override 
 			public void init() {}

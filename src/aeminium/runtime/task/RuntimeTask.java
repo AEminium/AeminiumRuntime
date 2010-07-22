@@ -19,10 +19,6 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	
 	public Body getBody();
 	
-	public boolean isCompleted();
-	
-	public void setCompleted();
-	
 	public void setData(String key, Object value);
 	
 	public Object getData(String key);
