@@ -5,6 +5,7 @@ import java.util.Arrays;
 import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
+import aeminium.runtime.examples.fjtests.AeminiumFib;
 
 import org.junit.Test;
 
@@ -45,5 +46,10 @@ public class LinearDependencies extends BaseTest {
 		rt.schedule(t2, Runtime.NO_PARENT, Arrays.asList(t1));
 		
 		rt.shutdown();
+	}
+	
+	@Test
+	public void fibTest() {
+		AeminiumFib.main(null);
 	}
 }

@@ -13,6 +13,8 @@ public abstract class AbstractTask implements RuntimeTask {
 	protected final Collection<Hints> hints;
 	protected final RuntimeGraph<RuntimeTask> graph;
 	protected Statistics statistics;
+	protected boolean completed = false;
+	protected Object data;
 	
 	public AbstractTask(RuntimeGraph<RuntimeTask> graph, Body body, Collection<Hints> hints) {
 		this.body = body;
@@ -60,6 +62,22 @@ public abstract class AbstractTask implements RuntimeTask {
 		return graph.getTaskDescription(this);
 	}
 
+	public boolean isCompleted() {
+		return completed;
+	}
+	
+	public void setCompleted() {
+		completed = true;
+	}
+	
+	public void setData(Object data) {
+		this.data = data;
+	}
+	
+	public Object getData() {
+		return data;
+	}
+	
 	@Override
 	public void taskCompleted() {		
 	}
