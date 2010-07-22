@@ -50,8 +50,8 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 	protected T task;
 	
 
-	public RuntimeTaskWrapper(RuntimeGraph<T> graph, T task) {
-		super((RuntimeGraph<RuntimeTask>)graph, task.getBody(), task.getHints());
+	public RuntimeTaskWrapper(RuntimeGraph<T> graph, T task, EnumSet<Flags> flags) {
+		super((RuntimeGraph<RuntimeTask>)graph, task.getBody(), task.getHints(), flags);
 		this.task = task;
 		task.setData(GenericGraph.TASK_DATA_KEY, this);
 	}
@@ -156,8 +156,8 @@ abstract class RuntimeTaskWrapper<T extends RuntimeTask> extends AbstractTask {
 
 class AtomicTaskWrapper<T extends RuntimeAtomicTask> extends RuntimeTaskWrapper<T> implements RuntimeAtomicTask {
 	
-	public AtomicTaskWrapper(RuntimeGraph<T> graph, T task) {
-		super(graph, task);
+	public AtomicTaskWrapper(RuntimeGraph<T> graph, T task, EnumSet<Flags> flags) {
+		super(graph, task, flags);
 	}
 	
 	@Override
@@ -185,15 +185,15 @@ class AtomicTaskWrapper<T extends RuntimeAtomicTask> extends RuntimeTaskWrapper<
 
 class BlockingTaskWrapper<T extends RuntimeBlockingTask> extends RuntimeTaskWrapper<T> implements RuntimeBlockingTask {
 	
-	public BlockingTaskWrapper(RuntimeGraph<T> graph, T task) {
-		super(graph, task);
+	public BlockingTaskWrapper(RuntimeGraph<T> graph, T task, EnumSet<Flags> flags) {
+		super(graph, task, flags);
 	}
 }
 
 class NonBlockingTaskWrapper<T extends RuntimeNonBlockingTask> extends RuntimeTaskWrapper<T> implements RuntimeNonBlockingTask {
 	
-	public NonBlockingTaskWrapper(RuntimeGraph<T> graph, T task) {
-		super(graph, task);
+	public NonBlockingTaskWrapper(RuntimeGraph<T> graph, T task, EnumSet<Flags> flags) {
+		super(graph, task, flags);
 	}
 }
 
@@ -208,8 +208,8 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	private Logger log = Logger.getLogger(GenericGraph.class.getCanonicalName());
 	public final static String TASK_DATA_KEY = GenericGraph.class.getCanonicalName();
 	
-	public GenericGraph(EnumSet<Flags> flags, RuntimePrioritizer<T> prioritizer) {
-		super(flags, prioritizer);
+	public GenericGraph(RuntimePrioritizer<T> prioritizer, EnumSet<Flags> flags) {
+		super(prioritizer, flags);
 		if ( flags.contains(Flags.CHECK_FOR_CYCLES)) {
 			checkForCycles = true;
 		} else {
@@ -250,11 +250,11 @@ public class GenericGraph<T extends RuntimeTask> extends AbstractGraph<T> {
 	
 	protected RuntimeTaskWrapper<T> wrapTask(T task) {
 		if ( task instanceof RuntimeAtomicTask<?> ) {
-			return new AtomicTaskWrapper(this, (RuntimeAtomicTask) task);
+			return new AtomicTaskWrapper(this, (RuntimeAtomicTask) task, flags);
 		} else if ( task instanceof RuntimeBlockingTask ) {
-			return new BlockingTaskWrapper(this, (RuntimeBlockingTask) task);
+			return new BlockingTaskWrapper(this, (RuntimeBlockingTask) task, flags);
 		} else {
-			return new NonBlockingTaskWrapper(this, (RuntimeNonBlockingTask) task);
+			return new NonBlockingTaskWrapper(this, (RuntimeNonBlockingTask) task, flags);
 		}
 	}
 	

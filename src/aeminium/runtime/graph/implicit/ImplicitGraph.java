@@ -24,8 +24,8 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	private final boolean checkForCycles;
 	private final ImplicitTask[] ita = new ImplicitTask[0];
 	
-	public ImplicitGraph(EnumSet<Flags> flags, RuntimePrioritizer<T> prioritizer) {
-		super(flags, prioritizer);
+	public ImplicitGraph(RuntimePrioritizer<T> prioritizer, EnumSet<Flags> flags) {
+		super(prioritizer, flags);
 		if ( flags.contains(Flags.CHECK_FOR_CYCLES)) {
 			checkForCycles = true;
 		} else {

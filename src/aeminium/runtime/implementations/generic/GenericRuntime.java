@@ -67,7 +67,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@Override
 	public DataGroup createDataGroup() {
 		assert( state == GenericRuntimeState.INITIALIZED);
-		return dataGroupFactory.createDataGroup(scheduler);
+		return dataGroupFactory.createDataGroup();
 	}
 
 	@Override

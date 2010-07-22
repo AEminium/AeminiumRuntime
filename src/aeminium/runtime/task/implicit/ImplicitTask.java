@@ -2,6 +2,7 @@ package aeminium.runtime.task.implicit;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -11,7 +12,9 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.RuntimeGraph;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.task.AbstractTask;
+import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.TaskFactory;
 
@@ -25,8 +28,8 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 	private Collection<Task> dependents = new ArrayList<Task>();
 	private Object result;
 
-	public static TaskFactory<ImplicitTask> createFactory(final RuntimeGraph<ImplicitTask> graph) {
-		return new TaskFactory<ImplicitTask>() {
+	public static TaskFactory<ImplicitTask> createFactory(final RuntimeGraph<ImplicitTask> graph, EnumSet<Flags> flags) {
+		return new AbstractTaskFactory<ImplicitTask>(flags) {
 			@Override 
 			public void init() {}
 			@Override 
@@ -35,23 +38,23 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 			@SuppressWarnings("unchecked")
 			@Override
 			public RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
-				return new ImplicitAtomicTask((RuntimeGraph<ImplicitTask>) graph, body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints);
+				return new ImplicitAtomicTask((RuntimeGraph<ImplicitTask>) graph, body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
 			}
 
 			@Override
 			public BlockingTask createBockingTask(Body body, Collection<Hints> hints) {
-				return new ImplicitBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints);
+				return new ImplicitBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints, flags);
 			}
 
 			@Override
 			public NonBlockingTask createNonBockingTask(Body body, Collection<Hints> hints) {
-				return  new ImplicitNonBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints);
+				return  new ImplicitNonBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints, flags);
 			}
 		};
 	}
 	
-	public ImplicitTask(RuntimeGraph<ImplicitTask> graph, Body body, Collection<Hints> hints) {
-		super(graph, body, hints);
+	public ImplicitTask(RuntimeGraph<ImplicitTask> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
+		super(graph, body, hints, flags);
 	}
 
 	public void setDependencies(Collection<Task> dependencies) {

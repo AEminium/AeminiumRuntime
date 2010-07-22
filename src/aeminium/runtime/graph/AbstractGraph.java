@@ -8,8 +8,10 @@ import aeminium.runtime.task.RuntimeTask;
 
 public abstract class AbstractGraph<T extends RuntimeTask> implements RuntimeGraph<T>{
 	protected final RuntimePrioritizer<T> prioritizer;
+	protected final EnumSet<Flags> flags;
 
-	public AbstractGraph(EnumSet<Flags> flags, RuntimePrioritizer<T> prioritizer) {
+	public AbstractGraph(RuntimePrioritizer<T> prioritizer, EnumSet<Flags> flags) {
 		this.prioritizer = prioritizer;
+		this.flags = flags;
 	}
 }

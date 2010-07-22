@@ -1,33 +1,35 @@
 package aeminium.runtime.datagroup.fifo;
 
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import aeminium.runtime.DataGroup;
+import aeminium.runtime.datagroup.AbstractDataGroup;
+import aeminium.runtime.datagroup.AbstractDataGroupFactory;
 import aeminium.runtime.datagroup.DataGroupFactory;
-import aeminium.runtime.datagroup.RuntimeDataGroup;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
-public class FifoDataGroup<T extends RuntimeTask> implements RuntimeDataGroup<T> {	
+public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {	
 	private boolean locked = false;
 	private List<T> waitQueue = new LinkedList<T>();
-	private final RuntimeScheduler<T> scheduler;
 
-	protected FifoDataGroup(RuntimeScheduler<T> scheduler) {
-		this.scheduler = scheduler;
+	protected FifoDataGroup(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {
+		super(scheduler, flags);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends RuntimeTask> DataGroupFactory<T> createFactory(RuntimeScheduler<T> scheduler) {
-		return (DataGroupFactory<T>) new DataGroupFactory<RuntimeTask>() {
+	public static <T extends RuntimeTask> DataGroupFactory<T> createFactory(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {
+		return (DataGroupFactory<T>) new AbstractDataGroupFactory<T>(scheduler, flags) {
 			@Override 
 			public void init() {}
 			@Override 
 			public void shutdown() {}
 			@Override
-			public DataGroup createDataGroup(RuntimeScheduler<RuntimeTask> scheduler) {
-				return new FifoDataGroup<RuntimeTask>(scheduler);
+			public DataGroup createDataGroup() {
+				return new FifoDataGroup<T>(scheduler, flags);
 			}
 		};
 	}

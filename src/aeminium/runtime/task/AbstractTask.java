@@ -1,12 +1,14 @@
 package aeminium.runtime.task;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;
 import aeminium.runtime.graph.RuntimeGraph;
+import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.statistics.Statistics;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
@@ -17,11 +19,13 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	protected Statistics statistics;
 	protected boolean completed = false;
 	protected Map<String, Object> data;
+	protected final EnumSet<Flags> flags;
 	
-	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints) {
+	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		this.body = body;
 		this.graph = graph;
 		this.hints = hints;
+		this.flags = flags;
 	}
 	
 	@Override
