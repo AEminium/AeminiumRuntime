@@ -13,37 +13,27 @@ import aeminium.runtime.implementations.Factory;
 
 public class AeminiumFib {
 
-	private static int MAX_CALC = 20;
-	private static int THRESHOLD = 12;
-    final static Runtime rt = Factory.getRuntime();
+	private static int MAX_CALC = 47;
+	private static int THRESHOLD = 13;
 
-	public static Body createFibBody(final int n) {
+	public static Body createFibBody(final Runtime rt, final int n) {
 		return new Body() {
 			
 			public int seqFib(int n) {
-				if (n <= 1) return 1;
+				if (n <= 2) return 1;
 				else return (seqFib(n-1) + seqFib(n-2));
 			}
 			
 			public void execute(final Task currentTask) {
 				if (n <= THRESHOLD) {
-					Task base = rt.createNonBlockingTask(new Body() {
-						public void execute(Task p) {
-							currentTask.setResult(seqFib(n));
-						}
-						
-						public String toString() {
-							return "Base case.";
-						}
-					}, Runtime.NO_HINTS);
-					rt.schedule(base, currentTask, Runtime.NO_DEPS);
+					currentTask.setResult(seqFib(n));
 				} else {
 
-					final Task branch1 = rt.createNonBlockingTask(createFibBody(
+					final Task branch1 = rt.createNonBlockingTask(createFibBody(rt,
 							n - 2), Runtime.NO_HINTS);
 					rt.schedule(branch1, currentTask, Runtime.NO_DEPS);
 
-					final Task branch2 = rt.createNonBlockingTask(createFibBody(
+					final Task branch2 = rt.createNonBlockingTask(createFibBody(rt,
 							n - 1), Runtime.NO_HINTS);
 					rt.schedule(branch2, currentTask, Runtime.NO_DEPS);
 
@@ -73,13 +63,14 @@ public class AeminiumFib {
 	}
 
 	public static void main(String[] args) {
+		final Runtime rt = Factory.getRuntime();
 		rt.init();
 
 		Task t1 = rt.createNonBlockingTask(new Body() {
 
 			@Override
 			public void execute(Task p) {
-				final Task calc = rt.createNonBlockingTask(createFibBody(MAX_CALC), Runtime.NO_HINTS);
+				final Task calc = rt.createNonBlockingTask(createFibBody(rt, MAX_CALC), Runtime.NO_HINTS);
 				rt.schedule(calc, p, Runtime.NO_DEPS);
 
 				Collection<Task> printDeps = new ArrayList<Task>();

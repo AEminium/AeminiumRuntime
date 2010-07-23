@@ -1,16 +1,16 @@
-package aeminium.runtime.tools.benchmark;
+package aeminium.runtime.tools.benchmark.forkjoin;
 
 import aeminium.runtime.implementations.Factory;
+import aeminium.runtime.tools.benchmark.Benchmark;
+import aeminium.runtime.tools.benchmark.RTBench;
+import aeminium.runtime.tools.benchmark.Reporter;
+import aeminium.runtime.tools.benchmark.StringBuilderReporter;
 
-public class RTBench {
-	
+public class BenchmarkRunner extends RTBench {
 	private static Benchmark[] benchmarks = {
-		new TaskCreationBenchmark(),
-		new IndependentTaskGraph(),
-		new LinearTaskGraph(),
-		new FixedParallelMaxDependencies(),
-		new ChildTaskBenchmark(),
-		new FibonacciBenchmark()
+		new AeminiumFibonacciBenchmark(),
+		new ForkJoinFibonacciBenchmark(),
+		new SequentialFibonacciBenchmark()
 	};
 	
 	public static void main(String[] args) {
@@ -23,17 +23,14 @@ public class RTBench {
 		
 		for ( Benchmark benchmark : benchmarks ) {
 			reporter.startBenchmark(benchmark.getName());
+			reporter.reportLn(String.format("Number of cores used: %d", Runtime.getRuntime().availableProcessors()));
 			benchmark.run(version, Factory.getFlagsFromEnvironment(), reporter);
 			reporter.stopBenchmark(benchmark.getName());
 			reporter.flush();
+			reportVMStats(reporter);
 		}
-		reportVMStats(reporter);
+		
 		reporter.flush();
 	}
-	
-	protected static void reportVMStats(Reporter reporter) {
-		reporter.reportLn(String.format("Memory (TOTAL/MAX/FREE) (%d,%d,%d)", Runtime.getRuntime().totalMemory(),
-																 			  Runtime.getRuntime().maxMemory(),
-																 			  Runtime.getRuntime().freeMemory()));
-	}
+
 }
