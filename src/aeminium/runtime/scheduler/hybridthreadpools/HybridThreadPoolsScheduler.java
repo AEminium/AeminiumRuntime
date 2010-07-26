@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import aeminium.runtime.BlockingTask;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
@@ -21,10 +20,8 @@ public class HybridThreadPoolsScheduler<T extends RuntimeTask> extends AbstractS
 	private ExecutorService blockingService;
 	private ExecutorService nonblockingService; 
 
-	
-	
 	public void init() {
-		blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*10);
+		blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
 		nonblockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 	}
 	

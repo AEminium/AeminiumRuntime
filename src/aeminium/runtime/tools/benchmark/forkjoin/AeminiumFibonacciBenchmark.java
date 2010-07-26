@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 
-import aeminium.runtime.Task;
 import aeminium.runtime.Runtime;
+import aeminium.runtime.Task;
 import aeminium.runtime.examples.fjtests.AeminiumFib;
 import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
-import aeminium.runtime.implementations.Factory.ImplementationDeclaration;
+import aeminium.runtime.implementations.Factory.RuntimeConfiguration;
 import aeminium.runtime.tools.benchmark.Reporter;
 
 public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
@@ -33,7 +33,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
-		Map<String, ImplementationDeclaration> impls = Factory
+		Map<String, RuntimeConfiguration> impls = Factory
 				.getImplementations();
 		for (String runtimeName : impls.keySet()) {
 			Runtime rt = impls.get(runtimeName).instanciate(flags);
