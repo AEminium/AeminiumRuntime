@@ -67,6 +67,7 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 			dependencies = aeminium.runtime.Runtime.NO_DEPS;
 		}
 	}
+	
 	public void removeDependency(Collection<Task> tasks) {
 		dependencies.removeAll(tasks);
 		if ( dependencies.isEmpty()) {

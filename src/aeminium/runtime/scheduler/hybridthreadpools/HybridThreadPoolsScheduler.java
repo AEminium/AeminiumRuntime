@@ -12,13 +12,14 @@ import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
 public class HybridThreadPoolsScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements RuntimeScheduler<T>, RuntimePrioritizer<T> {
+	private ExecutorService blockingService;
+	private ExecutorService nonblockingService; 
+	private int taskCount = 0;
+	
 	
 	public HybridThreadPoolsScheduler(EnumSet<Flags> flags) {
 		super(flags);
 	}
-
-	private ExecutorService blockingService;
-	private ExecutorService nonblockingService; 
 
 	public void init() {
 		blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
@@ -29,15 +30,20 @@ public class HybridThreadPoolsScheduler<T extends RuntimeTask> extends AbstractS
 	public void scheduleTasks(T ... tasks) {
 		for ( int i = 0; i < tasks.length; i++ ) {
 			scheduleTask(tasks[i]);
+			taskCount++;
 		}
 	}
 
 	protected void scheduleTask(T task) {
-		if ( task instanceof NonBlockingTask ) {
-			nonblockingService.submit(task);
-		} else {
-			blockingService.submit(task);
-		}		
+		try {
+			if ( task instanceof NonBlockingTask ) {
+				nonblockingService.submit(task);
+			} else {
+				blockingService.submit(task);
+			}	
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Override

@@ -20,6 +20,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	protected boolean completed = false;
 	protected Map<String, Object> data;
 	protected final EnumSet<Flags> flags;
+	protected boolean hasRun = false;
 	
 	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		this.body = body;
@@ -32,6 +33,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	public Object call() throws Exception {
 		body.execute(this);
 		graph.taskFinished((T) this);
+		hasRun = true;
 		return null;		
 	}
 	

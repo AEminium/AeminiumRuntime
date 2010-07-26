@@ -82,7 +82,6 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		assert ( state == GenericRuntimeState.INITIALIZED );
 	}
 
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void schedule(Task task, Task parent, Collection<Task> deps) {

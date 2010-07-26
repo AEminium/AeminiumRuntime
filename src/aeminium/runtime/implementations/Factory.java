@@ -10,7 +10,10 @@ import aeminium.runtime.datagroup.DataGroupFactory;
 import aeminium.runtime.datagroup.fifo.FifoDataGroup;
 import aeminium.runtime.graph.generic.GenericGraph;
 import aeminium.runtime.graph.implicit.ImplicitGraph;
+import aeminium.runtime.graph.implicit.ImplicitGraphBlockingQueue;
+import aeminium.runtime.graph.implicit.ImplicitGraphInternalThread;
 import aeminium.runtime.implementations.generic.GenericRuntime;
+import aeminium.runtime.scheduler.singlethreadpool.SingleThreadPoolScheduler;
 import aeminium.runtime.scheduler.forkjoin.ForkJoinScheduler;
 import aeminium.runtime.scheduler.hybridthreadpools.HybridThreadPoolsScheduler;
 import aeminium.runtime.scheduler.linear.LinearScheduler;
@@ -66,6 +69,55 @@ public class Factory {
 		};
 		database.put(ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup.getName(), ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
 
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraphInternalThread_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraphInternalThread.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup", "ImplicitGraphInternalThread.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup") {
+			@Override
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
+				HybridThreadPoolsScheduler<ImplicitTask> scheduler = new HybridThreadPoolsScheduler<ImplicitTask>(flags);
+				ImplicitGraphInternalThread<ImplicitTask> graph = new ImplicitGraphInternalThread<ImplicitTask>(scheduler, flags);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(graph, flags);
+				return new GenericRuntime<ImplicitTask>(scheduler, 
+															   scheduler, 
+															   graph,
+															   dgFactory,
+															   taskFactory);
+			}
+		};
+		database.put(ImplicitGraphInternalThread_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup.getName(), ImplicitGraphInternalThread_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
+
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraphBlockingQueue_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraphBlockingQueue.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup", "ImplicitGraphBlockingQueue.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup") {
+			@Override
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
+				HybridThreadPoolsScheduler<ImplicitTask> scheduler = new HybridThreadPoolsScheduler<ImplicitTask>(flags);
+				ImplicitGraphBlockingQueue<ImplicitTask> graph = new ImplicitGraphBlockingQueue<ImplicitTask>(scheduler, flags);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(graph, flags);
+				return new GenericRuntime<ImplicitTask>(scheduler, 
+															   scheduler, 
+															   graph,
+															   dgFactory,
+															   taskFactory);
+			}
+		};
+		database.put(ImplicitGraphBlockingQueue_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup.getName(), ImplicitGraphBlockingQueue_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
+
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraphBlockingQueue_SingleThreadPoolScheduler_None_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraphBlockingQueue.SingleThreadPoolScheduler.None.ImplicitTask.FifoDataGroup", "ImplicitGraphBlockingQueue.SingleThreadPoolScheduler.None.ImplicitTask.FifoDataGroup") {
+			@Override
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
+				SingleThreadPoolScheduler<ImplicitTask> scheduler = new SingleThreadPoolScheduler<ImplicitTask>(flags);
+				ImplicitGraphBlockingQueue<ImplicitTask> graph = new ImplicitGraphBlockingQueue<ImplicitTask>(scheduler, flags);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(graph, flags);
+				return new GenericRuntime<ImplicitTask>(scheduler, 
+															   scheduler, 
+															   graph,
+															   dgFactory,
+															   taskFactory);
+			}
+		};
+		database.put(ImplicitGraphBlockingQueue_SingleThreadPoolScheduler_None_ImplicitTask_FifoDataGroup.getName(), ImplicitGraphBlockingQueue_SingleThreadPoolScheduler_None_ImplicitTask_FifoDataGroup);
+		
+		
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_ForkJoinScheduler_None_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.ForkJoinScheduler.None.ImplicitTask.FifoDataGroup", "ImplicitGraph.ForkJoinScheduler.None.ImplicitTask.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
@@ -115,8 +167,9 @@ public class Factory {
 		};
 		database.put(GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup.getName(), GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
 		
+		database.put("default", ImplicitGraphBlockingQueue_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
 		//database.put("default", ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
-		database.put("default", GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
+		//database.put("default", GenericGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
 	}
 	
 	/**

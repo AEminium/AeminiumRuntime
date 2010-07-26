@@ -2,12 +2,11 @@ package aeminium.runtime.tests;
 
 import java.util.Arrays;
 
+import org.junit.Test;
+
 import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
-import aeminium.runtime.examples.fjtests.AeminiumFib;
-
-import org.junit.Test;
 
 public class LinearDependencies extends BaseTest {
 	@Test
