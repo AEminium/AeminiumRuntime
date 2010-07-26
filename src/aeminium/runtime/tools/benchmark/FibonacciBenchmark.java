@@ -8,6 +8,8 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.task.implicit.ImplicitTask;
+import aeminium.runtime.task.implicit.ImplicitTaskState;
 
 public class FibonacciBenchmark implements Benchmark {
 	private final String name = "FibonacciBenchmark";
@@ -59,7 +61,15 @@ public class FibonacciBenchmark implements Benchmark {
 					Task add  = rt.createNonBlockingTask(new Body() {
 						@Override
 						public void execute(Task mergeTask) {
-							current.setResult(((Integer)f1.getResult()) + ((Integer)f2.getResult()));
+							//current.setResult(((Integer)f1.getResult()) + ((Integer)f2.getResult()));
+
+							ImplicitTaskState s1 = ((ImplicitTask)f1).getTaskState();
+							Integer v1 = (Integer)f1.getResult();
+							Integer v2 = (Integer)f2.getResult();
+							if ( v1 == null || v2 == null ) {
+								v1 = v1;
+							}
+							current.setResult(v1+v2);
 						}
 					}, Runtime.NO_HINTS);
 					rt.schedule(add, current, Arrays.asList(f1, f2));

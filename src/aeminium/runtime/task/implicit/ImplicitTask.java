@@ -26,7 +26,6 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 	private Task parent = aeminium.runtime.Runtime.NO_PARENT;
 	private int childCount = 0;
 	private Collection<Task> dependents = new ArrayList<Task>();
-	private Object result;
 
 	public static TaskFactory<ImplicitTask> createFactory(final RuntimeGraph<ImplicitTask> graph, EnumSet<Flags> flags) {
 		return new AbstractTaskFactory<ImplicitTask>(flags) {
@@ -116,9 +115,6 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 		return null;
 	}
 
-	public Body getBody() {
-		return body;
-	}
 	
 	public void addDependent(ImplicitTask task) {
 			dependents.add(task);
@@ -128,16 +124,6 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 		return dependents;
 	}
 
-	@Override
-	public void setResult(Object value) {
-		this.result = value;
-	}
-	
-	@Override
-	public Object getResult() {
-		return result;
-	}
-	
 	@Override
 	public String toString() {
 		return "Task<"+body.toString()+">" + childCount;

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;
@@ -12,7 +13,8 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.statistics.Statistics;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
-	private Object result;
+	protected Object result;
+	//protected AtomicReference<Object> result = new AtomicReference<Object>();
 	protected final Body body;
 	protected final Collection<Hints> hints;
 	protected final RuntimeGraph<T> graph;
@@ -31,9 +33,16 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public Object call() throws Exception {
-		body.execute(this);
-		graph.taskFinished((T) this);
-		hasRun = true;
+		try {
+			body.execute(this);
+		} catch (Exception e) {
+			setResult(e);
+			System.out.println("bad " + e);
+			e.printStackTrace();
+		} finally {
+			graph.taskFinished((T) this);
+			hasRun = true;
+		}
 		return null;		
 	}
 	
@@ -46,12 +55,12 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 	
 	@Override
-	public void setResult(Object result) {
+	public void  setResult(Object result) {
 		this.result = result;
 	}
 	
 	@Override
-	public Object getResult() {
+	public synchronized Object getResult() {
 		return this.result;
 	}
 	
