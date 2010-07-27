@@ -10,7 +10,7 @@ public abstract class FibonacciBenchmark implements Benchmark{
 	
 	
 	// This value is the one used in Doug Lea's Paper on ForkJoin
-	protected static int MAX_CALC = 47;
+	protected static int MAX_CALC = 40;
 
 	@Override
 	public String getName() {

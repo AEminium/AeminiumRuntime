@@ -19,7 +19,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	protected final Collection<Hints> hints;
 	protected final RuntimeGraph<T> graph;
 	protected Statistics statistics;
-	protected boolean completed = false;
 	protected Map<String, Object> data;
 	protected final EnumSet<Flags> flags;
 	protected boolean hasRun = false;
@@ -55,12 +54,12 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 	
 	@Override
-	public void  setResult(Object result) {
+	public void setResult(Object result) {
 		this.result = result;
 	}
 	
 	@Override
-	public synchronized Object getResult() {
+	public  Object getResult() {
 		return this.result;
 	}
 	
@@ -79,14 +78,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return graph.getTaskDescription((T) this);
 	}
 
-	public boolean isCompleted() {
-		return completed;
-	}
-	
-	public void setCompleted() {
-		completed = true;
-	}
-	
 	@Override
 	public void setData(String key, Object value) {
 		if ( data == null) {

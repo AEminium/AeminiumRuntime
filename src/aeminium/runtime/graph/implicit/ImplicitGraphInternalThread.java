@@ -106,7 +106,7 @@ public class ImplicitGraphInternalThread<T extends ImplicitTask> extends Abstrac
 				throw new RuntimeError("Task '" + task + "' has already been scheduled");
 			}
 
-			if ( deps != Runtime.NO_DEPS ) {
+			if ( (Object)deps != Runtime.NO_DEPS ) {
 				task.setDependencies(new ArrayList<Task>(deps));
 			} else {
 				task.setDependencies(Runtime.NO_DEPS);

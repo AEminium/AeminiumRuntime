@@ -27,7 +27,7 @@ public abstract class BaseTest {
 		});
 		log.setUseParentHandlers(false);
 		log.addHandler(conHdlr);
-		log.setLevel(Level.WARNING);
+		log.setLevel(Level.INFO);
 	}
 	
 	@Before

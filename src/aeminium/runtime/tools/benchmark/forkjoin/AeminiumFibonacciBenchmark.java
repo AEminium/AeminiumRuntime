@@ -35,7 +35,8 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		Map<String, RuntimeConfiguration> impls = Factory
 				.getImplementations();
-		for (String runtimeName : impls.keySet()) {
+		//for (String runtimeName : impls.keySet()) {
+		for (String runtimeName :  Arrays.asList("default") ) {
 			Runtime rt = impls.get(runtimeName).instanciate(flags);
 			for (String temperature : Arrays.asList("Cold", "Warm")) {
 				String reportName = String.format("Aeminium %s %s %s", runtimeName,

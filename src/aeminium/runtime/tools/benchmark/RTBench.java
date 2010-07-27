@@ -5,11 +5,11 @@ import aeminium.runtime.implementations.Factory;
 public class RTBench {
 	
 	private static Benchmark[] benchmarks = {
-		new TaskCreationBenchmark(),
-		new IndependentTaskGraph(),
-		new LinearTaskGraph(),
-		new FixedParallelMaxDependencies(),
-		new ChildTaskBenchmark(),
+//		new TaskCreationBenchmark(),
+//		new IndependentTaskGraph(),
+//		new LinearTaskGraph(),
+//		new FixedParallelMaxDependencies(),
+//		new ChildTaskBenchmark(),
 		new FibonacciBenchmark()
 	};
 	

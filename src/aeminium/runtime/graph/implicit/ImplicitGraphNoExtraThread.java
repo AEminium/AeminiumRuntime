@@ -20,7 +20,7 @@ import aeminium.runtime.task.TaskDescription;
 import aeminium.runtime.task.implicit.ImplicitTask;
 import aeminium.runtime.task.implicit.ImplicitTaskState;
 
-public class ImplicitGraphNoExtraThread<T extends ImplicitTask> extends AbstractGraph<T> {
+public final class ImplicitGraphNoExtraThread<T extends ImplicitTask> extends AbstractGraph<T> {
 	private final List<T>  waitingForDeps= new LinkedList<T>();
 	private final List<T>  running = new LinkedList<T>();
 	private final List<T>  waitingForChildren = new LinkedList<T>();
@@ -29,6 +29,7 @@ public class ImplicitGraphNoExtraThread<T extends ImplicitTask> extends Abstract
 	private final ReentrantLock lockInternal = new ReentrantLock();
 	private final ReentrantLock lockRequest = new ReentrantLock();
 	private final List<T> pendingRequest = new LinkedList<T>();
+	//private final List<T> pendingRequest = new ArrayList<T>();
 	
  	public ImplicitGraphNoExtraThread(RuntimePrioritizer<T> prioritizer, EnumSet<Flags> flags) {
 		super(prioritizer, flags);
@@ -89,7 +90,7 @@ public class ImplicitGraphNoExtraThread<T extends ImplicitTask> extends Abstract
 				throw new RuntimeError("Task '" + task + "' has already been scheduled");
 			}
 
-			if ( deps != Runtime.NO_DEPS ) {
+			if ( (Object)deps != Runtime.NO_DEPS ) {
 				task.setDependencies(new ArrayList<Task>(deps));
 			} else {
 				task.setDependencies(Runtime.NO_DEPS);

@@ -1,6 +1,7 @@
 package aeminium.runtime.tools.benchmark;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -23,8 +24,8 @@ public class FixedParallelMaxDependencies implements Benchmark {
 	@Override
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		for (int COUNT : COUNTS) {
-			runTest(version, flags, reporter, COUNT);
 			reporter.flush();
+			runTest(version, flags, reporter, COUNT);
 		}
 	}
 
@@ -34,20 +35,24 @@ public class FixedParallelMaxDependencies implements Benchmark {
 		
 		long start = System.nanoTime();
 		List<Task> previousTasks = createTasks(rt, taskCount, "Task-0");
-		scheduleTasks(rt, previousTasks, new ArrayList<Task>());
+		scheduleTasks(rt, previousTasks, Runtime.NO_DEPS);
+		
 		
 		for(int i = 1; i < count; i++ ) {
 			List<Task> nextTasks = createTasks(rt, taskCount, "Task-"+i);
 			scheduleTasks(rt, nextTasks, previousTasks);
 			previousTasks = nextTasks;
 		}
+		
+		rt.shutdown();
 		long end = System.nanoTime();
+
 		String result = String.format("Run %10d tasks in %12d ns ==> %10d ns per task | %6d tasks/second.", count, (end-start), ((end-start)/count),  (1000000000/((end-start)/count)));
 		reporter.reportLn(result);
-		rt.shutdown();
+
 	}
 
-	private void scheduleTasks(Runtime rt, List<Task> tasks, List<Task> deps) {
+	private void scheduleTasks(Runtime rt, List<Task> tasks, Collection<Task> deps) {
 		for ( Task t : tasks ) {
 			rt.schedule(t, Runtime.NO_PARENT, deps);
 		}

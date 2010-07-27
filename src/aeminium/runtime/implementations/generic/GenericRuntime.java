@@ -88,7 +88,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		assert ( state == GenericRuntimeState.INITIALIZED );
 		assert ( task instanceof ImplicitTask );
 		assert ( parent instanceof ImplicitTask );
-		graph.addTask((T)task, parent, (Collection<T>)deps);
+		graph.addTask((T)((Object)task), parent, (Collection<T>)((Object)deps));
 	}
 
 	@Override

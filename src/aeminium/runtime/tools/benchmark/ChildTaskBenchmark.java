@@ -36,8 +36,8 @@ public class ChildTaskBenchmark implements Benchmark {
 			
 			rt.shutdown();		
 			long end = System.nanoTime();
-			long count = (long)Math.pow(fanout, level)+1;
-			String result = String.format("Level %3d with %6d tasks in %12d ns ==> %10d ns per task | %6d tasks/second. ", level, count, (end-start), ((end-start)/count),  (1000000000/((end-start)/count)));
+			
+			String result = String.format("Level %3d in %12d ns.", level, (end-start));
 			reporter.reportLn(result);
 
 	}

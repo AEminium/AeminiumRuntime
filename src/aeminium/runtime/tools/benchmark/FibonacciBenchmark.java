@@ -13,7 +13,7 @@ import aeminium.runtime.task.implicit.ImplicitTaskState;
 
 public class FibonacciBenchmark implements Benchmark {
 	private final String name = "FibonacciBenchmark";
-	private int[] input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
+	private int[] input = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 ,26};
 	
 	@Override
 	public String getName() {
@@ -39,7 +39,7 @@ public class FibonacciBenchmark implements Benchmark {
 
 		long end = System.nanoTime();
 		
-		String result = String.format("Fib(%3d) =  %5d in %12d ns", n, root.getResult(), (end-start));
+		String result = String.format("Fib(%3d) =  %7d in %12d ns", n, root.getResult(), (end-start));
 		reporter.reportLn(result);
 		reporter.flush();
 
@@ -61,15 +61,11 @@ public class FibonacciBenchmark implements Benchmark {
 					Task add  = rt.createNonBlockingTask(new Body() {
 						@Override
 						public void execute(Task mergeTask) {
-							//current.setResult(((Integer)f1.getResult()) + ((Integer)f2.getResult()));
-
-							ImplicitTaskState s1 = ((ImplicitTask)f1).getTaskState();
-							Integer v1 = (Integer)f1.getResult();
-							Integer v2 = (Integer)f2.getResult();
-							if ( v1 == null || v2 == null ) {
-								v1 = v1;
-							}
-							current.setResult(v1+v2);
+							current.setResult(((Integer)f1.getResult()) + ((Integer)f2.getResult()));
+						}
+						@Override
+						public String toString() {
+							return "fib("+(n-1)+") + fib(" + (n-2) + ")";
 						}
 					}, Runtime.NO_HINTS);
 					rt.schedule(add, current, Arrays.asList(f1, f2));
