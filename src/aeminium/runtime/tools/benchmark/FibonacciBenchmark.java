@@ -11,9 +11,30 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.task.implicit.ImplicitTask;
 import aeminium.runtime.task.implicit.ImplicitTaskState;
 
+
+
 public class FibonacciBenchmark implements Benchmark {
 	private final String name = "FibonacciBenchmark";
 	private int[] input = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 ,26};
+	public final static ResultOne RESULT_ONE = new FibonacciBenchmark().new ResultOne();
+	
+	abstract class Result {
+		public abstract Object result();
+		
+		public String toString() {
+			return "Result";
+		}
+	}
+
+	final class  ResultOne extends Result {
+		private final Integer one = new Integer(1);
+				
+		@Override
+		public Object result() {
+			return one;
+		}
+		
+	}
 	
 	@Override
 	public String getName() {
@@ -39,7 +60,7 @@ public class FibonacciBenchmark implements Benchmark {
 
 		long end = System.nanoTime();
 		
-		String result = String.format("Fib(%3d) =  %7d in %12d ns", n, root.getResult(), (end-start));
+		String result = String.format("Fib(%3d) =  %7d in %12d ns", n, ((Result)root.getResult()).result(), (end-start));
 		reporter.reportLn(result);
 		reporter.flush();
 
@@ -58,19 +79,16 @@ public class FibonacciBenchmark implements Benchmark {
 					final Task f2  = fib(rt, n-2);
 					rt.schedule(f2, current, Runtime.NO_DEPS);
 					
-					Task add  = rt.createNonBlockingTask(new Body() {
+					current.setResult(new Result() {
 						@Override
-						public void execute(Task mergeTask) {
-							current.setResult(((Integer)f1.getResult()) + ((Integer)f2.getResult()));
+						public Object result() {
+							Integer v1 = (Integer)((Result)f1.getResult()).result();
+							Integer v2 = (Integer)((Result)f1.getResult()).result();
+							return v1 + v2;
 						}
-						@Override
-						public String toString() {
-							return "fib("+(n-1)+") + fib(" + (n-2) + ")";
-						}
-					}, Runtime.NO_HINTS);
-					rt.schedule(add, current, Arrays.asList(f1, f2));
+					});
 				} else {
-					current.setResult(new Integer(1));
+					current.setResult(RESULT_ONE);
 				}
 			}
 			

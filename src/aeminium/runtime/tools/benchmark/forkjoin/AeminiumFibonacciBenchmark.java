@@ -14,6 +14,7 @@ import aeminium.runtime.tools.benchmark.Reporter;
 
 public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 
+	
 	public void runTest(Runtime rt, String version, EnumSet<Flags> flags,
 			Reporter reporter, int n) {
 		long start = System.nanoTime();

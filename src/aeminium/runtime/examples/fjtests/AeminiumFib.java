@@ -11,54 +11,60 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
 
+abstract class Result {
+	public abstract Object result();
+	
+	public String toString() {
+		return "Result";
+	}
+}
+
+final class  ResultOne extends Result {
+	private final Integer one = new Integer(1);
+			
+	@Override
+	public Object result() {
+		return one;
+	}
+	
+}
+
 public class AeminiumFib {
 
-	private static int MAX_CALC = 47;
-	private static int THRESHOLD = 13;
+	private static final int MAX_CALC = 47;
+	private static final int THRESHOLD = 13;
+	private static final ResultOne RESULT_ONE = new ResultOne();
+	
 
 	public static Body createFibBody(final Runtime rt, final int n) {
 		return new Body() {
-			
-			public int seqFib(int n) {
-				if (n <= 2) return 1;
-				else return (seqFib(n-1) + seqFib(n-2));
-			}
-			
-			public void execute(final Task currentTask) {
-				if (n <= THRESHOLD) {
-					currentTask.setResult(seqFib(n));
+			@Override
+			public void execute(final Task current) {
+				//System.out.println("n="+n);
+				if ( 2 < n ) {
+					final Task f1  = rt.createNonBlockingTask(createFibBody(rt, n-1), Runtime.NO_HINTS);
+					rt.schedule(f1, current, Runtime.NO_DEPS);
+					
+					final Task f2  = rt.createNonBlockingTask(createFibBody(rt, n-2), Runtime.NO_HINTS);
+					rt.schedule(f2, current, Runtime.NO_DEPS);
+					
+					current.setResult(new Result() {
+						@Override
+						public Object result() {
+							Integer v1 = (Integer)((Result)f1.getResult()).result();
+							Integer v2 = (Integer)((Result)f1.getResult()).result();
+							return v1 + v2;
+						}
+					});
 				} else {
-
-					final Task branch1 = rt.createNonBlockingTask(createFibBody(rt,
-							n - 2), Runtime.NO_HINTS);
-					rt.schedule(branch1, currentTask, Runtime.NO_DEPS);
-
-					final Task branch2 = rt.createNonBlockingTask(createFibBody(rt,
-							n - 1), Runtime.NO_HINTS);
-					rt.schedule(branch2, currentTask, Runtime.NO_DEPS);
-
-					Task join = rt.createNonBlockingTask(new Body() {
-						public void execute(Task p) {
-							int r1 = (Integer) branch1.getResult();
-							int r2 = (Integer) branch2.getResult();
-							currentTask.setResult(r1 + r2);
-							// System.out.println("Merging " + n + " -> " + currentTask.getResult());
-						}
-						
-						public String toString() {
-							return "Merge for n="+n;
-						}
-					}, Runtime.NO_HINTS);
-					rt.schedule(join, currentTask,  Arrays.asList(branch1, branch2));
+					current.setResult(RESULT_ONE);
 				}
-
 			}
 			
 			@Override
 			public String toString() {
-				return "Recursive for n=" + n;
+				return "Fib("+n+")";
 			}
-			
 		};
 	}
 
