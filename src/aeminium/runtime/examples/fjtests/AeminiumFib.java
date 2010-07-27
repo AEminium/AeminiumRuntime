@@ -52,7 +52,7 @@ public class AeminiumFib {
 						@Override
 						public Object result() {
 							Integer v1 = (Integer)((Result)f1.getResult()).result();
-							Integer v2 = (Integer)((Result)f1.getResult()).result();
+							Integer v2 = (Integer)((Result)f2.getResult()).result();
 							return v1 + v2;
 						}
 					});
