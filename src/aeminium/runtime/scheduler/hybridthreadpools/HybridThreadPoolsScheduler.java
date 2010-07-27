@@ -23,7 +23,7 @@ public class HybridThreadPoolsScheduler<T extends RuntimeTask> extends AbstractS
 
 	public void init() {
 		blockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()*2);
-		nonblockingService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		nonblockingService = Executors.newFixedThreadPool((int)(Runtime.getRuntime().availableProcessors()*1.5));
 	}
 	
 	@Override
