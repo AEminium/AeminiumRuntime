@@ -4,16 +4,16 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.statistics.Statistics;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
-	protected Object result;
+	protected volatile Object result;
 	//protected AtomicReference<Object> result = new AtomicReference<Object>();
 	protected final Body body;
 	protected final Collection<Hints> hints;
@@ -55,12 +55,16 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public void setResult(Object result) {
+		if ( result == null ) {
+			throw new RuntimeError("Cannot set result to 'null'.");
+		}
 		this.result = result;
 	}
 	
 	@Override
-	public  Object getResult() {
-		return this.result;
+	public Object getResult() {
+		while ( result == null ) ;
+		return result;
 	}
 	
 	@Override

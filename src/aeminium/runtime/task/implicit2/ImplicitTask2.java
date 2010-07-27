@@ -26,7 +26,7 @@ import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.TaskFactory;
 
-public class ImplicitTask2<T extends ImplicitTask2> extends AbstractTask<T> {
+public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTask<T> {
 	protected final ReentrantLock lock = new ReentrantLock();
 	protected final AtomicReference<ImplicitTaskState2> state = new AtomicReference<ImplicitTaskState2>(ImplicitTaskState2.UNSCHEDULED);
 	protected final AtomicInteger depCount = new AtomicInteger(0);
@@ -193,6 +193,8 @@ public class ImplicitTask2<T extends ImplicitTask2> extends AbstractTask<T> {
 	@Override
 	public void taskCompleted() {
 		state.set(ImplicitTaskState2.COMPLETED);
+		
+	
 		if ( parent != null) {
 			parent.detachChild(this);
 		}

@@ -32,6 +32,7 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 	public void addTask(T task, Task parent, Collection<T> deps) {
 		taskCount.incrementAndGet();
 		T itask = (T)task;
+		
 		if ( itask.getTaskState() != ImplicitTaskState2.UNSCHEDULED) {
 			throw new RuntimeError("Cannot schedule task twice: " + task);
 		}
