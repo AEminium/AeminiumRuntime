@@ -19,29 +19,24 @@ abstract class Result {
 	}
 }
 
-final class  ResultOne extends Result {
-	private final Integer one = new Integer(1);
-			
-	@Override
-	public Object result() {
-		return one;
-	}
-	
-}
-
 public class AeminiumFib {
 
 	private static final int MAX_CALC = 47;
 	private static final int THRESHOLD = 13;
-	private static final ResultOne RESULT_ONE = new ResultOne();
 	
 
 	public static Body createFibBody(final Runtime rt, final int n) {
 		return new Body() {
+			
+			public int seqFib(int n) {
+				if (n <= 2) return 1;
+				else return (seqFib(n-1) + seqFib(n-2));
+			}
+			
 			@Override
 			public void execute(final Task current) {
 				//System.out.println("n="+n);
-				if ( 2 < n ) {
+				if ( THRESHOLD < n ) {
 					final Task f1  = rt.createNonBlockingTask(createFibBody(rt, n-1), Runtime.NO_HINTS);
 					rt.schedule(f1, current, Runtime.NO_DEPS);
 					
@@ -57,7 +52,14 @@ public class AeminiumFib {
 						}
 					});
 				} else {
-					current.setResult(RESULT_ONE);
+					final Integer result = seqFib(n);
+					current.setResult(new Result() {
+						
+						@Override
+						public Object result() {
+							return result;
+						}
+					});
 				}
 			}
 			
