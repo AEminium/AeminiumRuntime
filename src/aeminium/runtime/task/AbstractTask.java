@@ -13,15 +13,16 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.statistics.Statistics;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
-	protected volatile Object result;
+	protected volatile Object result = UNSET;
 	//protected AtomicReference<Object> result = new AtomicReference<Object>();
-	protected final Body body;
+	protected Body body;
 	protected final Collection<Hints> hints;
 	protected final RuntimeGraph<T> graph;
 	protected Statistics statistics;
 	protected Map<String, Object> data;
 	protected final EnumSet<Flags> flags;
 	protected boolean hasRun = false;
+	protected static final Object UNSET = new Object();
 	
 	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		this.body = body;
@@ -63,8 +64,13 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public Object getResult() {
-		while ( result == null ) ;
-		return result;
+		if ( result == UNSET ) {
+			throw new RuntimeError("Result has either not been set or already retrieved");
+		}
+		//while ( result == null ) ;
+		Object value = result;
+		result = UNSET;
+		return value;
 	}
 	
 	@Override
