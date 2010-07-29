@@ -10,26 +10,42 @@ import aeminium.runtime.Hints;
 import aeminium.runtime.RuntimeError;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.statistics.Statistics;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
 	protected volatile Object result = UNSET;
-	//protected AtomicReference<Object> result = new AtomicReference<Object>();
 	protected Body body;
 	protected final Collection<Hints> hints;
-	protected final RuntimeGraph<T> graph;
-	protected Statistics statistics;
+	protected RuntimeGraph<T> graph;
 	protected Map<String, Object> data;
 	protected final EnumSet<Flags> flags;
 	protected boolean hasRun = false;
-	protected static final Object UNSET = new Object();
+	protected static final Object UNSET = new Object() {
+		@Override
+		public String toString() {
+			return "UNSET";
+		}
+	};
 	protected int level = 0;
+	protected RuntimeScheduler<T> scheduler;
 	
 	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		this.body = body;
 		this.graph = graph;
 		this.hints = hints;
 		this.flags = flags;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public void setScheduler(RuntimeScheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+	
+	@Override
+	public void setGraph(RuntimeGraph graph) {
+		this.graph = graph;
 	}
 	
 	@Override
@@ -42,6 +58,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 			e.printStackTrace();
 		} finally {
 			graph.taskFinished((T) this);
+			scheduler.taskFinished((T) this);
 			hasRun = true;
 		}
 		return null;		
@@ -72,16 +89,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		Object value = result;
 		result = UNSET;
 		return value;
-	}
-	
-	@Override
-	public void setStatistics(Statistics statistics) {
-		this.statistics = statistics;
-	}
-	
-	@Override
-	public Statistics getStatistics() {
-		return statistics;
 	}
 	
 	@Override

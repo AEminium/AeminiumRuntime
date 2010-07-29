@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.AbstractPrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
@@ -18,6 +19,7 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends Abstra
 	
 	public LowestLevelFirstPrioritizer(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {
 		super(scheduler, flags);
+		scheduler.setPrioritizer(this);
 	}
 
 	@Override
@@ -25,19 +27,24 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends Abstra
 		waitingQueue = new PriorityQueue<T>(20, new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {
-				return o1.getLevel() - o2.getLevel();
+				return o2.getLevel() - o1.getLevel();
 			}
 		});
 	}
 
 	@Override
 	public void shutdown() {
-		System.out.println("MAX priority queue size = " + maxQSize);
+		//System.out.println("MAX priority queue size = " + maxQSize);
 	}
 	
 	@Override
 	public void scheduleTasks(Collection<T> tasks) {
 		synchronized (this) {
+			for ( T t : tasks ) {
+				if ( waitingQueue.contains(t) ) {
+					throw new RuntimeError("Cannot schedule the same task twice.");
+				}
+			}
 			waitingQueue.addAll(tasks);
 			maxQSize = Math.max(maxQSize, waitingQueue.size());
 			schedule();
@@ -47,6 +54,9 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends Abstra
 	@Override
 	public void scheduleTask(T task) {
 		synchronized (this) {
+			if ( waitingQueue.contains(task) ) {
+				throw new RuntimeError("Cannot schedule the same task twice.");
+			}
 			waitingQueue.add(task);
 			maxQSize = Math.max(maxQSize, waitingQueue.size());
 			schedule();
@@ -56,6 +66,9 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends Abstra
 	protected void schedule() {
 		synchronized (this) {
 			int count  = scheduler.getMaxParallelism() - scheduler.getRunningTasks();
+			if ( count == 0 ) {
+				count = 0;
+			}
 			if ( count > 0 && !waitingQueue.isEmpty() ) {
 				count = Math.min(count, waitingQueue.size());
 

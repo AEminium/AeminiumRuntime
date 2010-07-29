@@ -19,6 +19,7 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 		this.flags = flags;
 	}
 
+
 	@Override
 	public void setPrioritizer(RuntimePrioritizer<T> prioritizer ) {
 		this.prioritizer = prioritizer;
@@ -54,14 +55,14 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 		runningCount.decrementAndGet();
 		RuntimePrioritizer<T> p = prioritizer;
 		if ( p != null ) {
-			p.taskFinished(task);
+			p.taskPaused(task);
 		}
 	}
 	
 	@Override 
 	public void taskResume(T task) {
 		pausedCount.decrementAndGet();
-		runningCount.incrementAndGet();
+		// runningCount must be incremented by the schedule function
 		scheduleTasks(Collections.singleton(task));
 	}
 }

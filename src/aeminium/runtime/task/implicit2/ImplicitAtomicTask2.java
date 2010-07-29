@@ -8,6 +8,7 @@ import aeminium.runtime.Hints;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeAtomicTask;
 
 public class ImplicitAtomicTask2<T extends ImplicitTask2> extends ImplicitTask2<T> implements RuntimeAtomicTask {
@@ -21,16 +22,7 @@ public class ImplicitAtomicTask2<T extends ImplicitTask2> extends ImplicitTask2<
 	@Override
 	public Object call() throws Exception {
 		if ( datagroup.trylock(this) ) {
-			try {
-				body.execute(this);
-			} catch (Exception e) {
-				setResult(e);
-				System.out.println("bad " + e);
-				e.printStackTrace();
-			} finally {
-				graph.taskFinished((T) this);
-				hasRun = true;
-			}
+			super.call();
 		}
 		return null;		
 	}
@@ -43,7 +35,9 @@ public class ImplicitAtomicTask2<T extends ImplicitTask2> extends ImplicitTask2<
 
 	@Override
 	public RuntimeDataGroup getDataGroup() {
-		return datagroup;
+		synchronized (this) {
+			return datagroup;
+		}
 	}
-	
+
 }

@@ -34,7 +34,8 @@ public class FixedParallelMaxDependencies implements Benchmark {
 		rt.init();
 		
 		long start = System.nanoTime();
-		List<Task> previousTasks = createTasks(rt, taskCount, "Task-0");
+		List<Task> firstTasks = createTasks(rt, taskCount, "Task-0");
+		List<Task> previousTasks = firstTasks;
 		scheduleTasks(rt, previousTasks, Runtime.NO_DEPS);
 		
 		

@@ -5,9 +5,12 @@ import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.task.implicit2.ImplicitTask2;
+import aeminium.runtime.task.implicit2.ImplicitTaskState2;
 
 public class SingleThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 	private ExecutorService execService; 
@@ -34,6 +37,8 @@ public class SingleThreadPoolScheduler<T extends RuntimeTask> extends AbstractSc
 	}
 	
 	public void scheduleTask(T task) {
+		runningCount.incrementAndGet();
+		task.setScheduler(this);
 		execService.submit(task);
 	}
 

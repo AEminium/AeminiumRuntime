@@ -12,7 +12,8 @@ public class ChildTasks extends BaseTest {
 		Runtime rt = getRuntime();
 		rt.init();
 		
-		rt.schedule(createTask(rt, 2), Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t1 = createTask(rt, 2);
+		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 			
 		rt.shutdown();
 	}

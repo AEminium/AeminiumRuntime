@@ -5,10 +5,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantLock;
 
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -28,13 +24,12 @@ import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.TaskFactory;
 
 public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTask<T> {
-	protected final ReentrantLock lock = new ReentrantLock();
-	protected final AtomicReference<ImplicitTaskState2> state = new AtomicReference<ImplicitTaskState2>(ImplicitTaskState2.UNSCHEDULED);
-	protected final AtomicInteger depCount = new AtomicInteger(0);
-	protected final AtomicInteger childCount = new AtomicInteger(0);
+	protected ImplicitTaskState2 state = ImplicitTaskState2.UNSCHEDULED;
+	protected int depCount = 0;
+	protected int childCount = 0;
 	protected Collection<T> dependents = null;
 	protected T parent = null;
-	protected final ImplicitTask2<T>[] ita = new ImplicitTask2[0];
+	//protected final ImplicitTask2<T>[] ita = new ImplicitTask2[0];
 	protected RuntimePrioritizer<T> prioritizer = null;
 	protected final boolean debug;
 	protected List<T> children;
@@ -74,152 +69,164 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		};
 	}
 	
-
-	public void lock() {
-		lock.lock();
-	}
-	
-	public void unlock() {
-		lock.unlock();
-	}
-	
 	public void setParent(Task parent) {
 		if ( parent != Runtime.NO_PARENT ) {
-			setLevel(((T)parent).getLevel()+1);
-			this.parent = (T) parent;
-			this.parent.attachChild(this);
+			synchronized (this) {
+				setLevel(((T)parent).getLevel()+1);
+				this.parent = (T) parent;
+				this.parent.attachChild(this);
+			}
 		}
 	}
 	
 	public void attachChild(T child) {
-		updateChildCount(1);
-		if ( debug ) {
-			lock.lock();
-			if ( children == null ) {
-				children = new LinkedList<T>();
+		synchronized (this) {
+			updateChildCount(1);
+			if ( debug ) {
+				if ( children == null ) {
+					children = new LinkedList<T>();
+				}
+				children.add(child);
 			}
-			children.add(child);
-			lock.unlock();
 		}
 	}
 	
 	public void detachChild(T child) {
-		updateChildCount(-1);
-		if ( debug ) {
-			lock.lock();
-			if ( children == null ) {
-				children = new LinkedList<T>();
+		synchronized (this) {
+			updateChildCount(-1);
+			if ( debug ) {
+				if ( children == null ) {
+					children = new LinkedList<T>();
+				}
+				children.remove(child);
 			}
-			children.remove(child);
-			lock.unlock();
 		}
 	}
 	
 	protected void updateChildCount(int delta ) {
-		int value = childCount.addAndGet(delta);
-		if ( value == 0 ) {
-			if ( state.get() == ImplicitTaskState2.WAITING_FOR_CHILDREN ) {
+		synchronized (this) {
+			childCount += delta;
+			if ( childCount == 0 ) {
+				if ( state == ImplicitTaskState2.WAITING_FOR_CHILDREN ) {
+					taskCompleted();
+				}
+			}			
+		}
+	}
+	
+	public ImplicitTaskState2 getTaskState() {
+		synchronized (this) {
+			return state;
+		}
+	}
+	
+	public int addDependent(T task) {
+		synchronized (this) {
+			if ( state == ImplicitTaskState2.COMPLETED ) {
+				return 0;
+			}
+			if ( dependents == null ) {
+				dependents = new LinkedList<T>();
+			}
+			dependents.add(task);
+			return 1;
+		}
+	}
+	
+	public void setDependencies(Collection<T> deps) {
+		synchronized (this) {
+			state = ImplicitTaskState2.WAITING_FOR_DEPENDENCIES;
+			if ( (Object)deps != Runtime.NO_DEPS ) {
+				int count = 0;
+				for ( T t : deps ) {
+					synchronized (t) {
+						 count = t.addDependent(this);						
+					}
+				}
+				updateDependencyCount(count);
+			} else {
+				scheduleTask();
+			}
+		}
+	}
+	
+	public void decDepencenyCount() {
+		synchronized (this) {
+			updateDependencyCount(-1);
+		}
+	}
+	
+	protected void updateDependencyCount(int delta) {
+		depCount += delta;
+		if ( depCount == 0 ) {
+			scheduleTask();
+		}			
+	}
+
+	protected void scheduleTask() {
+		synchronized (this) {
+			if ( state != ImplicitTaskState2.WAITING_FOR_DEPENDENCIES ) {
+				throw new RuntimeError("task in wrong state");
+			}
+			state = ImplicitTaskState2.RUNNING;
+			prioritizer.scheduleTask((T)this);			
+		}
+	}
+	
+	public boolean hasDependecies() {
+		synchronized (this) {
+			return (depCount != 0);			
+		}
+	}
+	
+	public boolean hasChildren() {
+		synchronized (this) {
+			return (childCount != 0);			
+		}
+	}
+	
+	public void taskFinished() {
+		synchronized (this) {
+			state = ImplicitTaskState2.WAITING_FOR_CHILDREN;
+			
+			if ( !hasChildren() ) {
 				taskCompleted();
 			}
 		}
 	}
 	
-	public ImplicitTaskState2 getTaskState() {
-		return state.get();
-	}
-	
-	public void setTaskState(ImplicitTaskState2 state) {
-		this.state.set(state);
-	}
-	
-	public int addDependent(T task) {
-		lock.lock();
-		if ( state.get() == ImplicitTaskState2.COMPLETED ) {
-			lock.unlock();
-			return 0;
-		}
-		if ( dependents == null ) {
-			dependents = new LinkedList<T>();
-		}
-		dependents.add(task);
-		lock.unlock();
-		return 1;
-	}
-	
-	public void setDependencies(Collection<T> deps) {
-		state.set(ImplicitTaskState2.WAITING_FOR_DEPENDENCIES);
-		if ( (Object)deps != Runtime.NO_DEPS ) {
-			for ( T t : deps ) {
-				updateDependencyCount(t.addDependent(this));
-			};
-		} else {
-			scheduleTask();
-		}
-	}
-	
-	public void decDepencenyCount() {
-		updateDependencyCount(-1);
-	}
-	
-	protected void updateDependencyCount(int delta) {
-		int value = depCount.addAndGet(delta);
-		if ( value == 0 ) {
-			scheduleTask();
-		}
-	}
-
-	protected void scheduleTask() {
-		if ( !state.compareAndSet(ImplicitTaskState2.WAITING_FOR_DEPENDENCIES, ImplicitTaskState2.RUNNING)) {
-			return;
-		} 
-		prioritizer.scheduleTask((T)this);
-	}
-	
-	public boolean hasDependecies() {
-		return (depCount.get() != 0);
-	}
-	
-	public boolean hasChildren() {
-		return (childCount.get() != 0);
-	}
-	
-	public void taskFinished() {
-		//System.out.println("task finished " + this);
-		if ( !state.compareAndSet(ImplicitTaskState2.RUNNING, ImplicitTaskState2.WAITING_FOR_CHILDREN) ) {
-			throw new RuntimeError("Finished task is not in RUNNING state.");
-		}
-		if ( !hasChildren() ) {
-			taskCompleted();
-		}
-	}
-	
 	@Override
 	public void taskCompleted() {
-		state.set(ImplicitTaskState2.COMPLETED);
-		
-	
+		state = ImplicitTaskState2.COMPLETED;	
+
 		if ( parent != null) {
 			parent.detachChild(this);
 		}
-		lock.lock();
 		if ( dependents != null ) {
-			for ( ImplicitTask2<T> t : dependents.toArray(ita)) {
+			for ( ImplicitTask2<T> t : dependents) {
 				t.decDepencenyCount();
 			}
 		}
 		
+		// cleanup
+		if ( dependents != null ) {
+			this.dependents.clear();
+			this.dependents = null;
+		}
 		this.body = null;
 		this.parent = null;
-		
-		lock.unlock();
 	}
 	
 	public void setPrioritizer(RuntimePrioritizer<T> prioritizer) {
-		this.prioritizer = prioritizer;
+		synchronized (this) {
+			this.prioritizer = prioritizer;			
+		}
 	}
 	
 	public void checkForCycles() {
-		checkForCycles((T)this, dependents);
+		synchronized (this) {
+			checkForCycles((T)this, dependents);
+		}
 	}
 	
 	protected void checkForCycles(T task, Collection<T> deps) {
@@ -245,6 +252,6 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	
 	@Override
 	public String toString() {
-		return "Task<"+body.toString()+">[children:"+childCount+", deps:"+depCount+", state:"+state+"]";
+		return "Task<"+body+">[children:"+childCount+", deps:"+depCount+", state:"+state+"]";
 	}
 }

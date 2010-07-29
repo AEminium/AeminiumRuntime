@@ -203,7 +203,7 @@ public class Factory {
 		database.put(ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup.getName(), ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup);
 
 	
-		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_SingleThreadPoolScheduler_None_ImplicitTask2_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph2.SingleThreadPoolScheduler.None.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.SingleThreadPoolScheduler.None.ImplicitTask2.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
 				SingleThreadPoolScheduler<ImplicitTask2> scheduler = new SingleThreadPoolScheduler<ImplicitTask2>(flags);
@@ -212,16 +212,16 @@ public class Factory {
 				DataGroupFactory<ImplicitTask2> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
 				TaskFactory<ImplicitTask2> taskFactory = ImplicitTask2.createFactory(graph, flags);
 				return new GenericRuntime<ImplicitTask2>(scheduler, 
-															   prioritizer, 
-															   graph,
-															   dgFactory,
-															   taskFactory);
+														 prioritizer, 
+													     graph,
+													     dgFactory,
+													     taskFactory);
 			}
 		};
-		database.put(ImplicitGraph2_SingleThreadPoolScheduler_None_ImplicitTask2_FifoDataGroup.getName(), ImplicitGraph2_SingleThreadPoolScheduler_None_ImplicitTask2_FifoDataGroup);
+		database.put(ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup.getName(), ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 
 		
-		database.put("default", ImplicitGraph2_SingleThreadPoolScheduler_None_ImplicitTask2_FifoDataGroup);
+		database.put("default", ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 		//database.put("default", ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup);
 		//database.put("default", ImplicitGraphNoExtraThread_HybridForkJoinThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);
 		//database.put("default", ImplicitGraphBlockingQueue_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup);

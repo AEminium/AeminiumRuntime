@@ -31,21 +31,26 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 		taskCount.incrementAndGet();
 		T itask = (T)task;
 		
-		if ( itask.getTaskState() != ImplicitTaskState2.UNSCHEDULED) {
-			throw new RuntimeError("Cannot schedule task twice: " + task);
-		}
+		synchronized (itask) {
+			if ( itask.getTaskState() != ImplicitTaskState2.UNSCHEDULED) {
+				throw new RuntimeError("Cannot schedule task twice: " + task);
+			}
 
-		// set prioritizer
-		itask.setPrioritizer(prioritizer);
+			// set prioritizer
+			itask.setPrioritizer(prioritizer);
 
-		// set parent
-		itask.setParent(parent);
-		
-		// update dependency count and eventually schedule 
-		itask.setDependencies(deps);
-		
-		if ( checkForCycles ) {
-			itask.checkForCycles();
+			// set graph
+			itask.setGraph(this);
+			
+			// set parent
+			itask.setParent(parent);
+			
+			// update dependency count and eventually schedule 
+			itask.setDependencies(deps);
+			
+			if ( checkForCycles ) {
+				itask.checkForCycles();
+			}			
 		}
 		
 	}
@@ -68,7 +73,6 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 	@Override
 	public void taskFinished(T task) {
 		task.taskFinished();
-		
 		if ( taskCount.decrementAndGet() == 0 ) {
 			synchronized (this) {
 				this.notifyAll();
@@ -81,7 +85,7 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 		while ( taskCount.get() != 0 ) {
 			synchronized (this) {
 				try {
-					if ( flags.contains(Flags.DEBUG)) {
+					if (flags.contains(Flags.DEBUG)) {
 						this.wait(2000);
 					} else {
 						this.wait();

@@ -17,11 +17,16 @@ public class AtomicTaskWaiting extends BaseTest {
 		rt.init();
 		
 		DataGroup dg = rt.createDataGroup();
-		rt.schedule(createAtomicTask(rt, dg, 110), Runtime.NO_PARENT, Runtime.NO_DEPS);
-		rt.schedule(createAtomicTask(rt, dg, 120), Runtime.NO_PARENT, Runtime.NO_DEPS);
-		rt.schedule(createAtomicTask(rt, dg, 130), Runtime.NO_PARENT, Runtime.NO_DEPS);
-		rt.schedule(createAtomicTask(rt, dg, 140), Runtime.NO_PARENT, Runtime.NO_DEPS);
-		rt.schedule(createAtomicTask(rt, dg, 150), Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t1 = createAtomicTask(rt, dg, 110);
+		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t2 = createAtomicTask(rt, dg, 120);
+		rt.schedule(t2, Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t3 = createAtomicTask(rt, dg, 130);
+		rt.schedule(t3, Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t4 = createAtomicTask(rt, dg, 140);
+		rt.schedule(t4, Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t5 = createAtomicTask(rt, dg, 150);
+		rt.schedule(t5, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
 		rt.shutdown();
 	}

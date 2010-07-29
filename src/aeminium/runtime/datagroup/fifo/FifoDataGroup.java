@@ -15,7 +15,8 @@ import aeminium.runtime.task.RuntimeTask;
 public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {	
 	private boolean locked = false;
 	private List<T> waitQueue = new LinkedList<T>();
-
+	private T owner = null;
+	
 	protected FifoDataGroup(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {
 		super(scheduler, flags);
 	}
@@ -43,6 +44,7 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 				return false;
 			} else {
 				locked = true;
+				owner = task;
 				return true;
 			}
 		}
@@ -52,10 +54,20 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 	public void unlock() {
 		synchronized (this) {
 			locked = false;
+			owner = null;
 			if (!waitQueue.isEmpty()) {
 				T head = waitQueue.remove(0);
 				scheduler.taskResume(head);
 			}
 		}
 	}
+
+	public String toString() {
+		if ( locked == false ) {
+			return "DataGroup[UNLOCKED]";
+		} else {
+			return "DataGroup[LOCKED"+owner+"]";
+		}
+	}
+
 }

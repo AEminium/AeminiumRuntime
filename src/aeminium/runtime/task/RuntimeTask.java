@@ -6,16 +6,13 @@ import java.util.concurrent.Callable;
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;
 import aeminium.runtime.Task;
-import aeminium.runtime.statistics.Statistics;
+import aeminium.runtime.graph.RuntimeGraph;
+import aeminium.runtime.scheduler.RuntimeScheduler;
 
 public interface RuntimeTask extends Task, Callable<Object> {
 	public void taskCompleted();
 	
 	public Collection<Hints> getHints();
-	
-	public void setStatistics(Statistics statistics);
-	
-	public Statistics getStatistics();
 	
 	public Body getBody();
 	
@@ -28,4 +25,8 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	public void setLevel(int level);
 	
 	public int getLevel();
+	
+	public void setScheduler(RuntimeScheduler scheduler);
+	
+	public void setGraph(RuntimeGraph graph);
 }

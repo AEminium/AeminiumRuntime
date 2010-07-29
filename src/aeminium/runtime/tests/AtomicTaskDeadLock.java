@@ -18,8 +18,10 @@ public class AtomicTaskDeadLock  extends BaseTest {
 		DataGroup dg1 = rt.createDataGroup();
 		DataGroup dg2 = rt.createDataGroup();
 		
-		rt.schedule(createAtomicTask(rt, dg1, dg2), Runtime.NO_PARENT, Runtime.NO_DEPS);
-		rt.schedule(createAtomicTask(rt, dg2, dg1), Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t1 = createAtomicTask(rt, dg1, dg2);
+		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
+		Task t2 = createAtomicTask(rt, dg2, dg1);
+		rt.schedule(t2, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
 		rt.shutdown();
 	}
