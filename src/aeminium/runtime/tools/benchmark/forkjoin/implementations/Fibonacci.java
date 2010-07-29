@@ -1,18 +1,18 @@
-package aeminium.runtime.tools.benchmark.forkjoin;
+package aeminium.runtime.tools.benchmark.forkjoin.implementations;
 
 import jsr166y.*;
 
 @SuppressWarnings("serial")
 public
 
-class ForkJoinFibonacciImplementation extends RecursiveAction { 
+class Fibonacci extends RecursiveAction { 
 	public volatile int number;
 	// This value is the one used in Doug Lea's Paper on ForkJoin
-	private int THREASHOLD = 13;
+	private int THREASHOLD = 23;
 	private static int TARGET = 2;
 	
 	
-	public ForkJoinFibonacciImplementation(int n) { number = n; }
+	public Fibonacci(int n) { number = n; }
 
 	private int seqFib(int n) {
 		if (n <= 2) return 1;
@@ -26,8 +26,8 @@ class ForkJoinFibonacciImplementation extends RecursiveAction {
 		else if (n <= THREASHOLD) 
 			number = seqFib(n);
 		else {
-			ForkJoinFibonacciImplementation f1 = new ForkJoinFibonacciImplementation(n - 1);	
-			ForkJoinFibonacciImplementation f2 = new ForkJoinFibonacciImplementation(n - 2);
+			Fibonacci f1 = new Fibonacci(n - 1);	
+			Fibonacci f2 = new Fibonacci(n - 2);
 			invokeAll(f1,f2);
 			number = f1.number + f2.number; // compose
 		}
@@ -35,7 +35,7 @@ class ForkJoinFibonacciImplementation extends RecursiveAction {
 	
 	public static void main(String[] args) {
 		ForkJoinPool pool = new ForkJoinPool();
-		ForkJoinFibonacciImplementation t = new ForkJoinFibonacciImplementation(TARGET);
+		Fibonacci t = new Fibonacci(TARGET);
 		pool.invoke(t);
 		System.out.println("Final result = " + t.number);
 	}

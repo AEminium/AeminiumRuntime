@@ -1,9 +1,6 @@
-
-
 package aeminium.runtime.examples.fjtests;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import aeminium.runtime.Body;
@@ -19,11 +16,10 @@ abstract class Result {
 	}
 }
 
-public class AeminiumFib {
+public class AeminiumFibonacci {
 
-	private static final int MAX_CALC = 47;
-	private static final int THRESHOLD = 13;
-	
+	private static final int MAX_CALC = 46;
+	private static final int THRESHOLD = 23;
 
 	public static Body createFibBody(final Runtime rt, final int n) {
 		return new Body() {
@@ -87,7 +83,7 @@ public class AeminiumFib {
 				Task print = rt.createBlockingTask(new Body() {
 					@Override
 					public void execute(Task p) {
-						System.out.println("Final result:" + calc.getResult());
+						System.out.println("Final result:" + ((Result) calc.getResult()).result());
 					}
 					
 					@Override

@@ -1,5 +1,6 @@
-package aeminium.runtime.tools.benchmark.forkjoin;
+package aeminium.runtime.tools.benchmark.forkjoin.fibonacci;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 
 import jsr166y.ForkJoinPool;
@@ -7,6 +8,7 @@ import jsr166y.ForkJoinPool;
 
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.tools.benchmark.Reporter;
+import aeminium.runtime.tools.benchmark.forkjoin.implementations.Fibonacci;
 
 public class ForkJoinFibonacciBenchmark extends FibonacciBenchmark {
 
@@ -14,7 +16,7 @@ public class ForkJoinFibonacciBenchmark extends FibonacciBenchmark {
 		ForkJoinPool pool = new ForkJoinPool();
 		long start = System.nanoTime();
 		
-		ForkJoinFibonacciImplementation task = new ForkJoinFibonacciImplementation(n);
+		Fibonacci task = new Fibonacci(n);
 		pool.invoke(task);
 
 		long end = System.nanoTime();
@@ -27,13 +29,11 @@ public class ForkJoinFibonacciBenchmark extends FibonacciBenchmark {
 	@Override
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		String reportName = "ForkJoin Version";
-		reporter.startBenchmark(reportName);
-		reporter.reportLn("Values in nanoseconds.");
-		runTest(reporter, MAX_CALC);
-		/*for (int i = 1; i <= MAX_CALC; i++) {
-			runTest(reporter, i);	
-		}*/
-		reporter.stopBenchmark(reportName);
+		for (String temperature : Arrays.asList("Cold", "Warm")) {
+			reporter.startBenchmark(reportName + " " + temperature);
+			runTest(reporter, MAX_CALC);
+			reporter.stopBenchmark(reportName);
+		}
 	}
 
 }

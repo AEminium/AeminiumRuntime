@@ -1,4 +1,4 @@
-package aeminium.runtime.tools.benchmark.forkjoin;
+package aeminium.runtime.tools.benchmark.forkjoin.fibonacci;
 
 import java.util.EnumSet;
 
@@ -10,7 +10,7 @@ public abstract class FibonacciBenchmark implements Benchmark{
 	
 	
 	// This value is the one used in Doug Lea's Paper on ForkJoin
-	protected static int MAX_CALC = 40;
+	protected static int MAX_CALC = 46;// Integer.parseInt(System.getenv().get("FIB"));
 
 	@Override
 	public String getName() {

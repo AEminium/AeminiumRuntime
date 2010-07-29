@@ -1,4 +1,4 @@
-package aeminium.runtime.tools.benchmark.forkjoin;
+package aeminium.runtime.tools.benchmark.forkjoin.fibonacci;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
-import aeminium.runtime.examples.fjtests.AeminiumFib;
+import aeminium.runtime.examples.fjtests.AeminiumFibonacci;
 import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.implementations.Factory.RuntimeConfiguration;
@@ -18,7 +18,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 			Reporter reporter, int n) {
 		long start = System.nanoTime();
 		rt.init();
-		Task t1 = rt.createNonBlockingTask(AeminiumFib.createFibBody(rt, n),
+		Task t1 = rt.createNonBlockingTask(AeminiumFibonacci.createFibBody(rt, n),
 				Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		rt.shutdown();
@@ -35,18 +35,14 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
 		Map<String, RuntimeConfiguration> impls = Factory
 				.getImplementations();
-		//for (String runtimeName : impls.keySet()) {
-		for (String runtimeName :  Arrays.asList("default") ) {
+		for (String runtimeName : impls.keySet()) {
 			Runtime rt = impls.get(runtimeName).instanciate(flags);
 			for (String temperature : Arrays.asList("Cold", "Warm")) {
 				String reportName = String.format("Aeminium %s %s %s", runtimeName,
 						flags, temperature);
 				reporter.startBenchmark(reportName);
-				reporter.reportLn("Values in nanoseconds.");
 				runTest(rt, runtimeName, flags, reporter, MAX_CALC);
-				/*for (int i = 1; i <= MAX_CALC; i++) {
-					runTest(rt, runtimeName, flags, reporter, i);
-				}*/
+
 				reporter.stopBenchmark(reportName);
 			}
 		}
