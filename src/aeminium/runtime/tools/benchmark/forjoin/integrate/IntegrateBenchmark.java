@@ -1,4 +1,4 @@
-package aenium.runtime.tools.benchmark.forjoin.integrate;
+package aeminium.runtime.tools.benchmark.forjoin.integrate;
 
 import java.util.EnumSet;
 
