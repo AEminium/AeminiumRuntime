@@ -249,6 +249,8 @@ public final class Integrate {
              double alr = al + ar;
              if (Math.abs(alr - a) <= errorTolerance)
                  return alr;
+             if (Math.abs(alr - a) <= 10)
+            	 return recEval(c, r, fc, fr, ar) + recEval(l, c, fl, fc, al);
              DQuad q = null;
              if (getSurplusQueuedTaskCount() <= 3)
                  (q = new DQuad(l, c, al)).fork();

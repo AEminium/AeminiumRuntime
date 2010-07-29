@@ -21,6 +21,6 @@ public class IntegrateBenchmarkExecutor extends BenchmarkExecutor {
 
 	@Override
 	public String getVersion() {
-		return "Fibonacci Test (Values in nanoseconds.)";
+		return "Integrate Test (Values in nanoseconds.)";
 	}
 }
