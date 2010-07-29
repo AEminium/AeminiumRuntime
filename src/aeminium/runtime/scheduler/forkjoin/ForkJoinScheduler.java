@@ -1,5 +1,6 @@
 package aeminium.runtime.scheduler.forkjoin;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.Callable;
 
@@ -24,18 +25,18 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
         pool.setAsyncMode(true);
     }
     
-	@Override
-	public void scheduleTasks(T... tasks) {
-		if ( tasks.length == 1 ) {
-			pool.execute(ForkJoinTask.adapt((Callable)tasks[0]));
-		} else {
-			for ( int i = 0 ; i < tasks.length ; i++ ) {
-				pool.execute(ForkJoinTask.adapt((Callable)tasks[i]));
-			}
-		}
-		
-	}
+    @Override
+    public void scheduleTasks(Collection<T> tasks) {
+    	for ( T t : tasks ) {
+    		scheduleTask(t);
+    	}
+    }
 	
+    @Override
+    public void scheduleTask(T task) {
+    	pool.execute(ForkJoinTask.adapt((Callable)task));
+    }
+    
 	public void shutdown() {
 		if ( pool != null ) {
 			pool.shutdown();

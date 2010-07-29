@@ -23,6 +23,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	protected final EnumSet<Flags> flags;
 	protected boolean hasRun = false;
 	protected static final Object UNSET = new Object();
+	protected int level = 0;
 	
 	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		this.body = body;
@@ -102,6 +103,14 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		} else {
 			return data.get(key);
 		}
+	}
+	
+	public void setLevel(int level) {
+		this.level = level;
+	}
+	
+	public int getLevel() {
+		return this.level;
 	}
 	
 	@Override

@@ -18,7 +18,6 @@ public class ImplicitAtomicTask2<T extends ImplicitTask2> extends ImplicitTask2<
 		this.datagroup = datagroup;
 	}
 
-	
 	@Override
 	public Object call() throws Exception {
 		if ( datagroup.trylock(this) ) {

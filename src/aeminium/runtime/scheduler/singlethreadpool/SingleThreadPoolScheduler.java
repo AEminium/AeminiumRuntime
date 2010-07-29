@@ -1,6 +1,6 @@
 package aeminium.runtime.scheduler.singlethreadpool;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,17 +17,24 @@ public class SingleThreadPoolScheduler<T extends RuntimeTask> extends AbstractSc
 	}
 
 	@Override
+	public int getMaxParallelism() {
+		return (int)(super.getMaxParallelism() * 1);
+	}
+	
+	@Override
 	public void init() {
-		execService = Executors.newFixedThreadPool((Runtime.getRuntime().availableProcessors()));
+		execService = Executors.newFixedThreadPool(getMaxParallelism());
 	}
 
 	@Override
-	public void scheduleTasks(T... tasks) {
-		try {
-			execService.invokeAll(Arrays.asList(tasks));
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	public void scheduleTasks(Collection<T> tasks) {
+		for ( T t : tasks ) {
+			scheduleTask(t);
 		}
+	}
+	
+	public void scheduleTask(T task) {
+		execService.submit(task);
 	}
 
 	@Override

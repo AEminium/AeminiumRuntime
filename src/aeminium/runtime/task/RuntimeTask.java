@@ -24,4 +24,8 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	public Object getData(String key);
 	
 	public TaskDescription getDescription();
+	
+	public void setLevel(int level);
+	
+	public int getLevel();
 }

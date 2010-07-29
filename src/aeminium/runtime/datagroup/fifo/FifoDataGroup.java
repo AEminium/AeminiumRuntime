@@ -39,6 +39,7 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 		synchronized (this) {
 			if ( locked ) {
 				waitQueue.add(task);
+				scheduler.taskPaused(task);
 				return false;
 			} else {
 				locked = true;
@@ -53,7 +54,7 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 			locked = false;
 			if (!waitQueue.isEmpty()) {
 				T head = waitQueue.remove(0);
-				scheduler.scheduleTasks(head);
+				scheduler.taskResume(head);
 			}
 		}
 	}

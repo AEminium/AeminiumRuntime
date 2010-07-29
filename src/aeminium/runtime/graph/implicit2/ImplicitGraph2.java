@@ -25,8 +25,6 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 			checkForCycles = false;
 		}
 	}
-
-
 	
 	@Override
 	public void addTask(T task, Task parent, Collection<T> deps) {
@@ -78,7 +76,6 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 		}
 	}
 	
-
 	@Override
 	public void waitToEmpty() {
 		while ( taskCount.get() != 0 ) {

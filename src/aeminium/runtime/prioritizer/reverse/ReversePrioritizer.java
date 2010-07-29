@@ -1,6 +1,8 @@
 package aeminium.runtime.prioritizer.reverse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -23,14 +25,21 @@ public class ReversePrioritizer<T extends RuntimeTask> extends AbstractPrioritiz
 	}
 
 	@Override
-	public void scheduleTasks(T... tasks) {
-		List<T> newOrder = Arrays.asList(tasks);
+	public void scheduleTasks(Collection<T> tasks) {
+		List<T> newOrder = new ArrayList<T>(tasks);
 		Collections.reverse(newOrder);
-		scheduler.scheduleTasks((T[])newOrder.toArray(rta));
+		scheduler.scheduleTasks(newOrder);
 	}
 
 	@Override
+	public void scheduleTask(T task) {
+		scheduler.scheduleTask(task);		
+	}
+
+	
+	@Override
 	public void shutdown() {
 	}
+
 
 }

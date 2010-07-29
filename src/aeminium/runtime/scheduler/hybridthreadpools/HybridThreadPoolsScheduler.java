@@ -1,5 +1,6 @@
 package aeminium.runtime.scheduler.hybridthreadpools;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,9 +15,7 @@ import aeminium.runtime.task.RuntimeTask;
 public class HybridThreadPoolsScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements RuntimeScheduler<T>, RuntimePrioritizer<T> {
 	private ExecutorService blockingService;
 	private ExecutorService nonblockingService; 
-	private int taskCount = 0;
-	
-	
+
 	public HybridThreadPoolsScheduler(EnumSet<Flags> flags) {
 		super(flags);
 	}
@@ -27,14 +26,15 @@ public class HybridThreadPoolsScheduler<T extends RuntimeTask> extends AbstractS
 	}
 	
 	@Override
-	public void scheduleTasks(T ... tasks) {
-		for ( int i = 0; i < tasks.length; i++ ) {
-			scheduleTask(tasks[i]);
-			taskCount++;
+	public void scheduleTasks(Collection<T> tasks) {
+		for ( T t : tasks ) {
+			scheduleTask(t);
 		}
 	}
 
-	protected void scheduleTask(T task) {
+
+	@Override
+	public void scheduleTask(T task) {
 		try {
 			if ( task instanceof NonBlockingTask ) {
 				nonblockingService.submit(task);

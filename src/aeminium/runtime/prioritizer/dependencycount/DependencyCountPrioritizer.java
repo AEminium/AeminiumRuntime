@@ -1,6 +1,8 @@
 package aeminium.runtime.prioritizer.dependencycount;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 
@@ -20,15 +22,19 @@ public class DependencyCountPrioritizer<T extends RuntimeTask> extends AbstractP
 	}
 
 	@Override
-	public void scheduleTasks(T... tasks) {
-		Arrays.sort(tasks, new Comparator<T>() {
+	public void scheduleTasks(Collection<T> tasks) {
+		Collections.sort(new ArrayList(tasks), new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {
 				return (int)(o1.getDescription().getDependentTaskCount() - o2.getDescription().getDependentTaskCount());
 			}
 		});
 		scheduler.scheduleTasks(tasks);
-		
+	}
+	
+	@Override
+	public void scheduleTask(T task) {
+		scheduler.scheduleTask(task);
 	}
 
 	@Override

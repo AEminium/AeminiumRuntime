@@ -126,7 +126,7 @@ public class ImplicitGraphInternalThread<T extends ImplicitTask> extends Abstrac
 			if ( task.getDependencies() == Runtime.NO_DEPS ) {
 				running.add(task);
 				task.setTaskState(ImplicitTaskState.RUNNING);
-				prioritizer.scheduleTasks(task);
+				prioritizer.scheduleTask(task);
 			} else {
 				List<Task> doneTasks = new ArrayList<Task>();
 				for ( Task t : task.getDependencies() ) {
@@ -146,7 +146,7 @@ public class ImplicitGraphInternalThread<T extends ImplicitTask> extends Abstrac
 				} else {
 					running.add(task);
 					task.setTaskState(ImplicitTaskState.RUNNING);
-					prioritizer.scheduleTasks(task);
+					prioritizer.scheduleTask(task);
 				}
 			}
 		}
@@ -244,7 +244,7 @@ public class ImplicitGraphInternalThread<T extends ImplicitTask> extends Abstrac
 			}
 
 			// trigger prioritize in case he was caching some tasks
-			prioritizer.scheduleTasks((T[]) readyTasks.toArray(ita));
+			prioritizer.scheduleTasks(readyTasks);
 
 			// wake up waiting threads 
 			if (waitingForChildren.isEmpty() && waitingForDeps.isEmpty() && running.isEmpty()  && pendingRequest.isEmpty() ) {

@@ -1,5 +1,6 @@
 package aeminium.runtime.scheduler.linear;
 
+import java.util.Collection;
 import java.util.EnumSet;
 
 import aeminium.runtime.implementations.Flags;
@@ -18,13 +19,22 @@ public class LinearScheduler<T extends RuntimeTask> extends AbstractScheduler<T>
 	}
 	
 	@Override
-	public void scheduleTasks(T... tasks) {
-		for ( int i = 0 ; i < tasks.length ; i++ ) {
+	public void scheduleTasks(Collection<T> tasks) {
+		for ( T t : tasks ) {
 			try {
-				tasks[i].call();
+				t.call();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	@Override
+	public void scheduleTask(T task) {
+		try {
+			task.call();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

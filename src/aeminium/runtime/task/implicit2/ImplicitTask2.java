@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,8 +39,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	protected final boolean debug;
 	protected List<T> children;
 	
-	public ImplicitTask2(RuntimeGraph<T> graph, Body body,
-			Collection<Hints> hints, EnumSet<Flags> flags) {
+	public ImplicitTask2(RuntimeGraph<T> graph, Body body,	Collection<Hints> hints, EnumSet<Flags> flags) {
 		super(graph, body, hints, flags);
 		if ( flags.contains(Flags.DEBUG)) {
 			debug = true;
@@ -50,6 +50,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 
 	public static TaskFactory<ImplicitTask2> createFactory(final RuntimeGraph<ImplicitTask2> graph, EnumSet<Flags> flags) {
 		return new AbstractTaskFactory<ImplicitTask2>(flags) {
+			
 			@Override 
 			public void init() {}
 			@Override 
@@ -73,6 +74,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		};
 	}
 	
+
 	public void lock() {
 		lock.lock();
 	}
@@ -83,6 +85,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	
 	public void setParent(Task parent) {
 		if ( parent != Runtime.NO_PARENT ) {
+			setLevel(((T)parent).getLevel()+1);
 			this.parent = (T) parent;
 			this.parent.attachChild(this);
 		}
@@ -169,7 +172,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		if ( !state.compareAndSet(ImplicitTaskState2.WAITING_FOR_DEPENDENCIES, ImplicitTaskState2.RUNNING)) {
 			return;
 		} 
-		prioritizer.scheduleTasks((T)this);
+		prioritizer.scheduleTask((T)this);
 	}
 	
 	public boolean hasDependecies() {
@@ -204,6 +207,10 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 				t.decDepencenyCount();
 			}
 		}
+		
+		this.body = null;
+		this.parent = null;
+		
 		lock.unlock();
 	}
 	

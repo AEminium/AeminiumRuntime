@@ -71,7 +71,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
  				if ( task.getDependencies() == aeminium.runtime.Runtime.NO_DEPS ) {
 					running.add(task);
 					task.setTaskState(ImplicitTaskState.RUNNING);
-					prioritizer.scheduleTasks(task);
+					prioritizer.scheduleTask(task);
 				} else {
 					List<Task> doneTasks = new ArrayList<Task>();
 					for ( Task t : task.getDependencies() ) {
@@ -91,7 +91,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 					} else {
 						running.add(task);
 						task.setTaskState(ImplicitTaskState.RUNNING);
-						prioritizer.scheduleTasks(task);
+						prioritizer.scheduleTask(task);
 					}
 				}
 			}
@@ -171,7 +171,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 				}
 
 				// trigger prioritize in case he was caching some tasks
-				prioritizer.scheduleTasks((T[]) readyTasks.toArray(ita));
+				prioritizer.scheduleTasks(readyTasks);
 				
 				// wake up waiting threads 
 				if (waitingForChildren.isEmpty() && waitingForDeps.isEmpty() && running.isEmpty()) {

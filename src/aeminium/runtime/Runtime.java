@@ -23,13 +23,17 @@ public interface Runtime {
 	};
     public final static Task NO_PARENT = new Task() {
 		@Override
+		public Body getBody() {
+			throw new RuntimeError("Cannot get body fom NO_PARENT");
+		}
+		@Override
 		public void setResult(Object value) {
-			
+			throw new RuntimeError("Cannot set result on NO_PARENT");
 		}
 
 		@Override
 		public Object getResult() {
-			return null;
+			throw new RuntimeError("Cannot get result from NO_PARENT");
 		}
 		@Override
 		public String toString() {

@@ -1,5 +1,6 @@
 package aeminium.runtime.scheduler.hybridforkjointhreadpool;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -29,16 +30,20 @@ public class HybridForkJoinThreadPoolScheduler<T extends RuntimeTask> extends Ab
 	}
 	
 	@Override
-	public void scheduleTasks(T... tasks) {
-		for ( int i = 0 ; i < tasks.length ; i++ ) {
-			if ( tasks[i] instanceof NonBlockingTask ) {
-				fjpool.execute(ForkJoinTask.adapt((Callable)tasks[i]));
-			} else {
-				// IO and blocking guess to thread pool
-				blockingService.submit(tasks[i]);
-			}
+	public void scheduleTasks(Collection<T> tasks) {
+		for (T t : tasks) {
+			scheduleTask(t);
 		}
-		
+	}
+	
+	@Override
+	public void scheduleTask(T task) {
+		if ( task instanceof NonBlockingTask ) {
+			fjpool.execute(ForkJoinTask.adapt((Callable)task));
+		} else {
+			// IO and blocking guess to thread pool
+			blockingService.submit(task);
+		}	
 	}
 
 	@Override

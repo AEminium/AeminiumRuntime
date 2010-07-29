@@ -1,6 +1,9 @@
 package aeminium.runtime.prioritizer.blockingfirst;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 
@@ -21,8 +24,8 @@ public class BlockingFirstPrioritizer<T extends RuntimeTask> extends AbstractPri
 	}
 
 	@Override
-	public void scheduleTasks(T... tasks) {
-		Arrays.sort(tasks, new Comparator<T>() {
+	public void scheduleTasks(Collection<T> tasks) {
+		Collections.sort(new ArrayList<T>(tasks), new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {
 				if ( o1 instanceof NonBlockingTask ) {
@@ -42,6 +45,11 @@ public class BlockingFirstPrioritizer<T extends RuntimeTask> extends AbstractPri
 			}
 		});
 		scheduler.scheduleTasks(tasks);
+	}
+	
+	@Override
+	public void scheduleTask(T task) {
+		scheduler.scheduleTask(task);
 	}
 
 	@Override

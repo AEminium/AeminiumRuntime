@@ -1,6 +1,7 @@
 package aeminium.runtime.prioritizer;
 
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.RuntimeScheduler;
@@ -14,4 +15,14 @@ public abstract class AbstractPrioritizer<T extends RuntimeTask> implements Runt
 		this.scheduler = scheduler;
 		this.flags = flags;
 	}
+	
+	@Override 
+	public void taskFinished(T task) {
+	}
+	
+	@Override 
+	public void taskPaused(T task) {
+		
+	}
+	
 }
