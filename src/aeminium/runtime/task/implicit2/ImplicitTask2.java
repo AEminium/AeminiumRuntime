@@ -203,19 +203,19 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		// BEFORE we trigger parent/dependents 
 		if ( body instanceof ResultBody<?> ) {
 			((ResultBody) body).completed();
-		
-		
+		}
+
 		if ( parent != null) {
 			parent.detachChild(this);
 		}
-		
+
 		if ( dependents != null ) {
 			for ( ImplicitTask2<T> t : dependents) {
 				t.decDepencenyCount();
 			}
 		}
-		}
-		
+
+
 		// cleanup
 		if ( dependents != null ) {
 			this.dependents.clear();
@@ -228,7 +228,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 			this.children = null;
 		}
 	}
-	
+
 	public void setPrioritizer(RuntimePrioritizer<T> prioritizer) {
 		synchronized (this) {
 			this.prioritizer = prioritizer;			
