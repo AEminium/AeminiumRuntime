@@ -10,7 +10,7 @@ import aeminium.runtime.implementations.Flags;
 
 public class ChildTaskBenchmark implements Benchmark {
 	private final String name = "ChildTaskBenchmark";
-	private int[] levels = {1, 2, 3, 4, 5, 6, 7, 8};
+	private int[] levels = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	private int fanout = 4;
 	
 	@Override
@@ -31,7 +31,7 @@ public class ChildTaskBenchmark implements Benchmark {
 			long start = System.nanoTime();
 			rt.init();
 			
-			Task root = creatTaskWithChildren(rt, level, fanout);
+			Task root = creatTaskWithChildren(rt, level, level, fanout);
 			rt.schedule(root, Runtime.NO_PARENT, Runtime.NO_DEPS);
 			
 			rt.shutdown();		
@@ -42,14 +42,21 @@ public class ChildTaskBenchmark implements Benchmark {
 
 	}
 
-	public Task creatTaskWithChildren(final Runtime rt, final int level, final int fanout) {
+	public Task creatTaskWithChildren(final Runtime rt, final int level, final int MAX_LEVEL, final int fanout) {
 		return rt.createNonBlockingTask(new Body() {
 			
 			@Override
 			public void execute(Task current) {
+//				StringBuilder sb = new StringBuilder();
+//				for ( int i =  0; i < (MAX_LEVEL - level) ; i++) {
+//					sb.append(" ");
+//				}
+//				sb.append("Task@level"+level);
+//				System.out.println(sb.toString());
+				
 				if ( 0 < level ) {
 					for ( int i = 0; i < fanout; i++ ) {
-						Task childTask = creatTaskWithChildren(rt, level-1, fanout);
+						Task childTask = creatTaskWithChildren(rt, level-1, MAX_LEVEL, fanout);
 						rt.schedule(childTask, current, Runtime.NO_DEPS);
 					}
 				}

@@ -27,7 +27,7 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 	private int childCount = 0;
 	private Collection<Task> dependents = new ArrayList<Task>();
 
-	public static TaskFactory<ImplicitTask> createFactory(final RuntimeGraph<ImplicitTask> graph, EnumSet<Flags> flags) {
+	public static TaskFactory<ImplicitTask> createFactory(EnumSet<Flags> flags) {
 		return new AbstractTaskFactory<ImplicitTask>(flags) {
 			@Override 
 			public void init() {}
@@ -37,23 +37,23 @@ public abstract class ImplicitTask extends AbstractTask<ImplicitTask> {
 			@SuppressWarnings("unchecked")
 			@Override
 			public RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
-				return new ImplicitAtomicTask((RuntimeGraph<ImplicitTask>) graph, body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
+				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
 			}
 
 			@Override
 			public BlockingTask createBockingTask(Body body, Collection<Hints> hints) {
-				return new ImplicitBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints, flags);
+				return new ImplicitBlockingTask(body, hints, flags);
 			}
 
 			@Override
 			public NonBlockingTask createNonBockingTask(Body body, Collection<Hints> hints) {
-				return  new ImplicitNonBlockingTask((RuntimeGraph<ImplicitTask>) graph, body, hints, flags);
+				return  new ImplicitNonBlockingTask(body, hints, flags);
 			}
 		};
 	}
 	
-	public ImplicitTask(RuntimeGraph<ImplicitTask> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
-		super(graph, body, hints, flags);
+	public ImplicitTask(Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
+		super(body, hints, flags);
 	}
 
 	public void setDependencies(Collection<Task> dependencies) {

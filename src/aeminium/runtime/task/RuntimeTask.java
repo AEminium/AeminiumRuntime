@@ -22,8 +22,6 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	
 	public TaskDescription getDescription();
 	
-	public void setLevel(int level);
-	
 	public int getLevel();
 	
 	public void setScheduler(RuntimeScheduler scheduler);

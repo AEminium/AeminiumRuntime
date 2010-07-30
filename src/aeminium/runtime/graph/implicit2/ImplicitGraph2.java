@@ -1,5 +1,9 @@
 package aeminium.runtime.graph.implicit2;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,7 +34,7 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 	public void addTask(T task, Task parent, Collection<T> deps) {
 		taskCount.incrementAndGet();
 		T itask = (T)task;
-		
+				
 		synchronized (itask) {
 			if ( itask.getTaskState() != ImplicitTaskState2.UNSCHEDULED) {
 				throw new RuntimeError("Cannot schedule task twice: " + task);
@@ -52,7 +56,8 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 				itask.checkForCycles();
 			}			
 		}
-		
+
+	
 	}
 
 	@Override
@@ -63,11 +68,10 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 
 	@Override
 	public void init() {
-		
 	}
 
 	@Override
-	public void shutdown() {		
+	public void shutdown() {
 	}
 
 	@Override
@@ -80,13 +84,14 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 		}
 	}
 	
+
 	@Override
 	public void waitToEmpty() {
 		while ( taskCount.get() != 0 ) {
 			synchronized (this) {
 				try {
 					if (flags.contains(Flags.DEBUG)) {
-						this.wait(2000);
+						this.wait(1000);
 					} else {
 						this.wait();
 					}

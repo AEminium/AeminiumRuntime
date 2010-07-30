@@ -14,8 +14,8 @@ import aeminium.runtime.task.RuntimeAtomicTask;
 public class ImplicitAtomicTask2<T extends ImplicitTask2> extends ImplicitTask2<T> implements RuntimeAtomicTask {
 	protected RuntimeDataGroup datagroup;
 	
-	public ImplicitAtomicTask2(RuntimeGraph<T> graph, Body body, RuntimeDataGroup datagroup,	Collection<Hints> hints, EnumSet<Flags> flags) {
-		super(graph, body, hints, flags);
+	public ImplicitAtomicTask2(Body body, RuntimeDataGroup datagroup,	Collection<Hints> hints, EnumSet<Flags> flags) {
+		super(body, hints, flags);
 		this.datagroup = datagroup;
 	}
 

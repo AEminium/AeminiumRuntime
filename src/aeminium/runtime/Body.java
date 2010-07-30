@@ -9,5 +9,5 @@ public interface Body {
 	 * 
 	 * @param current Reference to the associated task object.
 	 */
-    public void execute(final Task current);
+    public void execute(Task current);
 }

@@ -11,7 +11,7 @@ import aeminium.runtime.task.RuntimeNonBlockingTask;
 
 public class ImplicitNonBlockingTask extends ImplicitTask implements RuntimeNonBlockingTask {
 
-	public ImplicitNonBlockingTask(RuntimeGraph<ImplicitTask> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
-		super(graph, body, hints, flags);
+	public ImplicitNonBlockingTask(Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
+		super(body, hints, flags);
 	}
 }

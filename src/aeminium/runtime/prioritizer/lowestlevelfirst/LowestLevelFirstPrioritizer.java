@@ -15,7 +15,6 @@ import aeminium.runtime.task.implicit2.ImplicitTask2;
 
 public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends AbstractPrioritizer<T> {
 	protected PriorityQueue<T> waitingQueue = null;
-	protected volatile int maxQSize = 0;
 	
 	public LowestLevelFirstPrioritizer(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {
 		super(scheduler, flags);
@@ -34,19 +33,12 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends Abstra
 
 	@Override
 	public void shutdown() {
-		//System.out.println("MAX priority queue size = " + maxQSize);
 	}
 	
 	@Override
 	public void scheduleTasks(Collection<T> tasks) {
 		synchronized (this) {
-			for ( T t : tasks ) {
-				if ( waitingQueue.contains(t) ) {
-					throw new RuntimeError("Cannot schedule the same task twice.");
-				}
-			}
 			waitingQueue.addAll(tasks);
-			maxQSize = Math.max(maxQSize, waitingQueue.size());
 			schedule();
 		}
 	}
@@ -54,11 +46,7 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends Abstra
 	@Override
 	public void scheduleTask(T task) {
 		synchronized (this) {
-			if ( waitingQueue.contains(task) ) {
-				throw new RuntimeError("Cannot schedule the same task twice.");
-			}
 			waitingQueue.add(task);
-			maxQSize = Math.max(maxQSize, waitingQueue.size());
 			schedule();
 		}
 	}
@@ -66,9 +54,7 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends Abstra
 	protected void schedule() {
 		synchronized (this) {
 			int count  = scheduler.getMaxParallelism() - scheduler.getRunningTasks();
-			if ( count == 0 ) {
-				count = 0;
-			}
+
 			if ( count > 0 && !waitingQueue.isEmpty() ) {
 				count = Math.min(count, waitingQueue.size());
 

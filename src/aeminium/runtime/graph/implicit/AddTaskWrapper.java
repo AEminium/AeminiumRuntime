@@ -13,7 +13,7 @@ public class AddTaskWrapper<T extends RuntimeTask> extends ImplicitTask {
 	private final Collection<T> deps;
 	
 	public AddTaskWrapper(T task, Task parent, Collection<T> deps2) {
-		super(null, null, Runtime.NO_HINTS, null);
+		super(null, Runtime.NO_HINTS, null);
 		this.task = task;
 		this.parent = parent;
 		this.deps = deps2;

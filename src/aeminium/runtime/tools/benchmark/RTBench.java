@@ -8,8 +8,8 @@ public class RTBench {
 //		new TaskCreationBenchmark(),
 //		new IndependentTaskGraph(),
 //		new LinearTaskGraph(),
-		new FixedParallelMaxDependencies(),
-		new ChildTaskBenchmark(),
+//		new FixedParallelMaxDependencies(),
+//		new ChildTaskBenchmark(),
 		new FibonacciBenchmark()
 	};
 	

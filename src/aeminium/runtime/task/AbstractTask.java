@@ -20,7 +20,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	protected RuntimeGraph<T> graph;
 	protected Map<String, Object> data;
 	protected final EnumSet<Flags> flags;
-	protected boolean hasRun = false;
 	protected static final Object UNSET = new Object() {
 		@Override
 		public String toString() {
@@ -30,9 +29,8 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	protected int level = 0;
 	protected RuntimeScheduler<T> scheduler;
 	
-	public AbstractTask(RuntimeGraph<T> graph, Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
+	public AbstractTask(Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		this.body = body;
-		this.graph = graph;
 		this.hints = hints;
 		this.flags = flags;
 	}
@@ -59,7 +57,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		} finally {
 			graph.taskFinished((T) this);
 			scheduler.taskFinished((T) this);
-			hasRun = true;
 		}
 		return null;		
 	}
@@ -82,10 +79,10 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public Object getResult() {
+		while (result == UNSET ) ;
 		if ( result == UNSET ) {
 			throw new RuntimeError("Result has either not been set or already retrieved");
 		}
-		//while ( result == null ) ;
 		Object value = result;
 		result = UNSET;
 		return value;
@@ -98,21 +95,25 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 
 	@Override
 	public void setData(String key, Object value) {
-		if ( data == null) {
-			this.data = new HashMap<String, Object>();
+		synchronized (this) {
+			if ( data == null) {
+				this.data = new HashMap<String, Object>();
+			}
+			this.data.put(key, value);
 		}
-		this.data.put(key, value);
 	}
 	
 	public Object getData(String key) {
-		if (data == null) {
-			return null;
-		} else {
-			return data.get(key);
+		synchronized (this) {
+			if (data == null) {
+				return null;
+			} else {
+				return data.get(key);
+			}
 		}
 	}
 	
-	public void setLevel(int level) {
+	protected void setLevel(int level) {
 		this.level = level;
 	}
 	
