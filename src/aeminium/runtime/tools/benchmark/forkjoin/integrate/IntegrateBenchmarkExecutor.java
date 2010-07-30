@@ -1,4 +1,4 @@
-package aeminium.runtime.tools.benchmark.forjoin.integrate;
+package aeminium.runtime.tools.benchmark.forkjoin.integrate;
 
 import aeminium.runtime.tools.benchmark.Benchmark;
 import aeminium.runtime.tools.benchmark.forkjoin.BenchmarkExecutor;
