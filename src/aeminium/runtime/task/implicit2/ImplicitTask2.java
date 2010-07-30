@@ -199,6 +199,12 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		assert( state == ImplicitTaskState2.WAITING_FOR_CHILDREN );
 		state = ImplicitTaskState2.COMPLETED;	
 
+		// callback to ResultBody to compute final result 
+		// BEFORE we trigger parent/dependents 
+		if ( body instanceof ResultBody<?> ) {
+			((ResultBody) body).completed();
+		
+		
 		if ( parent != null) {
 			parent.detachChild(this);
 		}
@@ -208,9 +214,6 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 				t.decDepencenyCount();
 			}
 		}
-		
-		if ( body instanceof ResultBody<?> ) {
-			((ResultBody) body).completed();
 		}
 		
 		// cleanup
