@@ -11,9 +11,9 @@ import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.AbstractPrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
-import aeminium.runtime.task.implicit2.ImplicitTask2;
+import aeminium.runtime.task.implicit.ImplicitTask;
 
-public class LowestLevelFirstPrioritizer<T extends ImplicitTask2> extends AbstractPrioritizer<T> {
+public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends AbstractPrioritizer<T> {
 	protected PriorityQueue<T> waitingQueue = null;
 	
 	public LowestLevelFirstPrioritizer(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {

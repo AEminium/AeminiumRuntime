@@ -1,9 +1,5 @@
-package aeminium.runtime.graph.implicit2;
+package aeminium.runtime.graph.implicit;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,14 +10,14 @@ import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.TaskDescription;
-import aeminium.runtime.task.implicit2.ImplicitTask2;
-import aeminium.runtime.task.implicit2.ImplicitTaskState2;
+import aeminium.runtime.task.implicit.ImplicitTask;
+import aeminium.runtime.task.implicit.ImplicitTaskState;
 
-public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
+public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	protected AtomicInteger taskCount = new AtomicInteger(0);
 	protected final boolean checkForCycles;
 	
-	public ImplicitGraph2(RuntimePrioritizer<T> prioritizer,  EnumSet<Flags> flags) {
+	public ImplicitGraph(RuntimePrioritizer<T> prioritizer,  EnumSet<Flags> flags) {
 		super(prioritizer, flags);
 		if ( flags.contains(Flags.CHECK_FOR_CYCLES)) {
 			checkForCycles = true;
@@ -36,7 +32,7 @@ public class ImplicitGraph2<T extends ImplicitTask2> extends AbstractGraph<T> {
 		T itask = (T)task;
 				
 		synchronized (itask) {
-			if ( itask.getTaskState() != ImplicitTaskState2.UNSCHEDULED) {
+			if ( itask.getTaskState() != ImplicitTaskState.UNSCHEDULED) {
 				throw new RuntimeError("Cannot schedule task twice: " + task);
 			}
 

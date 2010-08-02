@@ -8,14 +8,14 @@ import java.util.Map;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.datagroup.DataGroupFactory;
 import aeminium.runtime.datagroup.fifo.FifoDataGroup;
-import aeminium.runtime.graph.implicit2.ImplicitGraph2;
+import aeminium.runtime.graph.implicit.ImplicitGraph;
 import aeminium.runtime.implementations.generic.GenericRuntime;
 import aeminium.runtime.prioritizer.lowestlevelfirst.LowestLevelFirstPrioritizer;
 import aeminium.runtime.scheduler.hybridthreadpools.HybridThreadPoolsScheduler;
 import aeminium.runtime.scheduler.singlethreadpool.SingleThreadPoolScheduler;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
-import aeminium.runtime.task.implicit2.ImplicitTask2;
+import aeminium.runtime.task.implicit.ImplicitTask;
 
 public class Factory {
 	protected static final String RT_PREFIX = "AEMINIUM_RT_";
@@ -50,14 +50,14 @@ public class Factory {
 		Factory f = new Factory();
 		
 	
-		final RuntimeConfiguration<ImplicitTask2> ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask2>("ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
-				HybridThreadPoolsScheduler<ImplicitTask2> scheduler = new HybridThreadPoolsScheduler<ImplicitTask2>(flags);
-				ImplicitGraph2<ImplicitTask2> graph = new ImplicitGraph2<ImplicitTask2>(scheduler, flags);
-				DataGroupFactory<ImplicitTask2> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
-				TaskFactory<ImplicitTask2> taskFactory = ImplicitTask2.createFactory(flags);
-				return new GenericRuntime<ImplicitTask2>(scheduler, 
+				HybridThreadPoolsScheduler<ImplicitTask> scheduler = new HybridThreadPoolsScheduler<ImplicitTask>(flags);
+				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler, flags);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(flags);
+				return new GenericRuntime<ImplicitTask>(scheduler, 
 														 scheduler, 
 														 graph,
 														 dgFactory,
@@ -67,15 +67,15 @@ public class Factory {
 		database.put(ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup.getName(), ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup);
 
 	
-		final RuntimeConfiguration<ImplicitTask2> ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask2>("ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
-				SingleThreadPoolScheduler<ImplicitTask2> scheduler = new SingleThreadPoolScheduler<ImplicitTask2>(flags);
-				LowestLevelFirstPrioritizer<ImplicitTask2> prioritizer = new LowestLevelFirstPrioritizer<ImplicitTask2>(scheduler, flags);
-				ImplicitGraph2<ImplicitTask2> graph = new ImplicitGraph2<ImplicitTask2>(prioritizer, flags);
-				DataGroupFactory<ImplicitTask2> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
-				TaskFactory<ImplicitTask2> taskFactory = ImplicitTask2.createFactory(flags);
-				return new GenericRuntime<ImplicitTask2>(scheduler, 
+				SingleThreadPoolScheduler<ImplicitTask> scheduler = new SingleThreadPoolScheduler<ImplicitTask>(flags);
+				LowestLevelFirstPrioritizer<ImplicitTask> prioritizer = new LowestLevelFirstPrioritizer<ImplicitTask>(scheduler, flags);
+				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(prioritizer, flags);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(flags);
+				return new GenericRuntime<ImplicitTask>(scheduler, 
 														 prioritizer, 
 													     graph,
 													     dgFactory,

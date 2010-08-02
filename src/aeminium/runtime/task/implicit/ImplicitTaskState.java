@@ -1,6 +1,6 @@
-package aeminium.runtime.task.implicit2;
+package aeminium.runtime.task.implicit;
 
-public enum ImplicitTaskState2 {
+public enum ImplicitTaskState {
 	UNSCHEDULED,
 	WAITING_FOR_DEPENDENCIES,
 	RUNNING,

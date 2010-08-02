@@ -7,9 +7,9 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
-import aeminium.runtime.task.implicit2.ImplicitNonBlockingTask2;
+import aeminium.runtime.task.implicit.ImplicitNonBlockingTask;
 
-public class FibonacciDirect<T extends ImplicitNonBlockingTask2> extends ImplicitNonBlockingTask2<T> implements Body {
+public class FibonacciDirect<T extends ImplicitNonBlockingTask> extends ImplicitNonBlockingTask<T> implements Body {
 	protected static final EnumSet<Flags> NO_FLAGS =  EnumSet.noneOf(Flags.class);
 	protected int n;
 	protected final Runtime rt;
@@ -36,9 +36,9 @@ public class FibonacciDirect<T extends ImplicitNonBlockingTask2> extends Implici
 //		System.out.println(sb.toString());
 		
 		if ( 2 < n ) {			
-			f1 = new FibonacciDirect<ImplicitNonBlockingTask2>(n-1, rt);
+			f1 = new FibonacciDirect<ImplicitNonBlockingTask>(n-1, rt);
 			rt.schedule(f1, this, Runtime.NO_DEPS);
-			f2 = new FibonacciDirect<ImplicitNonBlockingTask2>(n-2, rt);
+			f2 = new FibonacciDirect<ImplicitNonBlockingTask>(n-2, rt);
 			rt.schedule(f2, this, Runtime.NO_DEPS);
 		} else {
 			//setResult(ONE);
@@ -63,7 +63,7 @@ public class FibonacciDirect<T extends ImplicitNonBlockingTask2> extends Implici
 		
 		long start = System.nanoTime();
 		
-		FibonacciDirect<ImplicitNonBlockingTask2> root = new FibonacciDirect<ImplicitNonBlockingTask2>(N, rt);
+		FibonacciDirect<ImplicitNonBlockingTask> root = new FibonacciDirect<ImplicitNonBlockingTask>(N, rt);
 		rt.schedule(root, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
 		rt.shutdown();

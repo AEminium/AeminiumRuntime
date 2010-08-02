@@ -1,4 +1,4 @@
-package aeminium.runtime.task.implicit2;
+package aeminium.runtime.task.implicit;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -11,10 +11,10 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeAtomicTask;
 
-public class ImplicitAtomicTask2<T extends ImplicitTask2> extends ImplicitTask2<T> implements RuntimeAtomicTask {
+public class ImplicitAtomicTask<T extends ImplicitTask> extends ImplicitTask<T> implements RuntimeAtomicTask {
 	protected RuntimeDataGroup datagroup;
 	
-	public ImplicitAtomicTask2(Body body, RuntimeDataGroup datagroup,	Collection<Hints> hints, EnumSet<Flags> flags) {
+	public ImplicitAtomicTask(Body body, RuntimeDataGroup datagroup,	Collection<Hints> hints, EnumSet<Flags> flags) {
 		super(body, hints, flags);
 		this.datagroup = datagroup;
 	}

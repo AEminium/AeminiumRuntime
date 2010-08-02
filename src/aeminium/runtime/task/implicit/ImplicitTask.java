@@ -1,4 +1,4 @@
-package aeminium.runtime.task.implicit2;
+package aeminium.runtime.task.implicit;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,8 +25,8 @@ import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.TaskFactory;
 import aeminium.runtime.tools.Erazor;
 
-public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTask<T> {
-	protected ImplicitTaskState2 state = ImplicitTaskState2.UNSCHEDULED;
+public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<T> {
+	protected ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
 	protected int depCount = 0;
 	protected int childCount = 0;
 	protected List<T> dependents = null;
@@ -35,7 +35,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	protected RuntimePrioritizer<T> prioritizer = null;
 	protected final boolean debug;
 	
-	public ImplicitTask2( Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
+	public ImplicitTask( Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		super(body, hints, flags);
 		if ( flags.contains(Flags.DEBUG)) {
 			debug = true;
@@ -44,8 +44,8 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		}
 	}
 
-	public static TaskFactory<ImplicitTask2> createFactory(EnumSet<Flags> flags) {
-		return new AbstractTaskFactory<ImplicitTask2>(flags) {
+	public static TaskFactory<ImplicitTask> createFactory(EnumSet<Flags> flags) {
+		return new AbstractTaskFactory<ImplicitTask>(flags) {
 			
 			@Override 
 			public void init() {}
@@ -54,18 +54,18 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 			
 			@SuppressWarnings("unchecked")
 			@Override
-			public RuntimeAtomicTask<ImplicitTask2> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask2> datagroup, Collection<Hints> hints) {
-				return new ImplicitAtomicTask2(body, (RuntimeDataGroup<ImplicitTask2>) datagroup, hints, flags);
+			public RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
+				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
 			}
 
 			@Override
 			public BlockingTask createBockingTask(Body body, Collection<Hints> hints) {
-				return new ImplicitBlockingTask2(body, hints, flags);
+				return new ImplicitBlockingTask(body, hints, flags);
 			}
 
 			@Override
 			public NonBlockingTask createNonBockingTask(Body body, Collection<Hints> hints) {
-				return  new ImplicitNonBlockingTask2(body, hints, flags);
+				return  new ImplicitNonBlockingTask(body, hints, flags);
 			}
 		};
 	}
@@ -108,14 +108,14 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		synchronized (this) {
 			childCount += delta;
 			if ( childCount == 0 ) {
-				if ( state == ImplicitTaskState2.WAITING_FOR_CHILDREN ) {
+				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
 					taskCompleted();
 				}
 			}			
 		}
 	}
 	
-	public ImplicitTaskState2 getTaskState() {
+	public ImplicitTaskState getTaskState() {
 		synchronized (this) {
 			return state;
 		}
@@ -123,7 +123,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	
 	public int addDependent(T task) {
 		synchronized (this) {
-			if ( state == ImplicitTaskState2.COMPLETED ) {
+			if ( state == ImplicitTaskState.COMPLETED ) {
 				return 0;
 			}
 			if ( dependents == null ) {
@@ -136,7 +136,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	
 	public void setDependencies(Collection<T> deps) {
 		synchronized (this) {
-			state = ImplicitTaskState2.WAITING_FOR_DEPENDENCIES;
+			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
 				for ( T t : deps ) {
@@ -166,8 +166,8 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 
 	protected void scheduleTask() {
 		synchronized (this) {
-			assert( state == ImplicitTaskState2.WAITING_FOR_DEPENDENCIES );
-			state = ImplicitTaskState2.RUNNING;
+			assert( state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES );
+			state = ImplicitTaskState.RUNNING;
 			prioritizer.scheduleTask((T)this);			
 		}
 	}
@@ -186,8 +186,8 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	
 	public void taskFinished() {
 		synchronized (this) {
-			assert( state == ImplicitTaskState2.RUNNING );
-			state = ImplicitTaskState2.WAITING_FOR_CHILDREN;
+			assert( state == ImplicitTaskState.RUNNING );
+			state = ImplicitTaskState.WAITING_FOR_CHILDREN;
 			
 			if ( !hasChildren() ) {
 				taskCompleted();
@@ -197,8 +197,8 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 	
 	@Override
 	public void taskCompleted() {
-		assert( state == ImplicitTaskState2.WAITING_FOR_CHILDREN );
-		state = ImplicitTaskState2.COMPLETED;	
+		assert( state == ImplicitTaskState.WAITING_FOR_CHILDREN );
+		state = ImplicitTaskState.COMPLETED;	
 
 		// callback to ResultBody to compute final result 
 		// BEFORE we trigger parent/dependents 
@@ -211,7 +211,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 		}
 
 		if ( dependents != null ) {
-			for ( ImplicitTask2<T> t : dependents) {
+			for ( ImplicitTask<T> t : dependents) {
 				t.decDepencenyCount();
 			}
 		}

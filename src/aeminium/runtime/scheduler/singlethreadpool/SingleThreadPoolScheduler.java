@@ -9,8 +9,8 @@ import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.task.implicit2.ImplicitTask2;
-import aeminium.runtime.task.implicit2.ImplicitTaskState2;
+import aeminium.runtime.task.implicit.ImplicitTask;
+import aeminium.runtime.task.implicit.ImplicitTaskState;
 
 public class SingleThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 	private ExecutorService execService; 
