@@ -103,7 +103,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		}
 	}
 	
-	public Object getData(String key) {
+	public final Object getData(String key) {
 		synchronized (this) {
 			if (data == null) {
 				return null;

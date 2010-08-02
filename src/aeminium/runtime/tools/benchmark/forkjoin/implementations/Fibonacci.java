@@ -8,7 +8,7 @@ public
 class Fibonacci extends RecursiveAction { 
 	public volatile int number;
 	// This value is the one used in Doug Lea's Paper on ForkJoin
-	private int THREASHOLD = 23;
+	private int THREASHOLD = 13;
 	private static int TARGET = 2;
 	
 	

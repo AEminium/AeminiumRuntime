@@ -23,6 +23,7 @@ import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.TaskFactory;
+import aeminium.runtime.tools.Erazor;
 
 public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTask<T> {
 	protected ImplicitTaskState2 state = ImplicitTaskState2.UNSCHEDULED;
@@ -215,12 +216,12 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 			}
 		}
 
-
-		// cleanup
+		// cleanup references 
 		if ( dependents != null ) {
 			this.dependents.clear();
 			this.dependents = null;
 		}
+		//Erazor.eraseCapturedReferences(body);
 		this.body = null;
 		this.parent = null;
 		if ( this.children != null ) {
@@ -228,7 +229,7 @@ public abstract class ImplicitTask2<T extends ImplicitTask2> extends AbstractTas
 			this.children = null;
 		}
 	}
-
+	
 	public void setPrioritizer(RuntimePrioritizer<T> prioritizer) {
 		synchronized (this) {
 			this.prioritizer = prioritizer;			

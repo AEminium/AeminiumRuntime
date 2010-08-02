@@ -1,9 +1,7 @@
 package aeminium.runtime.tools.benchmark;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 
-import aeminium.runtime.Body;
 import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
@@ -35,11 +33,6 @@ class FibBody implements ResultBody<Integer> {
 	}
 
 	@Override
-	public Integer getResult() {
-		return null;
-	}
-
-	@Override
 	public void execute(Task current) {
 		if ( 2 < n ) {
 			b1 = new FibBody(n-1, rt);
@@ -55,39 +48,38 @@ class FibBody implements ResultBody<Integer> {
 
 
 public class FibonacciBenchmark implements Benchmark {
-        private final String name = "FibonacciBenchmark";
-        private int[] input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29};
-        
-      
-        @Override
-        public String getName() {
-                return name;
-        }
+	private final String name = "FibonacciBenchmark";
+	private int[] input = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29};
 
-        @Override
-        public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
-                for (int level : input) {
-                        runTest(version, flags, reporter, level);
-                }
-        }
-       
-        public void runTest(String version, EnumSet<Flags> flags, Reporter reporter, int n) {
-                Runtime rt = Factory.getRuntime(version, flags);
-                long start = System.nanoTime();
-                rt.init();
+	@Override
+	public String getName() {
+		return name;
+	}
 
-                FibBody rootBody = new FibBody(n, rt);
-                Task root = rt.createNonBlockingTask(rootBody, Runtime.NO_HINTS);
-                rt.schedule(root, Runtime.NO_PARENT, Runtime.NO_DEPS);
+	@Override
+	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
+		for (int level : input) {
+			runTest(version, flags, reporter, level);
+		}
+	}
 
-                rt.shutdown();  
+	public void runTest(String version, EnumSet<Flags> flags, Reporter reporter, int n) {
+		Runtime rt = Factory.getRuntime(version, flags);
+		long start = System.nanoTime();
+		rt.init();
 
-                long end = System.nanoTime();
-               
-                String result = String.format("Fib(%3d) =  %7d in %12d ns", n, rootBody.value, (end-start));
-                reporter.reportLn(result);
-                reporter.flush();
+		FibBody rootBody = new FibBody(n, rt);
+		Task root = rt.createNonBlockingTask(rootBody, Runtime.NO_HINTS);
+		rt.schedule(root, Runtime.NO_PARENT, Runtime.NO_DEPS);
 
-        }
+		rt.shutdown();  
+
+		long end = System.nanoTime();
+
+		String result = String.format("Fib(%3d) =  %7d in %12d ns", n, rootBody.value, (end-start));
+		reporter.reportLn(result);
+		reporter.flush();
+
+	}
 }
 

@@ -17,7 +17,6 @@ import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
-import aeminium.runtime.task.implicit.ImplicitTask;
 
 public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	private final RuntimeScheduler<T> scheduler;
@@ -86,8 +85,8 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@Override
 	public void schedule(Task task, Task parent, Collection<Task> deps) {
 		assert ( state == GenericRuntimeState.INITIALIZED );
-		assert ( task instanceof ImplicitTask );
-		assert ( parent instanceof ImplicitTask );
+		assert ( task instanceof RuntimeTask );
+		assert ( parent instanceof RuntimeTask );
 		graph.addTask((T)((Object)task), parent, (Collection<T>)((Object)deps));
 	}
 
