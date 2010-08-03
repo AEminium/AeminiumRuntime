@@ -6,11 +6,7 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.tools.benchmark.Benchmark;
 import aeminium.runtime.tools.benchmark.Reporter;
 
-public abstract class FibonacciBenchmark implements Benchmark{
-	
-	
-	// This value is the one used in Doug Lea's Paper on ForkJoin
-	protected static int MAX_CALC = 46;// Integer.parseInt(System.getenv().get("FIB"));
+public abstract class FibonacciBenchmark implements Benchmark, FibonacciConstants {
 
 	@Override
 	public String getName() {

@@ -16,14 +16,12 @@ import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
-import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.TaskFactory;
-import aeminium.runtime.tools.Erazor;
 
 public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<T> {
 	protected ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
@@ -141,7 +139,7 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 				int count = 0;
 				for ( T t : deps ) {
 					synchronized (t) {
-						 count = t.addDependent(this);						
+						 count += t.addDependent(this);						
 					}
 				}
 				updateDependencyCount(count);

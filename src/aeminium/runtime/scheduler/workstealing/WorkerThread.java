@@ -1,18 +1,20 @@
 package aeminium.runtime.scheduler.workstealing;
 
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import aeminium.runtime.task.RuntimeTask;
 
 public class WorkerThread<T extends RuntimeTask> extends Thread {
-	protected final List<T> taskQueue;
+	protected final Deque<T> taskQueue;
 	protected final int index;
 	protected boolean shutdown = false;
 	protected final WorkStealingScheduler<T> scheduler;
 	
 	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
-		this.taskQueue = new LinkedList<T>();
+		this.taskQueue = new LinkedBlockingDeque<T>();
 		this.index = index;
 		this.scheduler = scheduler;
 	}
@@ -21,7 +23,7 @@ public class WorkerThread<T extends RuntimeTask> extends Thread {
 		return index;
 	}
 	
-	public List<T> getTaskList() {
+	public Deque<T> getTaskList() {
 		return taskQueue;
 	}
 	
@@ -34,10 +36,8 @@ public class WorkerThread<T extends RuntimeTask> extends Thread {
 		scheduler.registerThread(this);
 		while (!shutdown) {
 			T task = null;
-			synchronized (taskQueue) {
-				if ( !taskQueue.isEmpty() ) {
-					task = taskQueue.remove(0);
-				}
+			if ( !taskQueue.isEmpty() ) {
+				task = taskQueue.pollFirst();
 			}
 			if ( task != null ) {
 				//System.out.println(""+this +" works on " + task);

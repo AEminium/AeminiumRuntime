@@ -11,8 +11,10 @@ import aeminium.runtime.datagroup.fifo.FifoDataGroup;
 import aeminium.runtime.graph.implicit.ImplicitGraph;
 import aeminium.runtime.implementations.generic.GenericRuntime;
 import aeminium.runtime.prioritizer.lowestlevelfirst.LowestLevelFirstPrioritizer;
+import aeminium.runtime.scheduler.forkjoin.ForkJoinScheduler;
 import aeminium.runtime.scheduler.hybridthreadpools.HybridThreadPoolsScheduler;
 import aeminium.runtime.scheduler.singlethreadpool.SingleThreadPoolScheduler;
+import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
 import aeminium.runtime.task.implicit.ImplicitTask;
@@ -50,7 +52,7 @@ public class Factory {
 		Factory f = new Factory();
 		
 	
-		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
 				HybridThreadPoolsScheduler<ImplicitTask> scheduler = new HybridThreadPoolsScheduler<ImplicitTask>(flags);
@@ -64,10 +66,10 @@ public class Factory {
 														 taskFactory);
 			}
 		};
-		database.put(ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup.getName(), ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup);
+		//database.put(ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup.getName(), ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup);
 
 	
-		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask2.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup", "ImplicitGraph.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
 				SingleThreadPoolScheduler<ImplicitTask> scheduler = new SingleThreadPoolScheduler<ImplicitTask>(flags);
@@ -82,10 +84,47 @@ public class Factory {
 													     taskFactory);
 			}
 		};
-		database.put(ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup.getName(), ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+		//database.put(ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup.getName(), ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.ForkJoinScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup", "ImplicitGraph.ForkJoinScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup") {
+			@Override
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
+				ForkJoinScheduler<ImplicitTask> scheduler = new ForkJoinScheduler<ImplicitTask>(flags);
+				LowestLevelFirstPrioritizer<ImplicitTask> prioritizer = new LowestLevelFirstPrioritizer<ImplicitTask>(scheduler, flags);
+				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(prioritizer, flags);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(flags);
+				return new GenericRuntime<ImplicitTask>(scheduler, 
+														prioritizer, 
+													    graph,
+													    dgFactory,
+													    taskFactory);
+			}
+		};
+		//database.put(ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup(), ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_WorkStealingScheduler_None_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.WorkStealingScheduler.None.FifoDataGroup", "ImplicitGraph.WorkStealingScheduler.None.FifoDataGroup") {
+			@Override
+			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
+				WorkStealingScheduler<ImplicitTask> scheduler = new WorkStealingScheduler<ImplicitTask>(flags);
+				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler, flags);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler, flags);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory(flags);
+				return new GenericRuntime<ImplicitTask>(scheduler, 
+														scheduler, 
+													    graph,
+													    dgFactory,
+													    taskFactory);
+			}
+		};
+		//database.put(ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup(), ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+
+		
+		
 		// set default implementation
-		database.put("default", ImplicitGraph2_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+		//database.put("default", ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+		//database.put("default", ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+		database.put("default", ImplicitGraph_WorkStealingScheduler_None_FifoDataGroup);
 	}
 	
 	/**

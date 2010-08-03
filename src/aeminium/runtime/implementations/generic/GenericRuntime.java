@@ -73,7 +73,9 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	public void init() {
 		assert( state == GenericRuntimeState.UNINITIALIZED);
 		graph.init();
-		prioritizer.init();
+		if ( prioritizer != scheduler ) {
+			prioritizer.init();
+		}
 		scheduler.init();
 		taskFactory.init();
 		dataGroupFactory.init();

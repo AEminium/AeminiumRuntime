@@ -10,8 +10,8 @@ public class FibonacciBenchmarkExecutor extends BenchmarkExecutor {
 
 	public Benchmark[] getBenchmarks() {
 		Benchmark[] tests = {
-			//new AeminiumFibonacciBenchmark(),
-			new ForkJoinFibonacciBenchmark(),
+			new AeminiumFibonacciBenchmark(),
+			//new ForkJoinFibonacciBenchmark(),
 			//new SequentialFibonacciBenchmark()
 		};
 		return tests;

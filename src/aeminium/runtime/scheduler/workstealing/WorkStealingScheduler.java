@@ -1,8 +1,8 @@
 package aeminium.runtime.scheduler.workstealing;
 
 import java.util.Collection;
+import java.util.Deque;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.LockSupport;
@@ -15,7 +15,7 @@ public class WorkStealingScheduler<T extends RuntimeTask> extends AbstractSchedu
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
 	protected ThreadLocal<WorkerThread<T>> currentThread = new ThreadLocal<WorkerThread<T>>();
 	protected WorkerThread<T>[] threads;
-	protected List<T>[] taskQueues;
+	protected Deque<T>[] taskQueues;
 	
 	public WorkStealingScheduler(EnumSet<Flags> flags) {
 		super(flags);
@@ -32,9 +32,9 @@ public class WorkStealingScheduler<T extends RuntimeTask> extends AbstractSchedu
 	@Override
 	public void init() {
 		threads = new WorkerThread[Runtime.getRuntime().availableProcessors()];
-		taskQueues = new List[threads.length];
+		taskQueues = new Deque[threads.length];
 				
-		// initialize data strucutres
+		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
 			threads[i] = new WorkerThread<T>(i, this);
 			taskQueues[i] = threads[i].getTaskList();
@@ -57,23 +57,26 @@ public class WorkStealingScheduler<T extends RuntimeTask> extends AbstractSchedu
 	public void scheduleTask(T task) {
 		//System.out.println("schedule task " + task);
 		task.setScheduler(this);
-		List<T> taskQueue = taskQueues[currentThread().getIndex()];
-		synchronized (taskQueue) {
-			taskQueue.add(0, task);
-		}
+		Deque<T> taskQueue = taskQueues[currentThread().getIndex()];
+		addTask(taskQueue, task);
 		signalWork();
 	}
 
 	@Override
 	public void scheduleTasks(Collection<T> tasks) {
-		//System.out.println("schedule task " + tasks);
-		List<T> taskQueue = taskQueues[currentThread().getIndex()];
-		synchronized (taskQueue) {
-			taskQueue.addAll(0, tasks);
+		Deque<T> taskQueue = taskQueues[currentThread().getIndex()];
+		for ( T task : tasks ) {
+			addTask(taskQueue, task);
 		}
 		signalWork();
 	}
 
+	protected void addTask(Deque<T> q, T task) {
+		while ( !q.offerFirst(task) ) {
+			// loop until we could add it 
+		}
+	}
+	
 	protected WorkerThread<T> currentThread() {
 		WorkerThread<T> current = currentThread.get();
 		if ( current == null ) {
@@ -92,19 +95,19 @@ public class WorkStealingScheduler<T extends RuntimeTask> extends AbstractSchedu
 		for ( WorkerThread<T> thread : threads ){
 			thread.shutdown();
 		}
-		
+
 		for ( WorkerThread<T> thread : parkedThreads ) {
 			LockSupport.unpark(thread);
 		}
 	}
 
 	public void signalWork() {
-			if ( !parkedThreads.isEmpty() ) {
-				WorkerThread<T> thread = parkedThreads.poll();
-				if ( thread != null ) {
-					LockSupport.unpark(thread);
-				}
+		if ( !parkedThreads.isEmpty() ) {
+			WorkerThread<T> thread = parkedThreads.poll();
+			if ( thread != null ) {
+				LockSupport.unpark(thread);
 			}
+		}
 	}
 	
 	public void parkThread(WorkerThread<T> thread) {
@@ -114,12 +117,10 @@ public class WorkStealingScheduler<T extends RuntimeTask> extends AbstractSchedu
 	}
 
 	public T scanQueues() {
-		List<T> threadQueue = taskQueues[currentThread().getIndex()];
-		for ( List<T> q : taskQueues ) {
-			synchronized (q) {
-				if ( !q.isEmpty() ) {
-					return q.remove(q.size()-1);
-				}
+		for ( Deque<T> q : taskQueues ) {
+			T task = q.pollLast();
+			if ( task != null ) {
+				return task;
 			}
 		}
 		return null;
