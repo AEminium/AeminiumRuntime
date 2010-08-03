@@ -23,7 +23,7 @@ public class DependencyCountPrioritizer<T extends RuntimeTask> extends AbstractP
 
 	@Override
 	public void scheduleTasks(Collection<T> tasks) {
-		Collections.sort(new ArrayList(tasks), new Comparator<T>() {
+		Collections.sort(new ArrayList<T>(tasks), new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {
 				return (int)(o1.getDescription().getDependentTaskCount() - o2.getDescription().getDependentTaskCount());

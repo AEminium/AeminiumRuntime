@@ -51,8 +51,7 @@ public class Factory {
 		 */
 		Factory f = new Factory();
 		
-	
-		final RuntimeConfiguration<ImplicitTask> ImplicitGraph2_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.HybridThreadPoolsScheduler.None.ImplicitTask2.FifoDataGroup", "ImplicitGraph2.HybridThreadPoolsScheduler.None.ImplicitTask.FifoDataGroup") {
 			@Override
 			public AbstractRuntime instanciate(EnumSet<Flags> flags) {
 				HybridThreadPoolsScheduler<ImplicitTask> scheduler = new HybridThreadPoolsScheduler<ImplicitTask>(flags);
@@ -66,8 +65,7 @@ public class Factory {
 														 taskFactory);
 			}
 		};
-		//database.put(ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup.getName(), ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup);
-
+		//database.put(ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask_FifoDataGroup.getName(), ImplicitGraph_HybridThreadPoolsScheduler_None_ImplicitTask2_FifoDataGroup);
 	
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup", "ImplicitGraph.SingleThreadPoolScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup") {
 			@Override
@@ -119,8 +117,7 @@ public class Factory {
 		};
 		//database.put(ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup(), ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 
-		
-		
+
 		// set default implementation
 		//database.put("default", ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 		//database.put("default", ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
