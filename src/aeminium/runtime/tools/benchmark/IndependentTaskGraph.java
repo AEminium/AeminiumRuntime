@@ -9,7 +9,7 @@ import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 
 public class IndependentTaskGraph implements Benchmark {
-	private final String name = "IndepenetTaskGraph";
+	private static final String name = "IndepenetTaskGraph";
 	private final int[] COUNTS = {100, 1000, 10000, 100000, 1000000};
 	
 	@Override

@@ -9,7 +9,7 @@ import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 
 public class ChildTaskBenchmark implements Benchmark {
-	private final String name = "ChildTaskBenchmark";
+	private static final String name = "ChildTaskBenchmark";
 	private int[] levels = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	private int fanout = 4;
 	

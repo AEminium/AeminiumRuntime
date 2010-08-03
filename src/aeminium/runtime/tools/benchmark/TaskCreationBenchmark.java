@@ -10,7 +10,7 @@ import aeminium.runtime.implementations.Flags;
 
 
 public class TaskCreationBenchmark implements Benchmark {
-	private final String name = "TaskCreation";
+	private static final String name = "TaskCreation";
 	private final int[] COUNTS = { 100, 1000, 10000, 100000, 1000000};
 	
 	@Override

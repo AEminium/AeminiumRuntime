@@ -12,9 +12,9 @@ import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 
 public class FixedParallelMaxDependencies implements Benchmark {
-	private final String name = "FixedParallelMaxDependencies";
+	private static final String name = "FixedParallelMaxDependencies";
 	private final int[] COUNTS = {100, 1000, 10000};
-	private final int taskCount = 16;
+	private static final int taskCount = 16;
 	
 	@Override
 	public String getName() {

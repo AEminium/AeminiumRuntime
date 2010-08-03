@@ -219,7 +219,7 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 			this.dependents.clear();
 			this.dependents = null;
 		}
-		//Erazor.eraseCapturedReferences(body);
+		
 		this.body = null;
 		this.parent = null;
 		if ( this.children != null ) {

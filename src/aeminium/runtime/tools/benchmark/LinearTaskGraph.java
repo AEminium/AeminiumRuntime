@@ -10,7 +10,7 @@ import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 
 public class LinearTaskGraph implements Benchmark {
-	private final String name = "LinearTaskGraph";
+	private static final String name = "LinearTaskGraph";
 	private final int[] COUNTS = {100, 1000, 10000, 100000};
 	
 	@Override
