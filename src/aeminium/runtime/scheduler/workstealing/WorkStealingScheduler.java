@@ -31,7 +31,7 @@ public class WorkStealingScheduler<T extends RuntimeTask> extends AbstractSchedu
 	
 	@Override
 	public void init() {
-		threads = new WorkerThread[Runtime.getRuntime().availableProcessors()];
+		threads = new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];
 				
 		// initialize data structures
@@ -124,5 +124,20 @@ public class WorkStealingScheduler<T extends RuntimeTask> extends AbstractSchedu
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void taskFinished(T task) {
+		// disable running count of abstract super class
+	}
+
+	@Override
+	public void taskPaused(T task) {
+		// disable paused count of abstract super class
+	}
+
+	@Override
+	public void taskResume(T task) {
+		scheduleTask(task);
 	}
 }
