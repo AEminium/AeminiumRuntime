@@ -92,20 +92,27 @@ public class LogCounter {
 	}
 
 	private static int countAccesses(String d)
-			throws FileNotFoundException, IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(d));
-		int count = 0;
-		String line;
-		while (true) {
-			line = reader.readLine();
-			//System.out.println(line);
-			if (line == null) break;
-			if (line.startsWith("wiki.alcidesfonseca.com")) {
-				count++;
+			throws FileNotFoundException, IOException { 
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(d));
+			int count = 0;
+			String line;
+			while (true) {
+				line = reader.readLine();
+				//System.out.println(line);
+				if (line == null) break;
+				if (line.startsWith("wiki.alcidesfonseca.com")) {
+					count++;
+				}
+				return count;
 			}
- 		} 
-		
-		return count;
+		} finally {
+			if ( reader != null ) {
+				reader.close();
+			}
+		}
+		return 0;
 	}
 
 	private static String uncompressGZip(File source) throws IOException {
