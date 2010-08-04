@@ -17,6 +17,7 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	protected ThreadLocal<WorkerThread<T>> currentThread = new ThreadLocal<WorkerThread<T>>();
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
+	protected boolean shutdown = false;
 	
 	public BlockingWorkStealingScheduler(EnumSet<Flags> flags) {
 		super(flags);
@@ -94,6 +95,7 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	
 	@Override
 	public void shutdown() {
+		shutdown = true;
 		for ( WorkerThread<T> thread : threads ){
 			thread.shutdown();
 		}
@@ -125,9 +127,10 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	
 	@Override
 	public void parkThread(WorkerThread<T> thread) {
-		parkedThreads.add(thread);
-		//LockSupport.parkNanos(thread, 100000);
-		LockSupport.park(thread);
+		if ( !shutdown ) {
+			parkedThreads.add(thread);
+			LockSupport.park(thread);
+		}
 	}
 
 	@Override
