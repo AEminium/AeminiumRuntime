@@ -98,6 +98,8 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 		for ( WorkerThread<T> thread : parkedThreads ) {
 			LockSupport.unpark(thread);
 		}
+		threads = null;
+		taskQueues = null;
 	}
 
 	public void signalWork() {

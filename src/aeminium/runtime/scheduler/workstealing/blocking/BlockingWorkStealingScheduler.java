@@ -103,6 +103,8 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 		for ( WorkerThread<T> thread : parkedThreads ) {
 			LockSupport.unpark(thread);
 		}
+		threads = null;
+		taskQueues = null;
 	}
 
 	protected WorkerThread<T> getNextThread() {
