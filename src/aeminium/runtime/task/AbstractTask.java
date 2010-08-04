@@ -11,7 +11,6 @@ import aeminium.runtime.RuntimeError;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.RuntimeScheduler;
-import aeminium.runtime.statistics.Statistics;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
 	protected volatile Object result = UNSET;
