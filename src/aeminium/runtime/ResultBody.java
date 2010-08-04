@@ -1,5 +1,5 @@
 package aeminium.runtime;
 
-public interface ResultBody<T> extends Body {
+public interface ResultBody extends Body {
 	public void completed();
 }
