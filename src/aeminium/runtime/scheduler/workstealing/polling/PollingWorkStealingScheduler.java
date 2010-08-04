@@ -13,8 +13,8 @@ import aeminium.runtime.scheduler.workstealing.WorkerThread;
 import aeminium.runtime.task.RuntimeTask;
 
 public class PollingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T> {
-	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
-	protected ThreadLocal<WorkerThread<T>> currentThread = new ThreadLocal<WorkerThread<T>>();
+	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
+	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
 	
@@ -33,6 +33,8 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	@Override
 	@SuppressWarnings("unchecked")
 	public void init() {
+		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
+		currentThread = new ThreadLocal<WorkerThread<T>>();
 		threads = new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];
 				
@@ -100,6 +102,8 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 		}
 		threads = null;
 		taskQueues = null;
+		currentThread = null;
+		parkedThreads = null;
 	}
 
 	public void signalWork() {
