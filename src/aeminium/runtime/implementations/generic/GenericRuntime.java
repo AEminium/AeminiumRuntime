@@ -98,8 +98,10 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		
 		graph.waitToEmpty();
 		graph.shutdown();
+		if ( prioritizer != scheduler ) {
+			prioritizer.shutdown();
+		}
 		scheduler.shutdown();
-		prioritizer.shutdown();
 		taskFactory.shutdown();
 		dataGroupFactory.shutdown();
 		
