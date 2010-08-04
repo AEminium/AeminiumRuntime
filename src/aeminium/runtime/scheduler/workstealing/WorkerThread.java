@@ -3,6 +3,7 @@ package aeminium.runtime.scheduler.workstealing;
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
 public class WorkerThread<T extends RuntimeTask> extends Thread {
