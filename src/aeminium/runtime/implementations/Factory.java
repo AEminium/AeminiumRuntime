@@ -68,7 +68,7 @@ public class Factory {
 													     taskFactory);
 			}
 		};
-		//database.put(ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup.getName(), ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+		database.put(ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup.getName(), ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.ForkJoinScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup", "ImplicitGraph.ForkJoinScheduler.LowestLevelFirstPrioritizer.ImplicitTask.FifoDataGroup") {
@@ -86,7 +86,7 @@ public class Factory {
 													    taskFactory);
 			}
 		};
-		//database.put(ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup.getName(), ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
+		database.put(ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup.getName(), ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.PollingWorkStealingScheduler.None.FifoDataGroup", "ImplicitGraph.PollingWorkStealingScheduler.None.FifoDataGroup") {
@@ -103,7 +103,7 @@ public class Factory {
 													    taskFactory);
 			}
 		};
-		//database.put(ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup.getName(), ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup);
+		database.put(ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup.getName(), ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup);
 
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.BlockingWorkStealingScheduler.None.FifoDataGroup", "ImplicitGraph.BlockingWorkStealingScheduler.None.FifoDataGroup") {
@@ -120,8 +120,11 @@ public class Factory {
 													    taskFactory);
 			}
 		};
-		//database.put(ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup.getName(), ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup.getName);
+		database.put(ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup.getName(), ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup);
 
+		// only export default implementation at the moment
+		database.clear();
+		
 		// set default implementation
 		//database.put("default", ImplicitGraph_ForkJoinScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
 		//database.put("default", ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
