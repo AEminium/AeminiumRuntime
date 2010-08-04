@@ -195,4 +195,14 @@ public class Factory {
 		return flags;
 	}
 
+	public static int getParallelism() {
+		String env = System.getenv(RT_PREFIX+"PARALLELISM");
+		if (  env != null ) {
+			int value = Integer.valueOf(env);
+			if ( value > 0 ) {
+				return value;
+			}
+		}
+		return java.lang.Runtime.getRuntime().availableProcessors();
+	}
 }

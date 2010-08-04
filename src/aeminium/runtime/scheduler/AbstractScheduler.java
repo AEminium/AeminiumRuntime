@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
@@ -13,12 +14,11 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 	protected final AtomicInteger runningCount = new AtomicInteger();
 	protected final AtomicInteger pausedCount = new AtomicInteger();
 	protected RuntimePrioritizer<T> prioritizer = null;
-	protected final int maxParallelism = Runtime.getRuntime().availableProcessors();
+	protected final int maxParallelism = Factory.getParallelism();
 
 	public AbstractScheduler(EnumSet<Flags> flags) {
 		this.flags = flags;
 	}
-
 
 	@Override
 	public void setPrioritizer(RuntimePrioritizer<T> prioritizer ) {
