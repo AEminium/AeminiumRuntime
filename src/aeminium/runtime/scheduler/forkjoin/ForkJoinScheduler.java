@@ -33,6 +33,7 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
     }
 	
     @Override
+    @SuppressWarnings("unchecked")
     public void scheduleTask(T task) {
     	pool.execute(ForkJoinTask.adapt((Callable)task));
     }

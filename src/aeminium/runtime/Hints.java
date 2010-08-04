@@ -2,7 +2,6 @@ package aeminium.runtime;
 
 /* interface for base hint */
 public class Hints {
-	private static Hints hintSingleton = new Hints();
 	private static Hints.Loops loopsHint = new Loops();
 	private static Hints.Recursion recursionHint = new Recursion();
 	

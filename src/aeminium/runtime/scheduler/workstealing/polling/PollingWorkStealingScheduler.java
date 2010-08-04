@@ -3,7 +3,6 @@ package aeminium.runtime.scheduler.workstealing.polling;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.EnumSet;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.LockSupport;
 
@@ -32,6 +31,7 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public void init() {
 		threads = new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];

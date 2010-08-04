@@ -130,7 +130,9 @@ public final class Integrate {
 
     // Sequential version
     public static final class SQuad extends RecursiveAction {
-        static double computeArea(ForkJoinPool pool, double l, double r) {
+		private static final long serialVersionUID = 2280172350754386752L;
+
+		static double computeArea(ForkJoinPool pool, double l, double r) {
             SQuad q = new SQuad(l, r, 0);
             pool.invoke(q);
             return q.area;
@@ -171,7 +173,9 @@ public final class Integrate {
 
     // ForkJoin version
     public static final class FQuad extends RecursiveAction {
-        static double computeArea(ForkJoinPool pool, double l, double r) {
+		private static final long serialVersionUID = -6277723543198168418L;
+
+		static double computeArea(ForkJoinPool pool, double l, double r) {
             FQuad q = new FQuad(l, r, 0);
             pool.invoke(q);
             return q.area;
@@ -218,7 +222,9 @@ public final class Integrate {
 
     // Version using on-demand Fork
     public static final class DQuad extends RecursiveAction {
-        static double computeArea(ForkJoinPool pool, double l, double r) {
+		private static final long serialVersionUID = -4117817369633015698L;
+
+		static double computeArea(ForkJoinPool pool, double l, double r) {
             DQuad q = new DQuad(l, r, 0);
             pool.invoke(q);
             return q.area;

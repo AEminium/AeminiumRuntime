@@ -1,7 +1,6 @@
 package aeminium.runtime.prioritizer;
 
 import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.RuntimeScheduler;

@@ -41,8 +41,9 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 	
 	@Override
-	public void setGraph(RuntimeGraph graph) {
-		this.graph = graph;
+	@SuppressWarnings("unchecked")
+	public void setGraph(RuntimeGraph<?> graph) {
+		this.graph = (RuntimeGraph<T>)graph;
 	}
 	
 	@Override
@@ -54,8 +55,10 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 			System.out.println("bad " + e);
 			e.printStackTrace();
 		} finally {
-			graph.taskFinished((T) this);
-			scheduler.taskFinished((T) this);
+			@SuppressWarnings("unchecked")
+			T Tthis = (T)this;
+			graph.taskFinished(Tthis);
+			scheduler.taskFinished(Tthis);
 		}
 		return null;		
 	}
@@ -88,6 +91,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public TaskDescription<T> getDescription() {
 		return graph.getTaskDescription((T) this);
 	}

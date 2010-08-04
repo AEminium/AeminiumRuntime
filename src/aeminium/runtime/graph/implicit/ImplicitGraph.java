@@ -13,6 +13,7 @@ import aeminium.runtime.task.TaskDescription;
 import aeminium.runtime.task.implicit.ImplicitTask;
 import aeminium.runtime.task.implicit.ImplicitTaskState;
 
+@SuppressWarnings("unchecked")
 public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	protected AtomicInteger taskCount = new AtomicInteger(0);
 	protected final boolean checkForCycles;
@@ -52,8 +53,6 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 				itask.checkForCycles();
 			}			
 		}
-
-	
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package aeminium.runtime.task;
 
 import java.util.Collection;
 
-import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;

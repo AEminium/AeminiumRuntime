@@ -21,7 +21,6 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 		super(scheduler, flags);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T extends RuntimeTask> DataGroupFactory<T> createFactory(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {
 		return (DataGroupFactory<T>) new AbstractDataGroupFactory<T>(scheduler, flags) {
 			@Override 
@@ -50,7 +49,6 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void unlock() {
 		synchronized (this) {
 			locked = false;

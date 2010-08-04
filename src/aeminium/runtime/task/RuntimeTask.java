@@ -20,11 +20,11 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	
 	public Object getData(String key);
 	
-	public TaskDescription getDescription();
+	public TaskDescription<?> getDescription();
 	
 	public int getLevel();
 	
-	public void setScheduler(RuntimeScheduler scheduler);
+	public void setScheduler(RuntimeScheduler<?> scheduler);
 	
-	public void setGraph(RuntimeGraph graph);
+	public void setGraph(RuntimeGraph<?> graph);
 }

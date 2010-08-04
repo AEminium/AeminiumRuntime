@@ -3,7 +3,6 @@ package aeminium.runtime.scheduler.workstealing.blocking;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.EnumSet;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.LockSupport;
 
@@ -33,8 +32,9 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public void init() {
-		threads = new WorkerThread[getMaxParallelism()];
+		threads =  new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];
 				
 		// initialize data structures

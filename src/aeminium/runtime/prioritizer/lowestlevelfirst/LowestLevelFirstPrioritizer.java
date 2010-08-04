@@ -7,12 +7,12 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.AbstractPrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.implicit.ImplicitTask;
 
+@SuppressWarnings("unchecked")
 public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends AbstractPrioritizer<T> {
 	protected PriorityQueue<T> waitingQueue = null;
 	

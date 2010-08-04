@@ -20,7 +20,6 @@ import aeminium.runtime.task.TaskFactory;
 
 public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	private final RuntimeScheduler<T> scheduler;
-	@SuppressWarnings("unused")
 	private final RuntimePrioritizer<T> prioritizer;
 	private final RuntimeGraph<T> graph;
 	private final DataGroupFactory<T> dataGroupFactory;

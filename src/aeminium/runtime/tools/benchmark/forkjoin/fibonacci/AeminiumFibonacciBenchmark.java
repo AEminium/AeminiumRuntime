@@ -8,7 +8,6 @@ import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.examples.fjtests.AeminiumFibonacci;
-import aeminium.runtime.examples.fjtests.AeminiumFibonacci.FibBody;
 import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.implementations.Factory.RuntimeConfiguration;

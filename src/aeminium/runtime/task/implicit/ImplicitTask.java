@@ -23,7 +23,7 @@ import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.TaskFactory;
 
-public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<T> {
+public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTask<T> {
 	protected ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
 	protected int depCount = 0;
 	protected int childCount = 0;
@@ -42,6 +42,8 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 		}
 	}
 
+
+	@SuppressWarnings("unchecked")
 	public static TaskFactory<ImplicitTask> createFactory(EnumSet<Flags> flags) {
 		return new AbstractTaskFactory<ImplicitTask>(flags) {
 			
@@ -50,7 +52,6 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 			@Override 
 			public void shutdown() {}
 			
-			@SuppressWarnings("unchecked")
 			@Override
 			public RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
 				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
@@ -68,12 +69,13 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 		};
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void setParent(Task parent) {
 		if ( parent != Runtime.NO_PARENT ) {
 			synchronized (this) {
 				setLevel(((T)parent).getLevel()+1);
 				this.parent = (T) parent;
-				this.parent.attachChild(this);
+				this.parent.attachChild((T)this);
 			}
 		}
 	}
@@ -139,7 +141,9 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 				int count = 0;
 				for ( T t : deps ) {
 					synchronized (t) {
-						 count += t.addDependent(this);						
+						@SuppressWarnings("unchecked")
+						T Tthis = (T)this;
+						 count += t.addDependent(Tthis);						
 					}
 				}
 				updateDependencyCount(count);
@@ -162,6 +166,7 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 		}			
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void scheduleTask() {
 		synchronized (this) {
 			assert( state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES );
@@ -201,11 +206,13 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 		// callback to ResultBody to compute final result 
 		// BEFORE we trigger parent/dependents 
 		if ( body instanceof ResultBody<?> ) {
-			((ResultBody) body).completed();
+			((ResultBody<?>) body).completed();
 		}
 
 		if ( parent != null) {
-			parent.detachChild(this);
+			@SuppressWarnings("unchecked")
+			T Tthis = (T)this;
+			parent.detachChild(Tthis);
 		}
 
 		if ( dependents != null ) {
@@ -236,7 +243,9 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 	
 	public void checkForCycles() {
 		synchronized (this) {
-			checkForCycles((T)this, dependents);
+			@SuppressWarnings("unchecked")
+			T Tthis = (T)this;
+			checkForCycles(Tthis, dependents);
 		}
 	}
 	
@@ -245,7 +254,9 @@ public abstract class ImplicitTask<T extends ImplicitTask> extends AbstractTask<
 			return;
 		}
 		for ( Task t : deps ) {
-			checkPath(task, (T)t);
+			@SuppressWarnings("unchecked")
+			T Tt = (T)t;
+			checkPath(task, Tt);
 		}
 	}
 	
