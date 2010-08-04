@@ -1,8 +1,6 @@
 package aeminium.runtime.scheduler.workstealing;
 
 import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import aeminium.runtime.task.RuntimeTask;
@@ -36,11 +34,8 @@ public class WorkerThread<T extends RuntimeTask> extends Thread {
 		scheduler.registerThread(this);
 		while (!shutdown) {
 			T task = null;
-			if ( !taskQueue.isEmpty() ) {
-				task = taskQueue.pollFirst();
-			}
+			task = taskQueue.pollFirst();
 			if ( task != null ) {
-				//System.out.println(""+this +" works on " + task);
 				executeTask(task);
 			} else {
 				// scan for other queues
@@ -48,7 +43,6 @@ public class WorkerThread<T extends RuntimeTask> extends Thread {
 				if ( task != null ) {
 					executeTask(task);
 				} else {
-					//System.out.println("" + this + "is parking");
 					scheduler.parkThread(this);
 				}
 			}
