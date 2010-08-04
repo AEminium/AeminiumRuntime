@@ -15,7 +15,7 @@ import aeminium.runtime.tools.benchmark.Reporter;
 
 public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 
-	public static class FibBody implements ResultBody<Integer>, FibonacciConstants {
+	public static class FibBody implements ResultBody, FibonacciConstants {
 		private final Runtime rt;
 		private final int n;
 		private FibBody b1;
@@ -38,7 +38,6 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 			b2 = null;
 		}
 
-		
 		public int seqFib(int n) {
 			if (n <= 2) return 1;
 			else return (seqFib(n-1) + seqFib(n-2));

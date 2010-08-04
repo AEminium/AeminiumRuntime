@@ -11,7 +11,7 @@ public class AeminiumFibonacci {
 	private static final int MAX_CALC = 46;
 	private static final int THRESHOLD = 23;
 
-	public static class FibBody implements ResultBody<Integer> {
+	public static class FibBody implements ResultBody {
 		private final Runtime rt;
 		private final int n;
 		private FibBody b1;

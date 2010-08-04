@@ -205,8 +205,8 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 
 		// callback to ResultBody to compute final result 
 		// BEFORE we trigger parent/dependents 
-		if ( body instanceof ResultBody<?> ) {
-			((ResultBody<?>) body).completed();
+		if ( body instanceof ResultBody) {
+			((ResultBody) body).completed();
 		}
 
 		if ( parent != null) {

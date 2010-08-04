@@ -9,7 +9,7 @@ import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
 
 
-class FibBody implements ResultBody<Integer> {
+class FibBody implements ResultBody {
 	private final Runtime rt;
 	private final int n;
 	private FibBody b1;
