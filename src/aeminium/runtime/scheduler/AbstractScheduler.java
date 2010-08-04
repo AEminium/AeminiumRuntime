@@ -14,12 +14,18 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 	protected final AtomicInteger runningCount = new AtomicInteger();
 	protected final AtomicInteger pausedCount = new AtomicInteger();
 	protected RuntimePrioritizer<T> prioritizer = null;
-	protected final int maxParallelism = Factory.getParallelism();
+	protected final int maxParallelism;
 
 	public AbstractScheduler(EnumSet<Flags> flags) {
 		this.flags = flags;
+		this.maxParallelism = Factory.getParallelism();
 	}
 
+	public AbstractScheduler(int maxParallelism, EnumSet<Flags> flags) {
+		this.flags = flags;
+		this.maxParallelism = maxParallelism;
+	}
+	
 	@Override
 	public void setPrioritizer(RuntimePrioritizer<T> prioritizer ) {
 		this.prioritizer = prioritizer;

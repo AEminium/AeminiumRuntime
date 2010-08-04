@@ -19,6 +19,10 @@ public class LinearScheduler<T extends RuntimeTask> extends AbstractScheduler<T>
 	}
 	
 	@Override
+	public void shutdown() {
+	}
+
+	@Override
 	public void scheduleTasks(Collection<T> tasks) {
 		for ( T t : tasks ) {
 			try {
@@ -36,10 +40,6 @@ public class LinearScheduler<T extends RuntimeTask> extends AbstractScheduler<T>
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void shutdown() {
 	}
 
 }

@@ -21,6 +21,10 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	public PollingWorkStealingScheduler(EnumSet<Flags> flags) {
 		super(flags);
 	}
+	
+	public PollingWorkStealingScheduler(int maxParallelism, EnumSet<Flags> flags) {
+		super(maxParallelism, flags);
+	}
 
 	public void registerThread(WorkerThread<T> thread) {
 		synchronized (this) {
@@ -58,6 +62,22 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	}
 
 	@Override
+	public void shutdown() {
+		for ( WorkerThread<T> thread : threads ){
+			thread.shutdown();
+		}
+	
+		for ( WorkerThread<T> thread : parkedThreads ) {
+			LockSupport.unpark(thread);
+		}
+		threads = null;
+		taskQueues = null;
+		currentThread = null;
+		parkedThreads = null;
+	}
+	
+
+	@Override
 	public void scheduleTask(T task) {
 		Deque<T> taskQueue = taskQueues[currentThread().getIndex()];
 		addTask(taskQueue, task);
@@ -91,21 +111,6 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 		return current;
 	}
 	
-	@Override
-	public void shutdown() {
-		for ( WorkerThread<T> thread : threads ){
-			thread.shutdown();
-		}
-
-		for ( WorkerThread<T> thread : parkedThreads ) {
-			LockSupport.unpark(thread);
-		}
-		threads = null;
-		taskQueues = null;
-		currentThread = null;
-		parkedThreads = null;
-	}
-
 	public void signalWork() {
 		WorkerThread<T> thread = parkedThreads.poll();
 		if ( thread != null ) {

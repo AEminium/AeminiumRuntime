@@ -16,16 +16,30 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
     
     public ForkJoinScheduler(EnumSet<Flags> flags) {
     	super(flags);
-        
     }
+    
+    public ForkJoinScheduler(int maxParallelism, EnumSet<Flags> flags) {
+		super(maxParallelism, flags);
+	}
+    
 
-    @Override
+
+
+	@Override
     public void init() {
     	pool = new ForkJoinPool();
         pool.setAsyncMode(true);
     }
     
-    @Override
+	@Override
+    public void shutdown() {
+		if ( pool != null ) {
+			pool.shutdown();
+			pool = null;
+		}
+	}
+
+	@Override
     public void scheduleTasks(Collection<T> tasks) {
     	for ( T t : tasks ) {
     		scheduleTask(t);
@@ -36,16 +50,5 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
     @SuppressWarnings("unchecked")
     public void scheduleTask(T task) {
     	pool.execute(ForkJoinTask.adapt((Callable)task));
-    }
-    
-	public void shutdown() {
-		if ( pool != null ) {
-			pool.shutdown();
-			pool = null;
-		}
-    }
-
-
-
-    
+    }    
 }

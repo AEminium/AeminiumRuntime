@@ -16,12 +16,28 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 		super(flags);
 	}
 
+	public SingleFixedThreadPoolScheduler(int maxParallelism, EnumSet<Flags> flags) {
+		super(maxParallelism, flags);
+	}
+	
+
+
+
 	@Override
 	public void init() {
 		execService = Executors.newFixedThreadPool(getMaxParallelism());
 	}
 
 	@Override
+	public void shutdown() {
+		if ( execService != null ) {
+			execService.shutdown();
+			execService = null;
+		}
+	}
+	
+	
+@Override
 	public void scheduleTasks(Collection<T> tasks) {
 		for ( T t : tasks ) {
 			scheduleTask(t);
@@ -32,14 +48,6 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 		runningCount.incrementAndGet();
 		task.setScheduler(this);
 		execService.submit(task);
-	}
-
-	@Override
-	public void shutdown() {
-		if ( execService != null ) {
-			execService.shutdown();
-			execService = null;
-		}
 	}
 
 }

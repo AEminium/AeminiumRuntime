@@ -23,6 +23,11 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 		super(flags);
 	}
 
+	public BlockingWorkStealingScheduler(int maxParallelism, EnumSet<Flags> flags) {
+		super(maxParallelism, flags);
+	}
+	
+
 	@Override
 	public void registerThread(WorkerThread<T> thread) {
 		synchronized (this) {
@@ -60,6 +65,23 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	}
 
 	@Override
+	public void shutdown() {
+		shutdown = true;
+		for ( WorkerThread<T> thread : threads ){
+			thread.shutdown();
+		}
+	
+		for ( WorkerThread<T> thread : parkedThreads ) {
+			LockSupport.unpark(thread);
+		}
+		threads = null;
+		taskQueues = null;
+		currentThread = null;
+		parkedThreads = null;
+	}
+	
+
+	@Override
 	public void scheduleTask(T task) {
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
@@ -95,22 +117,6 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 		return current;
 	}
 	
-	@Override
-	public void shutdown() {
-		shutdown = true;
-		for ( WorkerThread<T> thread : threads ){
-			thread.shutdown();
-		}
-
-		for ( WorkerThread<T> thread : parkedThreads ) {
-			LockSupport.unpark(thread);
-		}
-		threads = null;
-		taskQueues = null;
-		currentThread = null;
-		parkedThreads = null;
-	}
-
 	protected WorkerThread<T> getNextThread() {
 		WorkerThread<T> thread = currentThread.get();
 		if ( thread == null ) {
