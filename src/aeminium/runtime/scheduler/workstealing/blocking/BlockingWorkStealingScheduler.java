@@ -66,7 +66,7 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 
 	@Override
 	public void shutdown() {
-		shutdown = false;
+		shutdown = true;
 		for ( WorkerThread<T> thread : threads ){
 			thread.shutdown();
 			LockSupport.unpark(thread);
