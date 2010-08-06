@@ -27,7 +27,7 @@ public class ForkJoinFibonacciBenchmark extends FibonacciBenchmark {
 		protected void compute() {
 			int n = number;
 			if (n <= 1) { /* do nothing */ }
-			else if (n < THRESHOLD) 
+			else if (n <= THRESHOLD) 
 				number = seqFib(n);
 			else {
 				Fibonacci f1 = new Fibonacci(n - 1);	
