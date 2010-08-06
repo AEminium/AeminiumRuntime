@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.EnumSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import aeminium.runtime.implementations.Flags;
@@ -17,7 +18,8 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
-	protected boolean shutdown = false;
+	protected AtomicInteger counter;
+	protected volatile boolean shutdown = false;
 	
 	public BlockingWorkStealingScheduler(EnumSet<Flags> flags) {
 		super(flags);
@@ -27,14 +29,18 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 		super(maxParallelism, flags);
 	}
 	
-
 	@Override
 	public void registerThread(WorkerThread<T> thread) {
-		synchronized (this) {
-			currentThread.set(thread);
-			this.notify();
+		currentThread.set(thread);
+	}
+	
+	@Override
+	public void unregisterThread(WorkerThread<T> thread) {
+		if ( 0 == counter.decrementAndGet() ) {
+			synchronized (this) {
+				this.notifyAll();
+			}
 		}
-		parkThread(thread);
 	}
 	
 	@Override
@@ -44,6 +50,7 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 		currentThread = new ThreadLocal<WorkerThread<T>>();
 		threads =  new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];
+		counter = new AtomicInteger(threads.length);
 				
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
@@ -54,32 +61,33 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 		// start and register threads threads
 		for ( WorkerThread<T> thread : threads ) {
 			thread.start();
-			try {
-				synchronized (this) {
-					this.wait();					
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
 	@Override
 	public void shutdown() {
-		shutdown = true;
+		shutdown = false;
 		for ( WorkerThread<T> thread : threads ){
 			thread.shutdown();
-		}
-	
-		for ( WorkerThread<T> thread : parkedThreads ) {
 			LockSupport.unpark(thread);
 		}
+
+		synchronized (this) {
+			while (counter.get() > 0 ) {
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		threads = null;
 		taskQueues = null;
 		currentThread = null;
 		parkedThreads = null;
+		counter = null;
 	}
-	
 
 	@Override
 	public void scheduleTask(T task) {

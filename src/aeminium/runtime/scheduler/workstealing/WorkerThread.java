@@ -9,7 +9,7 @@ import aeminium.runtime.task.RuntimeTask;
 public class WorkerThread<T extends RuntimeTask> extends Thread {
 	protected final Deque<T> taskQueue;
 	protected final int index;
-	protected boolean shutdown = false;
+	protected volatile boolean shutdown = false;
 	protected final WorkStealingScheduler<T> scheduler;
 	
 	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
@@ -48,6 +48,7 @@ public class WorkerThread<T extends RuntimeTask> extends Thread {
 				}
 			}
 		}
+		scheduler.unregisterThread(this);
 	}
 	
 	protected void executeTask(T task) {

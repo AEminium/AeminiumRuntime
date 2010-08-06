@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.EnumSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import aeminium.runtime.implementations.Flags;
@@ -17,6 +18,7 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
+	protected AtomicInteger counter;
 	
 	public PollingWorkStealingScheduler(EnumSet<Flags> flags) {
 		super(flags);
@@ -27,11 +29,15 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	}
 
 	public void registerThread(WorkerThread<T> thread) {
-		synchronized (this) {
-			currentThread.set(thread);
-			this.notify();
+		currentThread.set(thread);
+	}
+	
+	public void unregisterThread(WorkerThread<T> thread) {
+		if ( 0 ==  counter.decrementAndGet() ) {
+			synchronized (this) {
+				this.notifyAll();
+			}
 		}
-		parkThread(thread);
 	}
 	
 	@Override
@@ -41,7 +47,8 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 		currentThread = new ThreadLocal<WorkerThread<T>>();
 		threads = new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];
-				
+		counter = new AtomicInteger(threads.length);
+		
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
 			threads[i] = new WorkerThread<T>(i, this);
@@ -51,13 +58,6 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 		// start and register threads threads
 		for ( WorkerThread<T> thread : threads ) {
 			thread.start();
-			try {
-				synchronized (this) {
-					this.wait();					
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 
@@ -65,17 +65,25 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	public void shutdown() {
 		for ( WorkerThread<T> thread : threads ){
 			thread.shutdown();
-		}
-	
-		for ( WorkerThread<T> thread : parkedThreads ) {
 			LockSupport.unpark(thread);
 		}
+
+		synchronized (this) {
+			while (counter.get() > 0 ) {
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		threads = null;
 		taskQueues = null;
 		currentThread = null;
 		parkedThreads = null;
+		counter = null;
 	}
-	
 
 	@Override
 	public void scheduleTask(T task) {
@@ -123,6 +131,7 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 		LockSupport.parkNanos(thread, 100000);
 	}
 
+	@Override
 	public T scanQueues() {
 		for ( Deque<T> q : taskQueues ) {
 			T task = q.pollLast();
