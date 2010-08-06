@@ -33,10 +33,12 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	}
 	
 	public void unregisterThread(WorkerThread<T> thread) {
-		if ( 0 ==  counter.decrementAndGet() ) {
-			synchronized (this) {
-				this.notifyAll();
-			}
+		if ( 0 ==  counter.decrementAndGet() ) {	
+			threads = null;
+			taskQueues = null;
+			currentThread = null;
+			parkedThreads = null;
+			counter = null;
 		}
 	}
 	
@@ -67,22 +69,6 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 			thread.shutdown();
 			LockSupport.unpark(thread);
 		}
-
-		synchronized (this) {
-			while (counter.get() > 0 ) {
-				try {
-					this.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		threads = null;
-		taskQueues = null;
-		currentThread = null;
-		parkedThreads = null;
-		counter = null;
 	}
 
 	@Override

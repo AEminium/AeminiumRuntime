@@ -37,9 +37,12 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	@Override
 	public void unregisterThread(WorkerThread<T> thread) {
 		if ( 0 == counter.decrementAndGet() ) {
-			synchronized (this) {
-				this.notifyAll();
-			}
+			// last thread cleansup resources 
+			threads = null;
+			taskQueues = null;
+			currentThread = null;
+			parkedThreads = null;
+			counter = null;
 		}
 	}
 	
@@ -72,21 +75,7 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 			LockSupport.unpark(thread);
 		}
 
-		synchronized (this) {
-			while (counter.get() > 0 ) {
-				try {
-					this.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		threads = null;
-		taskQueues = null;
-		currentThread = null;
-		parkedThreads = null;
-		counter = null;
+
 	}
 
 	@Override
