@@ -58,12 +58,12 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			}
 
 			@Override
-			public BlockingTask createBockingTask(Body body, Collection<Hints> hints) {
+			public BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
 				return new ImplicitBlockingTask(body, hints, flags);
 			}
 
 			@Override
-			public NonBlockingTask createNonBockingTask(Body body, Collection<Hints> hints) {
+			public NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
 				return  new ImplicitNonBlockingTask(body, hints, flags);
 			}
 		};

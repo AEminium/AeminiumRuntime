@@ -54,12 +54,12 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@Override
 	public BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
 		assert( state == GenericRuntimeState.INITIALIZED);
-		return taskFactory.createBockingTask(body, hints);
+		return taskFactory.createBlockingTask(body, hints);
 	}
 
 	@Override
 	public NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
-		return taskFactory.createNonBockingTask(body, hints);
+		return taskFactory.createNonBlockingTask(body, hints);
 	}
 	
 	@Override
