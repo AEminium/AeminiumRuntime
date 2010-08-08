@@ -13,7 +13,7 @@ import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkerThread;
 import aeminium.runtime.task.RuntimeTask;
 
-public class PollingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T> {
+public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T> {
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
 	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
@@ -34,11 +34,10 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 	
 	public void unregisterThread(WorkerThread<T> thread) {
 		if ( 0 ==  counter.decrementAndGet() ) {	
-			threads = null;
-			taskQueues = null;
-			currentThread = null;
-			parkedThreads = null;
-			counter = null;
+			// last thread signals 
+			synchronized (this) {
+				this.notifyAll();
+			}
 		}
 	}
 	
@@ -69,6 +68,24 @@ public class PollingWorkStealingScheduler<T extends RuntimeTask> extends Abstrac
 			thread.shutdown();
 			LockSupport.unpark(thread);
 		}
+		
+		synchronized (this) {
+			try {
+				while ( counter.get() > 0 ) {
+					wait();
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		// cleanup
+		threads = null;
+		taskQueues = null;
+		currentThread = null;
+		parkedThreads = null;
+		counter = null;
 	}
 
 	@Override

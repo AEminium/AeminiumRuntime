@@ -13,7 +13,7 @@ import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkerThread;
 import aeminium.runtime.task.RuntimeTask;
 
-public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
+public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
 	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
@@ -37,12 +37,10 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 	@Override
 	public void unregisterThread(WorkerThread<T> thread) {
 		if ( 0 == counter.decrementAndGet() ) {
-			// last thread cleansup resources 
-			threads = null;
-			taskQueues = null;
-			currentThread = null;
-			parkedThreads = null;
-			counter = null;
+			// last thread signals 
+			synchronized (this) {
+				this.notifyAll();
+			}
 		}
 	}
 	
@@ -74,8 +72,24 @@ public class BlockingWorkStealingScheduler<T extends RuntimeTask> extends Abstra
 			thread.shutdown();
 			LockSupport.unpark(thread);
 		}
+		
+		synchronized (this) {
+			try {
+				while ( counter.get() > 0 ) {
+					wait();
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
-
+		// cleanup
+		threads = null;
+		taskQueues = null;
+		currentThread = null;
+		parkedThreads = null;
+		counter = null;
 	}
 
 	@Override

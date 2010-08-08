@@ -6,7 +6,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
-public class WorkerThread<T extends RuntimeTask> extends Thread {
+public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	protected final Deque<T> taskQueue;
 	protected final int index;
 	protected volatile boolean shutdown = false;
