@@ -5,11 +5,9 @@ import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
+import aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciConstants;
 
-public class AeminiumFibonacci {
-
-	private static final int MAX_CALC = 46;
-	private static final int THRESHOLD = 23;
+public class AeminiumFibonacci  implements FibonacciConstants{
 
 	public static class FibBody implements ResultBody {
 		private final Runtime rt;
@@ -33,7 +31,6 @@ public class AeminiumFibonacci {
 			b1 = null;
 			b2 = null;
 		}
-
 		
 		public int seqFib(int n) {
 			if (n <= 2) return 1;
@@ -42,17 +39,17 @@ public class AeminiumFibonacci {
 		
 		@Override
 		public void execute(Task current) {
-			if ( THRESHOLD < n ) {
+			if ( n <= THRESHOLD  ) {
+				seqFib(n);
+			} else {
 				b1 = new FibBody(n-1, rt);
 				Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
 				rt.schedule(t1, current, Runtime.NO_DEPS);
-				
+
 				b2 = new FibBody(n-2, rt);
 				Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
 				rt.schedule(t2, current, Runtime.NO_DEPS);
-			} else {
-				seqFib(n);
-			}
+			} 
 		}
 	}
 
