@@ -35,18 +35,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public void setScheduler(RuntimeScheduler scheduler) {
-		this.scheduler = scheduler;
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public void setGraph(RuntimeGraph<?> graph) {
-		this.graph = (RuntimeGraph<T>)graph;
-	}
-	
-	@Override
 	public Object call() throws Exception {
 		try {
 			body.execute(this);
@@ -71,6 +59,10 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return hints;
 	}
 	
+	public void setScheduler(RuntimeScheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+	
 	@Override
 	public void setResult(Object result) {
 		if ( result == null ) {
@@ -88,12 +80,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		Object value = result;
 		result = UNSET;
 		return value;
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public TaskDescription<T> getDescription() {
-		return graph.getTaskDescription((T) this);
 	}
 
 	@Override

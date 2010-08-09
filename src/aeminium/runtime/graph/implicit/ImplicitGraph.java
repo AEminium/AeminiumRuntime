@@ -8,7 +8,6 @@ import aeminium.runtime.Task;
 import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
-import aeminium.runtime.task.TaskDescription;
 import aeminium.runtime.task.implicit.ImplicitTask;
 
 @SuppressWarnings("unchecked")
@@ -46,12 +45,6 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	}
 
 	@Override
-	public TaskDescription<T> getTaskDescription(T task) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void taskCompleted(T task) {
 		if ( taskCount.decrementAndGet() == 0 ) {
 			synchronized (this) {
@@ -60,7 +53,6 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		}
 	}
 	
-
 	@Override
 	public void waitToEmpty() {
 		while ( taskCount.get() != 0 ) {

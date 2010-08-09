@@ -23,6 +23,7 @@ import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
+import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
 
 public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTask<T> {
@@ -71,7 +72,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void init(Task parent, RuntimePrioritizer<T> prioritizer, RuntimeGraph<T> graph, Collection<T> deps){
+	public void init(Task parent, RuntimePrioritizer<RuntimeTask> prioritizer, RuntimeGraph<RuntimeTask> graph, Collection<RuntimeTask> deps){
 		synchronized (this) {
 			// check for double scheduling
 			if ( state != ImplicitTaskState.UNSCHEDULED) {
@@ -86,17 +87,16 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			}
 			
 			// initialize references
-			this.prioritizer = prioritizer;
-			this.graph = graph;
+			this.prioritizer = (RuntimePrioritizer<T>) prioritizer;
+			this.graph = (RuntimeGraph<T>) graph;
 			
 			// setup dependencies
 			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
-				for ( T t : deps ) {
-						@SuppressWarnings("unchecked")
+				for ( RuntimeTask t :deps) {
 						T Tthis = (T)this;
-						 count += t.addDependent(Tthis);
+						 count += ((ImplicitTask<T>) t).addDependent(Tthis);
 				}
 				updateDependencyCount(count);
 			} else {
@@ -104,18 +104,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			}
 		}
 	}
-	
-//	@SuppressWarnings("unchecked")
-//	public void setParent(Task parent) {
-//		if ( parent != Runtime.NO_PARENT ) {
-//			synchronized (this) {
-//				setLevel(((T)parent).getLevel()+1);
-//				this.parent = (T) parent;
-//				this.parent.attachChild((T)this);
-//			}
-//		}
-//	}
-	
+
 	public void attachChild(T child) {
 		synchronized (this) {
 			updateChildCount(1);
@@ -269,13 +258,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 		graph.taskCompleted((T)this);
 	}
-	
-//	public void setPrioritizer(RuntimePrioritizer<T> prioritizer) {
-//		synchronized (this) {
-//			this.prioritizer = prioritizer;			
-//		}
-//	}
-	
+
 	public void checkForCycles() {
 		synchronized (this) {
 			@SuppressWarnings("unchecked")
