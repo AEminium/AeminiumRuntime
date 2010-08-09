@@ -19,7 +19,6 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
 	protected AtomicInteger counter;
-	
 	public PollingWorkStealingScheduler(EnumSet<Flags> flags) {
 		super(flags);
 	}
@@ -91,8 +90,17 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	@Override
 	public final void scheduleTask(T task) {
 		Deque<T> taskQueue = currentThread().getTaskList();//taskQueues[currentThread().getIndex()];
-		addTask(taskQueue, task);
-		signalWork();
+		if ( taskQueue.isEmpty() ) {
+			addTask(taskQueue, task);
+			signalWork();
+		} else {
+			try {
+				task.setScheduler(this);
+				task.call();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override

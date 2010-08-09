@@ -96,8 +96,17 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	public final void scheduleTask(T task) {
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
+		if ( taskQueue.isEmpty() ) {
 		addTask(taskQueue, task);
 		signalWork(thread);
+		} else {
+			task.setScheduler(this);
+			try {
+				task.call();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override

@@ -3,6 +3,8 @@ package aeminium.runtime.scheduler.forkjoin;
 import java.util.Collection;
 import java.util.EnumSet;
 
+import javax.smartcardio.ATR;
+
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
 import aeminium.runtime.implementations.Flags;
@@ -44,8 +46,18 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
     @Override
     public final void scheduleTask(T task) {
     	task.setScheduler(this);
-    	if ( Thread.currentThread() instanceof AeminiumForkJoinWorkerThread ) {
-    		ForkJoinTask.adapt(task).fork();
+    	Thread thread =Thread.currentThread();
+    	if (  thread instanceof AeminiumForkJoinWorkerThread ) {
+    		AeminiumForkJoinWorkerThread athread = (AeminiumForkJoinWorkerThread)thread;
+    		if ( athread.doFork() ) {
+    			ForkJoinTask.adapt(task).fork();
+    		} else {
+    			try {
+					task.call();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+    		}
     	} else {
     		pool.execute(ForkJoinTask.adapt(task));
     	}
