@@ -248,7 +248,9 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		if ( this.children != null ) {
 			this.children = null;
 		}
-		graph.taskCompleted((T)this);
+		@SuppressWarnings("unchecked")
+		T This = (T)this;
+		graph.taskCompleted(This);
 	}
 
 	public void checkForCycles() {

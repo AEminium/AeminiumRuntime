@@ -59,6 +59,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return hints;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void setScheduler(RuntimeScheduler scheduler) {
 		this.scheduler = scheduler;
 	}
@@ -110,6 +111,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return this.level;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void taskCompleted() {
 		graph.taskCompleted((T)this);

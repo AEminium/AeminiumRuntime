@@ -14,7 +14,7 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	
 	public void init(Task parent, RuntimePrioritizer<RuntimeTask> prioritizer, RuntimeGraph<RuntimeTask> graph, Collection<RuntimeTask> deps);
 	
-	public void setScheduler(RuntimeScheduler scheduler);
+	public void setScheduler(RuntimeScheduler<?> scheduler);
 	
 	public Collection<Hints> getHints();
 	

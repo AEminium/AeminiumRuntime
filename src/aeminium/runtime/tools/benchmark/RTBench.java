@@ -1,9 +1,6 @@
 package aeminium.runtime.tools.benchmark;
 
-import java.util.Arrays;
-
 import aeminium.runtime.implementations.Configuration;
-import aeminium.runtime.implementations.Factory;
 
 public class RTBench {
 	
