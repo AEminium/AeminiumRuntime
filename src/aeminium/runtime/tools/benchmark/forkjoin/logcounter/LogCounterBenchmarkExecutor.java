@@ -16,7 +16,7 @@ public class LogCounterBenchmarkExecutor extends BenchmarkExecutor {
 	
 	public static void main(String[] args) {
 		BenchmarkExecutor bench = new LogCounterBenchmarkExecutor();
-		bench.run();
+		bench.run(args);
 	}
 
 	@Override

@@ -16,7 +16,7 @@ public class IntegrateBenchmarkExecutor extends BenchmarkExecutor {
 	
 	public static void main(String[] args) {
 		BenchmarkExecutor bench = new IntegrateBenchmarkExecutor();
-		bench.run();
+		bench.run(args);
 	}
 
 	@Override

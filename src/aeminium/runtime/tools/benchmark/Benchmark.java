@@ -7,5 +7,4 @@ import aeminium.runtime.implementations.Flags;
 public interface Benchmark {
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter);
 	public String getName();
-	
 }

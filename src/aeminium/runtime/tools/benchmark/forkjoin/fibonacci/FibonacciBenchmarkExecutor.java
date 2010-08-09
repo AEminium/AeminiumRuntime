@@ -8,15 +8,15 @@ public class FibonacciBenchmarkExecutor extends BenchmarkExecutor {
 	public Benchmark[] getBenchmarks() {
 		Benchmark[] tests = {
 			new AeminiumFibonacciBenchmark(),
-			//new ForkJoinFibonacciBenchmark(),
-			//new SequentialFibonacciBenchmark()
+			new ForkJoinFibonacciBenchmark(),
+			new SequentialFibonacciBenchmark()
 		};
 		return tests;
 	}
 	
 	public static void main(String[] args) {
 		BenchmarkExecutor bench = new FibonacciBenchmarkExecutor();
-		bench.run();
+		bench.run(args);
 	}
 
 	@Override

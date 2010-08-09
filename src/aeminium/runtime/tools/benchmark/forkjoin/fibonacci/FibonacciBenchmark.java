@@ -10,9 +10,9 @@ public abstract class FibonacciBenchmark implements Benchmark, FibonacciConstant
 
 	@Override
 	public String getName() {
-		return "Fibonacci Benchmark";
+		return this.getClass().getSimpleName();
 	}
-
+	
 	@Override
 	public abstract void run(String version, EnumSet<Flags> flags, Reporter reporter);
 	

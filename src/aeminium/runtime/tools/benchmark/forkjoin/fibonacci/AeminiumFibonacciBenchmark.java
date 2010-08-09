@@ -1,21 +1,18 @@
 package aeminium.runtime.tools.benchmark.forkjoin.fibonacci;
 
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.Map;
 
 import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
-import aeminium.runtime.examples.fjtests.AeminiumFibonacci;
+import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.Factory;
 import aeminium.runtime.implementations.Flags;
-import aeminium.runtime.implementations.Factory.RuntimeConfiguration;
 import aeminium.runtime.tools.benchmark.Reporter;
 
 public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 
-	public static class FibBody implements ResultBody, FibonacciConstants {
+	public static class FibBody implements ResultBody {
 		private final Runtime rt;
 		private final int n;
 		private FibBody b1;
@@ -37,60 +34,43 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 			b1 = null;
 			b2 = null;
 		}
-
-		public int seqFib(int n) {
-			if (n <= 2) return 1;
-			else return (seqFib(n-1) + seqFib(n-2));
-		}
 		
 		@Override
 		public void execute(Task current) {
-			if ( THRESHOLD < n ) {
+			if ( n <= THRESHOLD  ) {
+				Fibonacci.fibOf(n);
+			} else {
 				b1 = new FibBody(n-1, rt);
 				Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
 				rt.schedule(t1, current, Runtime.NO_DEPS);
-				
+
 				b2 = new FibBody(n-2, rt);
 				Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
 				rt.schedule(t2, current, Runtime.NO_DEPS);
-			} else {
-				seqFib(n);
-			}
+			} 
 		}
 	}
-
 	
-	public void runTest(Runtime rt, String version, EnumSet<Flags> flags, Reporter reporter, int n) {
+	protected long runTest(Runtime rt, int n) {
 		long start = System.nanoTime();
 		rt.init();
-		Task t1 = rt.createNonBlockingTask(AeminiumFibonacci.createFibBody(rt, n),
+		
+		Task t1 = rt.createNonBlockingTask(new FibBody(n, rt),
 				                           Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
+		
 		rt.shutdown();
 
 		long end = System.nanoTime();
-
-		String result = String.format("%d", (end - start));
-		reporter.reportLn(result);
-		reporter.flush();
+		return (end - start);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
-		Map<String, RuntimeConfiguration> impls = Factory
-				.getImplementations();
-		for (String runtimeName : impls.keySet()) {
-			Runtime rt = impls.get(runtimeName).instanciate(flags);
-			for (String temperature : Arrays.asList("Cold", "Warm")) {
-				String reportName = String.format("Aeminium %s %s %s", runtimeName,
-						flags, temperature);
-				reporter.startBenchmark(reportName);
-				runTest(rt, runtimeName, flags, reporter, MAX_CALC);
-
-				reporter.stopBenchmark(reportName);
-			}
-		}
+		Runtime rt = Factory.getRuntime(version, flags);
+		long cold = runTest(rt, MAX_CALC);
+		long warm = runTest(rt, MAX_CALC);
+		reporter.reportLn(String.format(RESULT_FORMAT, Configuration.getProcessorCount(), cold, warm));
 	}
 
 }
