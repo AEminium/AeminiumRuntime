@@ -4,14 +4,12 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.TaskDescription;
 import aeminium.runtime.task.implicit.ImplicitTask;
-import aeminium.runtime.task.implicit.ImplicitTaskState;
 
 @SuppressWarnings("unchecked")
 public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
@@ -39,27 +37,11 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	public void addTask(T task, Task parent, Collection<T> deps) {
 		taskCount.incrementAndGet();
 		T itask = (T)task;
-				
-		synchronized (itask) {
-			if ( itask.getTaskState() != ImplicitTaskState.UNSCHEDULED) {
-				throw new RuntimeError("Cannot schedule task twice: " + task);
-			}
 
-			// set prioritizer
-			itask.setPrioritizer(prioritizer);
+		itask.init(parent, prioritizer, this, deps);
 
-			// set graph
-			itask.setGraph(this);
-			
-			// set parent
-			itask.setParent(parent);
-			
-			// update dependency count and eventually schedule 
-			itask.setDependencies(deps);
-			
-			if ( checkForCycles ) {
-				itask.checkForCycles();
-			}			
+		if ( checkForCycles ) {
+			itask.checkForCycles();
 		}
 	}
 
@@ -68,8 +50,6 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
 
 	@Override
 	public void taskCompleted(T task) {

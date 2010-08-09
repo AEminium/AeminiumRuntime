@@ -14,8 +14,10 @@ import aeminium.runtime.Hints;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
+import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
@@ -41,7 +43,6 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			debug = false;
 		}
 	}
-
 
 	@SuppressWarnings("unchecked")
 	public static TaskFactory<ImplicitTask> createFactory(EnumSet<Flags> flags) {
@@ -70,15 +71,50 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void setParent(Task parent) {
-		if ( parent != Runtime.NO_PARENT ) {
-			synchronized (this) {
+	public void init(Task parent, RuntimePrioritizer<T> prioritizer, RuntimeGraph<T> graph, Collection<T> deps){
+		synchronized (this) {
+			// check for double scheduling
+			if ( state != ImplicitTaskState.UNSCHEDULED) {
+				throw new RuntimeError("Cannot schedule task twice: " + this);
+			}
+			
+			// setup parent connection
+			if ( parent != Runtime.NO_PARENT ) {
 				setLevel(((T)parent).getLevel()+1);
 				this.parent = (T) parent;
 				this.parent.attachChild((T)this);
 			}
+			
+			// initialize references
+			this.prioritizer = prioritizer;
+			this.graph = graph;
+			
+			// setup dependencies
+			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
+			if ( (Object)deps != Runtime.NO_DEPS ) {
+				int count = 0;
+				for ( T t : deps ) {
+						@SuppressWarnings("unchecked")
+						T Tthis = (T)this;
+						 count += t.addDependent(Tthis);
+				}
+				updateDependencyCount(count);
+			} else {
+				scheduleTask();
+			}
 		}
 	}
+	
+//	@SuppressWarnings("unchecked")
+//	public void setParent(Task parent) {
+//		if ( parent != Runtime.NO_PARENT ) {
+//			synchronized (this) {
+//				setLevel(((T)parent).getLevel()+1);
+//				this.parent = (T) parent;
+//				this.parent.attachChild((T)this);
+//			}
+//		}
+//	}
 	
 	public void attachChild(T child) {
 		synchronized (this) {
@@ -223,24 +259,22 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 
 		// cleanup references 
 		if ( dependents != null ) {
-			this.dependents.clear();
 			this.dependents = null;
 		}
 		
 		this.body = null;
 		this.parent = null;
 		if ( this.children != null ) {
-			this.children.clear();
 			this.children = null;
 		}
 		graph.taskCompleted((T)this);
 	}
 	
-	public void setPrioritizer(RuntimePrioritizer<T> prioritizer) {
-		synchronized (this) {
-			this.prioritizer = prioritizer;			
-		}
-	}
+//	public void setPrioritizer(RuntimePrioritizer<T> prioritizer) {
+//		synchronized (this) {
+//			this.prioritizer = prioritizer;			
+//		}
+//	}
 	
 	public void checkForCycles() {
 		synchronized (this) {
