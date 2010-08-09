@@ -32,7 +32,7 @@ public abstract class BaseTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		rt = Factory.getRuntime("default", Factory.getFlagsFromEnvironment());
+		rt = Factory.getRuntime();
 	}
 
 	protected Runtime getRuntime() {
