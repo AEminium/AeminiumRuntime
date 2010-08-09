@@ -9,7 +9,7 @@ import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.task.RuntimeAtomicTask;
 
-public class ImplicitAtomicTask<T extends ImplicitTask<T>> extends ImplicitTask<T> implements RuntimeAtomicTask<T> {
+public final class ImplicitAtomicTask<T extends ImplicitTask<T>> extends ImplicitTask<T> implements RuntimeAtomicTask<T> {
 	protected RuntimeDataGroup<T> datagroup;
 	
 	public ImplicitAtomicTask(Body body, RuntimeDataGroup<T> datagroup,	Collection<Hints> hints, EnumSet<Flags> flags) {
