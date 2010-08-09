@@ -23,5 +23,4 @@ public abstract class AbstractPrioritizer<T extends RuntimeTask> implements Runt
 	public void taskPaused(T task) {
 		
 	}
-	
 }

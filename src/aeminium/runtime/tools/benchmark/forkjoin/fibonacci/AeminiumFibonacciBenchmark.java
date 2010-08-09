@@ -25,7 +25,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		}
 		
 		@Override
-		public void completed() {
+		public final void completed() {
 			if ( b1 != null && b2 != null ) {
 				value = b1.value + b2.value;
 			} else {
@@ -36,7 +36,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		}
 		
 		@Override
-		public void execute(Task current) {
+		public final void execute(Task current) {
 			if ( n <= THRESHOLD  ) {
 				Fibonacci.fibOf(n);
 			} else {

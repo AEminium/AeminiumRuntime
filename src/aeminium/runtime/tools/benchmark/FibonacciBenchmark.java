@@ -22,7 +22,7 @@ class FibBody implements ResultBody {
 	}
 	
 	@Override
-	public void completed() {
+	public final void completed() {
 		if ( b1 != null && b2 != null ) {
 			value = b1.value + b2.value;
 		} else {
@@ -33,7 +33,7 @@ class FibBody implements ResultBody {
 	}
 
 	@Override
-	public void execute(Task current) {
+	public final void execute(Task current) {
 		if ( 2 < n ) {
 			b1 = new FibBody(n-1, rt);
 			Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);

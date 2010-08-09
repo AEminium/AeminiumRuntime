@@ -25,11 +25,11 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	}
 	
 	@Override
-	public void init() {
+	public final void init() {
 	}
 
 	@Override
-	public void shutdown() {
+	public final void shutdown() {
 	}
 	
 	@Override
@@ -54,7 +54,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	}
 	
 	@Override
-	public void waitToEmpty() {
+	public final void waitToEmpty() {
 		while ( taskCount.get() != 0 ) {
 			synchronized (this) {
 				try {

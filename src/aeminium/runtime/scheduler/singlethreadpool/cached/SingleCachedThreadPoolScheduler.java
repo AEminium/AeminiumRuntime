@@ -20,29 +20,27 @@ public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends Abst
 		super(maxParallelism, flags);
 	}
 	
-
 	@Override
-	public void init() {
+	public final void init() {
 		execService = Executors.newCachedThreadPool();
 	}
 
 	@Override
-	public void shutdown() {
+	public final void shutdown() {
 		if ( execService != null ) {
 			execService.shutdown();
 			execService = null;
 		}
 	}
-	
 
 	@Override
-	public void scheduleTasks(Collection<T> tasks) {
+	public final void scheduleTasks(Collection<T> tasks) {
 		for ( T t : tasks ) {
 			scheduleTask(t);
 		}
 	}
 	
-	public void scheduleTask(T task) {
+	public final void scheduleTask(T task) {
 		runningCount.incrementAndGet();
 		task.setScheduler(this);
 		execService.submit(task);

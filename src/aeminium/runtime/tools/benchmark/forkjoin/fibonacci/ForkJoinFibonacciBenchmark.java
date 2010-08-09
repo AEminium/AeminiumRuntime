@@ -17,7 +17,7 @@ public class ForkJoinFibonacciBenchmark extends FibonacciBenchmark {
 		public FibonacciAction(int n) { number = n; }
 
 		@Override
-		protected void compute() {
+		protected final void compute() {
 			int n = number;
 			if (n <= 1) { 
 				/* do nothing */ 

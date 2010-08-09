@@ -9,7 +9,7 @@ public class AeminiumForkJoinWorkerThread extends ForkJoinWorkerThread {
 	public static ForkJoinWorkerThreadFactory getFactory() {
 		return new ForkJoinWorkerThreadFactory() {
 			@Override
-			public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+			public final ForkJoinWorkerThread newThread(ForkJoinPool pool) {
 				return new AeminiumForkJoinWorkerThread(pool);
 			}
 		};

@@ -18,7 +18,7 @@ public final class ImplicitAtomicTask<T extends ImplicitTask<T>> extends Implici
 	}
 
 	@Override
-	public Object call() throws Exception {
+	public final Object call() throws Exception {
 		@SuppressWarnings("unchecked")
 		T Tthis = (T)this;
 		if ( datagroup.trylock(Tthis) ) {
@@ -28,13 +28,13 @@ public final class ImplicitAtomicTask<T extends ImplicitTask<T>> extends Implici
 	}
 
 	@Override 
-	public void taskCompleted() {
+	public final void taskCompleted() {
 		super.taskCompleted();
 		datagroup.unlock();
 	}
 
 	@Override
-	public RuntimeDataGroup<T> getDataGroup() {
+	public final RuntimeDataGroup<T> getDataGroup() {
 		synchronized (this) {
 			return datagroup;
 		}

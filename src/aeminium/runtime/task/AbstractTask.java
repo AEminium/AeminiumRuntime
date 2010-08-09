@@ -51,11 +51,11 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return null;		
 	}
 	
-	public Body getBody() {
+	public final Body getBody() {
 		return body;
 	}
 	
-	public Collection<Hints> getHints() {
+	public final Collection<Hints> getHints() {
 		return hints;
 	}
 	
@@ -83,7 +83,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 
 	@Override
-	public void setData(String key, Object value) {
+	public final void setData(String key, Object value) {
 		synchronized (this) {
 			if ( data == null) {
 				this.data = new HashMap<String, Object>();
@@ -102,11 +102,11 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		}
 	}
 	
-	protected void setLevel(int level) {
+	protected final void setLevel(int level) {
 		this.level = level;
 	}
 	
-	public int getLevel() {
+	public final int getLevel() {
 		return this.level;
 	}
 	

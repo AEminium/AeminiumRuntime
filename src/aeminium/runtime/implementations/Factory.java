@@ -126,9 +126,9 @@ public class Factory {
 		database.clear();
 		
 		// set default implementation
-		//database.put("default", ImplicitGraph_ForkJoinScheduler_None_FifoDataGroup);
+		database.put("default", ImplicitGraph_ForkJoinScheduler_None_FifoDataGroup);
 		//database.put("default", ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
-		database.put("default", ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup);
+		//database.put("default", ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup);
 		//database.put("default", ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup);
 	}
 	
@@ -138,7 +138,7 @@ public class Factory {
 	protected Factory() {} 
 	
 	@SuppressWarnings("unchecked")
-	public static Map<String, RuntimeConfiguration> getImplementations() {
+	public final static Map<String, RuntimeConfiguration> getImplementations() {
 		return Collections.unmodifiableMap(database);
 	}
 	
@@ -146,7 +146,7 @@ public class Factory {
 	 * Returns a new 'default' runtime object.
 	 * @return
 	 */
-	public static Runtime getRuntime() {
+	public final static Runtime getRuntime() {
 		return getRuntime(Configuration.getImplementation(), Configuration.getFlags());
 	}
 	
@@ -159,7 +159,7 @@ public class Factory {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static Runtime getRuntime(String name, EnumSet<Flags> flags) {
+	public final static Runtime getRuntime(String name, EnumSet<Flags> flags) {
 		if ( database.containsKey(name)) {
 			return database.get(name).instanciate(flags);
 		} else {

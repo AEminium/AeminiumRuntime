@@ -22,12 +22,12 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 	}
     
 	@Override
-    public void init() {
+    public final void init() {
     	pool = new ForkJoinPool(AeminiumForkJoinWorkerThread.getFactory());
     }
     
 	@Override
-    public void shutdown() {
+    public final void shutdown() {
 		if ( pool != null ) {
 			pool.shutdown();
 			pool = null;

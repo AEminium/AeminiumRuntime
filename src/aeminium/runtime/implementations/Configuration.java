@@ -41,11 +41,11 @@ public final class Configuration {
 	
 	protected Configuration() {}
 	
-	public static int getProcessorCount() {
+	public final static int getProcessorCount() {
 		return processorCount;
 	}
 	
-	public static String getImplementation() {
+	public final static String getImplementation() {
 		return implementation;
 	}
 	
@@ -54,16 +54,15 @@ public final class Configuration {
 	 * 
 	 * @return
 	 */
-	public static EnumSet<Flags> getFlags() {
+	public final static EnumSet<Flags> getFlags() {
 		return flags;
 	}
 
-	public static class ListImplementations {
+	public final static class ListImplementations {
 		public static void main(String[] args) {
 			for ( RuntimeConfiguration<?> rc : Factory.getImplementations().values()  ) {
 				System.out.println(rc.getName());
 			}
 		}
 	}
-
 }
