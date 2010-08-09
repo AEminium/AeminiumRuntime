@@ -28,14 +28,14 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 			@Override 
 			public void shutdown() {}
 			@Override
-			public DataGroup createDataGroup() {
+			public final DataGroup createDataGroup() {
 				return new FifoDataGroup<T>(scheduler, flags);
 			}
 		};
 	}
 	
 	@Override
-	public boolean trylock(T task) {
+	public final boolean trylock(T task) {
 		synchronized (this) {
 			if ( locked ) {
 				waitQueue.add(task);
@@ -49,7 +49,7 @@ public class FifoDataGroup<T extends RuntimeTask> extends AbstractDataGroup<T> {
 		}
 	}
 
-	public void unlock() {
+	public final void unlock() {
 		synchronized (this) {
 			locked = false;
 			owner = null;

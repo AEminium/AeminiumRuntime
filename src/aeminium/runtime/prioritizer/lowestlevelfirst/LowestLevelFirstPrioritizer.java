@@ -36,7 +36,7 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	}
 	
 	@Override
-	public void scheduleTasks(Collection<T> tasks) {
+	public final void scheduleTasks(Collection<T> tasks) {
 		synchronized (this) {
 			waitingQueue.addAll(tasks);
 			schedule();
@@ -44,14 +44,14 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	}
 
 	@Override
-	public void scheduleTask(T task) {
+	public  final void scheduleTask(T task) {
 		synchronized (this) {
 			waitingQueue.add(task);
 			schedule();
 		}
 	}
 	
-	protected void schedule() {
+	protected  final void schedule() {
 		synchronized (this) {
 			int count  = scheduler.getMaxParallelism() - scheduler.getRunningTasks();
 
@@ -72,11 +72,11 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	}
 
 	@Override
-	public void taskFinished(T task) {
+	public final void taskFinished(T task) {
 		schedule();
 	}
 	
-	public void taskPaused(T task) {
+	public final void taskPaused(T task) {
 		schedule();
 	}
 

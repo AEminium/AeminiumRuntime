@@ -46,24 +46,24 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public AtomicTask createAtomicTask(Body body, DataGroup group, Collection<Hints> hints) {
+	public final AtomicTask createAtomicTask(Body body, DataGroup group, Collection<Hints> hints) {
 		assert( state == GenericRuntimeState.INITIALIZED);
 		return taskFactory.createAtomicTask(body, (RuntimeDataGroup<T>)group, hints);
 	}
 
 	@Override
-	public BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
+	public final BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
 		assert( state == GenericRuntimeState.INITIALIZED);
 		return taskFactory.createBlockingTask(body, hints);
 	}
 
 	@Override
-	public NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
+	public final NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
 		return taskFactory.createNonBlockingTask(body, hints);
 	}
 	
 	@Override
-	public DataGroup createDataGroup() {
+	public final DataGroup createDataGroup() {
 		assert( state == GenericRuntimeState.INITIALIZED);
 		return dataGroupFactory.createDataGroup();
 	}
@@ -84,7 +84,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void schedule(Task task, Task parent, Collection<Task> deps) {
+	public final void schedule(Task task, Task parent, Collection<Task> deps) {
 		assert ( state == GenericRuntimeState.INITIALIZED );
 		assert ( task instanceof RuntimeTask );
 		assert ( parent instanceof RuntimeTask );
@@ -92,7 +92,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	}
 
 	@Override
-	public void shutdown() {
+	public final void shutdown() {
 		assert ( state == GenericRuntimeState.INITIALIZED );
 		state = GenericRuntimeState.SHUTTING_DOWN;
 		

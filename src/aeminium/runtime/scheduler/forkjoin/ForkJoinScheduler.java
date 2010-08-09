@@ -35,14 +35,14 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 	}
 
 	@Override
-    public void scheduleTasks(Collection<T> tasks) {
+    public final void scheduleTasks(Collection<T> tasks) {
     	for ( T t : tasks ) {
     		scheduleTask(t);
     	}
     }
 	
     @Override
-    public void scheduleTask(T task) {
+    public final void scheduleTask(T task) {
     	task.setScheduler(this);
     	if ( Thread.currentThread() instanceof AeminiumForkJoinWorkerThread ) {
     		ForkJoinTask.adapt(task).fork();

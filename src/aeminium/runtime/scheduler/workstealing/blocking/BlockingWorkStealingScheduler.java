@@ -30,12 +30,12 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 	
 	@Override
-	public void registerThread(WorkerThread<T> thread) {
+	public final void registerThread(WorkerThread<T> thread) {
 		currentThread.set(thread);
 	}
 	
 	@Override
-	public void unregisterThread(WorkerThread<T> thread) {
+	public final void unregisterThread(WorkerThread<T> thread) {
 		if ( 0 == counter.decrementAndGet() ) {
 			// last thread signals 
 			synchronized (this) {
@@ -93,7 +93,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 
 	@Override
-	public void scheduleTask(T task) {
+	public final void scheduleTask(T task) {
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
 		addTask(taskQueue, task);
@@ -101,7 +101,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 
 	@Override
-	public void scheduleTasks(Collection<T> tasks) {
+	public final void scheduleTasks(Collection<T> tasks) {
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
 		for ( T task : tasks ) {
@@ -110,14 +110,14 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		signalWork(thread);
 	}
 
-	protected void addTask(Deque<T> q, T task) {
+	protected final void addTask(Deque<T> q, T task) {
 		task.setScheduler(this);
 		while ( !q.offerFirst(task) ) {
 			// loop until we could add it 
 		}
 	}
 	
-	protected WorkerThread<T> currentThread() {
+	protected final WorkerThread<T> currentThread() {
 		WorkerThread<T> current = currentThread.get();
 		if ( current == null ) {
 			current = parkedThreads.poll();
@@ -128,7 +128,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		return current;
 	}
 	
-	protected WorkerThread<T> getNextThread() {
+	protected final WorkerThread<T> getNextThread() {
 		WorkerThread<T> thread = currentThread.get();
 		if ( thread == null ) {
 			thread = parkedThreads.poll();
@@ -140,7 +140,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		return thread;
 	}
 	
-	public void signalWork(WorkerThread<T> thread) {
+	public final void signalWork(WorkerThread<T> thread) {
 		LockSupport.unpark(thread);
 		WorkerThread<T> threadParked = parkedThreads.poll();
 		if ( threadParked != null ) {
@@ -149,7 +149,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 	
 	@Override
-	public void parkThread(WorkerThread<T> thread) {
+	public final void parkThread(WorkerThread<T> thread) {
 		if ( !shutdown ) {
 			parkedThreads.add(thread);
 			LockSupport.park(thread);
@@ -157,7 +157,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 
 	@Override
-	public T scanQueues() {
+	public final T scanQueues() {
 		for ( Deque<T> q : taskQueues ) {
 			T task = q.pollLast();
 			if ( task != null ) {
@@ -168,17 +168,17 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 
 	@Override
-	public void taskFinished(T task) {
+	public final void taskFinished(T task) {
 		// disable running count of abstract super class
 	}
 
 	@Override
-	public void taskPaused(T task) {
+	public final void taskPaused(T task) {
 		// disable paused count of abstract super class
 	}
 
 	@Override
-	public void taskResume(T task) {
+	public final void taskResume(T task) {
 		scheduleTask(task);
 	}
 }

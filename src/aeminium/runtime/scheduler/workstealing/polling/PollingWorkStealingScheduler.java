@@ -28,11 +28,11 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 		super(maxParallelism, flags);
 	}
 
-	public void registerThread(WorkerThread<T> thread) {
+	public final void registerThread(WorkerThread<T> thread) {
 		currentThread.set(thread);
 	}
 	
-	public void unregisterThread(WorkerThread<T> thread) {
+	public final void unregisterThread(WorkerThread<T> thread) {
 		if ( 0 ==  counter.decrementAndGet() ) {	
 			// last thread signals 
 			synchronized (this) {
@@ -89,14 +89,14 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	}
 
 	@Override
-	public void scheduleTask(T task) {
+	public final void scheduleTask(T task) {
 		Deque<T> taskQueue = currentThread().getTaskList();//taskQueues[currentThread().getIndex()];
 		addTask(taskQueue, task);
 		signalWork();
 	}
 
 	@Override
-	public void scheduleTasks(Collection<T> tasks) {
+	public final void scheduleTasks(Collection<T> tasks) {
 		Deque<T> taskQueue = taskQueues[currentThread().getIndex()];
 		for ( T task : tasks ) {
 			addTask(taskQueue, task);
@@ -104,14 +104,14 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 		signalWork();
 	}
 
-	protected void addTask(Deque<T> q, T task) {
+	protected final void addTask(Deque<T> q, T task) {
 		task.setScheduler(this);
 		while ( !q.offerFirst(task) ) {
 			// loop until we could add it 
 		}
 	}
 	
-	protected WorkerThread<T> currentThread() {
+	protected final WorkerThread<T> currentThread() {
 		WorkerThread<T> current = currentThread.get();
 		if ( current == null ) {
 			current = parkedThreads.poll();
@@ -122,20 +122,20 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 		return current;
 	}
 	
-	public void signalWork() {
+	public final void signalWork() {
 		WorkerThread<T> thread = parkedThreads.poll();
 		if ( thread != null ) {
 			LockSupport.unpark(thread);
 		}
 	}
 	
-	public void parkThread(WorkerThread<T> thread) {
+	public final void parkThread(WorkerThread<T> thread) {
 		parkedThreads.add(thread);
 		LockSupport.parkNanos(thread, 100000);
 	}
 
 	@Override
-	public T scanQueues() {
+	public final T scanQueues() {
 		for ( Deque<T> q : taskQueues ) {
 			T task = q.pollLast();
 			if ( task != null ) {
@@ -146,17 +146,17 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	}
 
 	@Override
-	public void taskFinished(T task) {
+	public final void taskFinished(T task) {
 		// disable running count of abstract super class
 	}
 
 	@Override
-	public void taskPaused(T task) {
+	public final void taskPaused(T task) {
 		// disable paused count of abstract super class
 	}
 
 	@Override
-	public void taskResume(T task) {
+	public final void taskResume(T task) {
 		scheduleTask(task);
 	}
 }

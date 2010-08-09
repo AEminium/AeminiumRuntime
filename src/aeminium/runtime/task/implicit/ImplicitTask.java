@@ -55,24 +55,24 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			public void shutdown() {}
 			
 			@Override
-			public RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
+			public final  RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
 				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
 			}
 
 			@Override
-			public BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
+			public final BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
 				return new ImplicitBlockingTask(body, hints, flags);
 			}
 
 			@Override
-			public NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
+			public final NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
 				return  new ImplicitNonBlockingTask(body, hints, flags);
 			}
 		};
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void init(Task parent, RuntimePrioritizer<RuntimeTask> prioritizer, RuntimeGraph<RuntimeTask> graph, Collection<RuntimeTask> deps){
+	public final void init(Task parent, RuntimePrioritizer<RuntimeTask> prioritizer, RuntimeGraph<RuntimeTask> graph, Collection<RuntimeTask> deps){
 		synchronized (this) {
 			// check for double scheduling
 			if ( state != ImplicitTaskState.UNSCHEDULED) {
@@ -105,7 +105,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 
-	public void attachChild(T child) {
+	public final void attachChild(T child) {
 		synchronized (this) {
 			updateChildCount(1);
 			if ( debug ) {
@@ -117,7 +117,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
-	public void detachChild(T child) {
+	public final void detachChild(T child) {
 		synchronized (this) {
 			updateChildCount(-1);
 			if ( debug ) {
@@ -129,24 +129,16 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
-	protected void updateChildCount(int delta ) {
-		synchronized (this) {
-			childCount += delta;
-			if ( childCount == 0 ) {
-				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
-					taskCompleted();
-				}
-			}			
-		}
+	protected final void updateChildCount(int delta ) {
+		childCount += delta;
+		if ( childCount == 0 ) {
+			if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
+				taskCompleted();
+			}
+		}			
 	}
 	
-	public ImplicitTaskState getTaskState() {
-		synchronized (this) {
-			return state;
-		}
-	}
-	
-	public int addDependent(T task) {
+	public final int addDependent(T task) {
 		synchronized (this) {
 			if ( state == ImplicitTaskState.COMPLETED ) {
 				return 0;
@@ -159,7 +151,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
-	public void setDependencies(Collection<T> deps) {
+	public final void setDependencies(Collection<T> deps) {
 		synchronized (this) {
 			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
 			if ( (Object)deps != Runtime.NO_DEPS ) {
@@ -178,13 +170,13 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
-	public void decDepencenyCount() {
+	public final void decDepencenyCount() {
 		synchronized (this) {
 			updateDependencyCount(-1);
 		}
 	}
 	
-	protected void updateDependencyCount(int delta) {
+	protected final void updateDependencyCount(int delta) {
 		depCount += delta;
 		if ( depCount == 0 ) {
 			scheduleTask();
@@ -192,7 +184,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void scheduleTask() {
+	protected final void scheduleTask() {
 		synchronized (this) {
 			assert( state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES );
 			state = ImplicitTaskState.RUNNING;
@@ -200,19 +192,19 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
-	public boolean hasDependecies() {
+	public final boolean hasDependecies() {
 		synchronized (this) {
 			return (depCount != 0);			
 		}
 	}
 	
-	public boolean hasChildren() {
+	public final boolean hasChildren() {
 		synchronized (this) {
 			return (childCount != 0);			
 		}
 	}
 	
-	public void taskFinished() {
+	public final void taskFinished() {
 		synchronized (this) {
 			assert( state == ImplicitTaskState.RUNNING );
 			state = ImplicitTaskState.WAITING_FOR_CHILDREN;

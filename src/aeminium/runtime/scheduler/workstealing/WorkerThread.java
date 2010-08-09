@@ -18,20 +18,20 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 		this.scheduler = scheduler;
 	}
 
-	public int getIndex() {
+	public final int getIndex() {
 		return index;
 	}
 	
-	public Deque<T> getTaskList() {
+	public final Deque<T> getTaskList() {
 		return taskQueue;
 	}
 	
-	public void shutdown() {
+	public final void shutdown() {
 		shutdown = true;
 	}
 	
 	@Override
-	public void run() {
+	public final void run() {
 		int pollCounter = POLL_COUNT;
 		scheduler.registerThread(this);
 		while (!shutdown) {
@@ -57,7 +57,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 		scheduler.unregisterThread(this);
 	}
 	
-	protected void executeTask(T task) {
+	protected final void executeTask(T task) {
 		try {
 			task.call();
 		} catch (Exception e) {
@@ -65,7 +65,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 		}
 	}
 	
-	public String toString() {
+	public final String toString() {
 		return "WorkerThread<" + index + ">";
 	}
 }
