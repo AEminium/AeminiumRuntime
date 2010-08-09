@@ -90,7 +90,7 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 
 	@Override
 	public void scheduleTask(T task) {
-		Deque<T> taskQueue = taskQueues[currentThread().getIndex()];
+		Deque<T> taskQueue = currentThread().getTaskList();//taskQueues[currentThread().getIndex()];
 		addTask(taskQueue, task);
 		signalWork();
 	}

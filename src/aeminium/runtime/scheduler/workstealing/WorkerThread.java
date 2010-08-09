@@ -3,7 +3,6 @@ package aeminium.runtime.scheduler.workstealing;
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
 public final class WorkerThread<T extends RuntimeTask> extends Thread {
@@ -11,9 +10,10 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	protected final int index;
 	protected volatile boolean shutdown = false;
 	protected final WorkStealingScheduler<T> scheduler;
+	protected final int POLL_COUNT = 5;
 	
 	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
-		this.taskQueue = new LinkedBlockingDeque<T>();
+		this.taskQueue =  new LinkedBlockingDeque<T>();
 		this.index = index;
 		this.scheduler = scheduler;
 	}
@@ -32,6 +32,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	
 	@Override
 	public void run() {
+		int pollCounter = POLL_COUNT;
 		scheduler.registerThread(this);
 		while (!shutdown) {
 			T task = null;
@@ -44,7 +45,12 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 				if ( task != null ) {
 					executeTask(task);
 				} else {
-					scheduler.parkThread(this);
+					if ( pollCounter == 0) {
+						scheduler.parkThread(this);
+						pollCounter = POLL_COUNT;
+					} else {
+						pollCounter--;
+					}
 				}
 			}
 		}
