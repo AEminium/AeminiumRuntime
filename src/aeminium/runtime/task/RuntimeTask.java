@@ -10,7 +10,6 @@ import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 
 public interface RuntimeTask extends Task, Callable<Object> {
-	public void taskCompleted();
 	
 	public Collection<Hints> getHints();
 	
@@ -27,4 +26,8 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	public void setScheduler(RuntimeScheduler<?> scheduler);
 	
 	public void setGraph(RuntimeGraph<?> graph);
+	
+	public void taskFinished();
+	
+	public void taskCompleted();
 }

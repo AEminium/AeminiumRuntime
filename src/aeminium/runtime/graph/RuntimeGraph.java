@@ -19,14 +19,11 @@ public interface RuntimeGraph <T extends RuntimeTask> {
 	public abstract void addTask(T task, Task parent, Collection<T> deps);
 	
 	/**
-	 * Callback function for task that have finished. Finished 
-	 * means that the body of the corresponding graph has 
-	 * finished its execution. Note that there might still be 
-	 * some sub-task pending.
+	 * Callback function for task that has complteted.
 	 * 
 	 * @param task
 	 */
-	public abstract void taskFinished(T task);
+	public abstract void taskCompleted(T task);
 	
 	
 	/**

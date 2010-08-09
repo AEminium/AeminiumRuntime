@@ -233,6 +233,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			this.children.clear();
 			this.children = null;
 		}
+		graph.taskCompleted((T)this);
 	}
 	
 	public void setPrioritizer(RuntimePrioritizer<T> prioritizer) {

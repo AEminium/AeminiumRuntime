@@ -28,6 +28,14 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	}
 	
 	@Override
+	public void init() {
+	}
+
+	@Override
+	public void shutdown() {
+	}
+	
+	@Override
 	public void addTask(T task, Task parent, Collection<T> deps) {
 		taskCount.incrementAndGet();
 		T itask = (T)task;
@@ -61,17 +69,10 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		return null;
 	}
 
-	@Override
-	public void init() {
-	}
+
 
 	@Override
-	public void shutdown() {
-	}
-
-	@Override
-	public void taskFinished(T task) {
-		task.taskFinished();
+	public void taskCompleted(T task) {
 		if ( taskCount.decrementAndGet() == 0 ) {
 			synchronized (this) {
 				this.notifyAll();
