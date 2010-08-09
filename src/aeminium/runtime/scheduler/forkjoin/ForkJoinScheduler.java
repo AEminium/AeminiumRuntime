@@ -2,7 +2,6 @@ package aeminium.runtime.scheduler.forkjoin;
 
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.concurrent.Callable;
 
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
@@ -22,13 +21,9 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 		super(maxParallelism, flags);
 	}
     
-
-
-
 	@Override
     public void init() {
-    	pool = new ForkJoinPool();
-        pool.setAsyncMode(true);
+    	pool = new ForkJoinPool(AeminiumForkJoinWorkerThread.getFactory());
     }
     
 	@Override
@@ -47,8 +42,12 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
     }
 	
     @Override
-    @SuppressWarnings("unchecked")
     public void scheduleTask(T task) {
-    	pool.execute(ForkJoinTask.adapt((Callable)task));
-    }    
+    	task.setScheduler(this);
+    	if ( Thread.currentThread() instanceof AeminiumForkJoinWorkerThread ) {
+    		ForkJoinTask.adapt(task).fork();
+    	} else {
+    		pool.execute(ForkJoinTask.adapt(task));
+    	}
+    }
 }
