@@ -35,6 +35,7 @@ public interface Runtime {
 		public Object getResult() {
 			throw new RuntimeError("Cannot get result from NO_PARENT");
 		}
+		
 		@Override
 		public String toString() {
 			return "NO_PARENT";
