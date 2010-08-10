@@ -17,6 +17,7 @@ import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
+import aeminium.runtime.taskcounter.TaskCounter;
 
 public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	private final RuntimeScheduler<T> scheduler;
@@ -71,11 +72,12 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@Override
 	public void init() {
 		assert( state == GenericRuntimeState.UNINITIALIZED);
-		graph.init();
+		TaskCounter tc = new TaskCounter();
+		graph.init(tc);
 		if ( prioritizer != scheduler ) {
-			prioritizer.init();
+			prioritizer.init(tc);
 		}
-		scheduler.init();
+		scheduler.init(tc);
 		taskFactory.init();
 		dataGroupFactory.init();
 		state = GenericRuntimeState.INITIALIZED;

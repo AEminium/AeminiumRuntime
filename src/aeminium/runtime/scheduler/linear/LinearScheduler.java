@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public class LinearScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 
@@ -14,7 +15,7 @@ public class LinearScheduler<T extends RuntimeTask> extends AbstractScheduler<T>
 	}
 
 	@Override
-	public final void init() {
+	public final void init(RuntimeTaskCounter tc) {
 		
 	}
 	

@@ -4,10 +4,11 @@ import java.util.Collection;
 
 import aeminium.runtime.Task;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public interface RuntimeGraph <T extends RuntimeTask> {
 
-	public void init();
+	public void init(RuntimeTaskCounter tc);
 	
 	public void shutdown();
 	

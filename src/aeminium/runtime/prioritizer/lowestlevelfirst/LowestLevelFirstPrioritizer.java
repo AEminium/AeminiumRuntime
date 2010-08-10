@@ -11,6 +11,7 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.AbstractPrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.implicit.ImplicitTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 @SuppressWarnings("unchecked")
 public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends AbstractPrioritizer<T> {
@@ -22,7 +23,7 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	}
 
 	@Override
-	public void init() {
+	public void init(RuntimeTaskCounter tc) {
 		waitingQueue = new PriorityQueue<T>(20, new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {
@@ -38,6 +39,9 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	@Override
 	public final void scheduleTasks(Collection<T> tasks) {
 		synchronized (this) {
+			for ( T task : tasks ) {
+				task.computeLevel();
+			}
 			waitingQueue.addAll(tasks);
 			schedule();
 		}
@@ -46,6 +50,7 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	@Override
 	public  final void scheduleTask(T task) {
 		synchronized (this) {
+			task.computeLevel();
 			waitingQueue.add(task);
 			schedule();
 		}

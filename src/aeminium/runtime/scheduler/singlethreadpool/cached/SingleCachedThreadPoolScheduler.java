@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
+import aeminium.runtime.taskcounter.SimpleTaskCountThread;
 
 public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 	private ExecutorService execService; 
@@ -21,8 +23,8 @@ public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends Abst
 	}
 	
 	@Override
-	public final void init() {
-		execService = Executors.newCachedThreadPool();
+	public final void init(RuntimeTaskCounter tc) {
+		execService = Executors.newCachedThreadPool(SimpleTaskCountThread.getFactory(tc));
 	}
 
 	@Override

@@ -81,7 +81,6 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			
 			// setup parent connection
 			if ( parent != Runtime.NO_PARENT ) {
-				setLevel(((T)parent).getLevel()+1);
 				this.parent = (T) parent;
 				this.parent.attachChild((T)this);
 			}
@@ -105,6 +104,10 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 
+	public final void computeLevel() {
+		setLevel(((T)parent).getLevel()+1);
+	}
+	
 	public final void attachChild(T child) {
 		synchronized (this) {
 			updateChildCount(1);

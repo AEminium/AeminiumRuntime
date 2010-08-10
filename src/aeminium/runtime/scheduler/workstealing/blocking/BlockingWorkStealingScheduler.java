@@ -12,6 +12,7 @@ import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkerThread;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
@@ -19,7 +20,8 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
 	protected AtomicInteger counter;
-	protected volatile boolean shutdown = false;
+	protected RuntimeTaskCounter taskCounter;
+	protected int queueBufferLength = 3;
 	
 	public BlockingWorkStealingScheduler(EnumSet<Flags> flags) {
 		super(flags);
@@ -32,21 +34,19 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	@Override
 	public final void registerThread(WorkerThread<T> thread) {
 		currentThread.set(thread);
+		taskCounter.registerThread(thread);
 	}
 	
 	@Override
 	public final void unregisterThread(WorkerThread<T> thread) {
-		if ( 0 == counter.decrementAndGet() ) {
-			// last thread signals 
-			synchronized (this) {
-				this.notifyAll();
-			}
-		}
+		counter.decrementAndGet();
+		taskCounter.unregisterThread(thread);
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public void init() {
+	public void init(RuntimeTaskCounter tc) {
+		taskCounter = tc;
 		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
 		currentThread = new ThreadLocal<WorkerThread<T>>();
 		threads =  new WorkerThread[getMaxParallelism()];
@@ -67,20 +67,11 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 
 	@Override
 	public void shutdown() {
-		shutdown = true;
-		for ( WorkerThread<T> thread : threads ){
-			thread.shutdown();
-			LockSupport.unpark(thread);
-		}
-		
-		synchronized (this) {
-			try {
-				while ( counter.get() > 0 ) {
-					wait();
-				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		counter.set(threads.length);
+		while ( counter.get() > 0 ) {
+			for ( WorkerThread<T> thread : threads ){
+				thread.shutdown();
+				LockSupport.unpark(thread);
 			}
 		}
 
@@ -96,7 +87,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	public final void scheduleTask(T task) {
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
-		if ( taskQueue.isEmpty() ) {
+		if ( taskQueue.size() < queueBufferLength ) {
 		addTask(taskQueue, task);
 		signalWork(thread);
 		} else {
@@ -159,10 +150,9 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	
 	@Override
 	public final void parkThread(WorkerThread<T> thread) {
-		if ( !shutdown ) {
-			parkedThreads.add(thread);
-			LockSupport.park(thread);
-		}
+		taskCounter.threadWaiting(thread);
+		parkedThreads.add(thread);
+		LockSupport.park(thread);
 	}
 
 	@Override

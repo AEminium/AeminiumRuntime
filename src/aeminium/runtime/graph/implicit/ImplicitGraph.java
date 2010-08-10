@@ -2,18 +2,21 @@ package aeminium.runtime.graph.implicit;
 
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import aeminium.runtime.Task;
 import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.implicit.ImplicitTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
+import aeminium.runtime.taskcounter.TaskCountingThread;
 
 @SuppressWarnings("unchecked")
 public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
-	protected AtomicInteger taskCount = new AtomicInteger(0);
 	protected final boolean checkForCycles;
+	protected RuntimeTaskCounter taskCounter;
+	protected volatile long taskCount = 0;
 	
 	public ImplicitGraph(RuntimePrioritizer<T> prioritizer,  EnumSet<Flags> flags) {
 		super(prioritizer, flags);
@@ -25,16 +28,29 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	}
 	
 	@Override
-	public final void init() {
+	public final void init(RuntimeTaskCounter tc) {
+		taskCounter = tc;
+		taskCount = 0;
 	}
 
 	@Override
 	public final void shutdown() {
 	}
 	
+	protected final void updateTaskCount(int delta) {
+		Thread thread = Thread.currentThread();
+		if (  thread instanceof TaskCountingThread ) {
+			TaskCountingThread tct = (TaskCountingThread)thread;
+			tct.tasksAdded(delta);
+		} else {
+			taskCount += delta;
+		}
+	}
+	
 	@Override
 	public final void addTask(T task, Task parent, Collection<T> deps) {
-		taskCount.incrementAndGet();
+		
+		updateTaskCount(1);
 		T itask = (T)task;
 
 		itask.init(parent, prioritizer, this, deps);
@@ -46,28 +62,12 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 
 	@Override
 	public final void taskCompleted(T task) {
-		if ( taskCount.decrementAndGet() == 0 ) {
-			synchronized (this) {
-				this.notifyAll();
-			};
-		}
+		updateTaskCount(-1);
 	}
 	
 	@Override
 	public final void waitToEmpty() {
-		while ( taskCount.get() != 0 ) {
-			synchronized (this) {
-				try {
-					if (flags.contains(Flags.DEBUG)) {
-						this.wait(1000);
-					} else {
-						this.wait();
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		taskCounter.waitToEmpty(taskCount);
 	}
 
 }

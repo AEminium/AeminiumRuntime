@@ -4,13 +4,15 @@ import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.taskcounter.TaskCountingThread;
 
-public final class WorkerThread<T extends RuntimeTask> extends Thread {
+public final class WorkerThread<T extends RuntimeTask> extends Thread implements TaskCountingThread {
 	protected final Deque<T> taskQueue;
 	protected final int index;
 	protected volatile boolean shutdown = false;
 	protected final WorkStealingScheduler<T> scheduler;
 	protected final int POLL_COUNT = 5;
+	protected volatile long taskCount = 0;
 	
 	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
 		this.taskQueue =  new LinkedBlockingDeque<T>();
@@ -67,5 +69,20 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	
 	public final String toString() {
 		return "WorkerThread<" + index + ">";
+	}
+
+	@Override
+	public final long getDelta() {
+		return taskCount;
+	}
+
+	@Override
+	public final void tasksAdded(int delta) {
+		taskCount += delta;		
+	}
+
+	@Override
+	public final void tasksCompleted(int delta) {
+		taskCount -= delta;
 	}
 }

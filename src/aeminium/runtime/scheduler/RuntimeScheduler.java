@@ -4,9 +4,10 @@ import java.util.Collection;
 
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public interface RuntimeScheduler <T extends RuntimeTask> {	
-	public void init();
+	public void init(RuntimeTaskCounter tc);
 	
 	/**
 	 * Schedules task in the order they have been passed in.

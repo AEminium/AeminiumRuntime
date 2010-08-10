@@ -3,16 +3,14 @@ package aeminium.runtime.scheduler.forkjoin;
 import java.util.Collection;
 import java.util.EnumSet;
 
-import javax.smartcardio.ATR;
-
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
 import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<T>{
-
     private ForkJoinPool pool = null;
     
     public ForkJoinScheduler(EnumSet<Flags> flags) {
@@ -24,8 +22,9 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 	}
     
 	@Override
-    public final void init() {
-    	pool = new ForkJoinPool(AeminiumForkJoinWorkerThread.getFactory());
+    public final void init(RuntimeTaskCounter tc) {
+		tc.setPolling();
+    	pool = new ForkJoinPool(AeminiumForkJoinWorkerThread.getFactory(tc));
     }
     
 	@Override
