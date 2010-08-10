@@ -2,8 +2,6 @@ package aeminium.runtime.task;
 
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;
@@ -15,10 +13,9 @@ import aeminium.runtime.scheduler.RuntimeScheduler;
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
 	protected volatile Object result = UNSET;
 	protected Body body;
-	protected final Collection<Hints> hints;
 	protected RuntimeGraph<T> graph;
-	protected Map<String, Object> data;
-	protected final EnumSet<Flags> flags;
+	protected RuntimeScheduler<T> scheduler;
+	protected final Collection<Hints> hints;
 	protected static final Object UNSET = new Object() {
 		@Override
 		public String toString() {
@@ -26,27 +23,25 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		}
 	};
 	protected int level = 0;
-	protected RuntimeScheduler<T> scheduler;
 	
 	public AbstractTask(Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		this.body = body;
 		this.hints = hints;
-		this.flags = flags;
 	}
 	
 	@Override
 	public Object call() throws Exception {
 		try {
 			body.execute(this);
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			setResult(e);
-			System.out.println("bad " + e);
-			e.printStackTrace();
 		} finally {
 			@SuppressWarnings("unchecked")
 			T Tthis = (T)this;
 			taskFinished();
-			scheduler.taskFinished(Tthis);
+			if ( scheduler != null ) {
+				scheduler.taskFinished(Tthis);
+			}
 		}
 		return null;		
 	}
@@ -83,26 +78,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return value;
 	}
 
-	@Override
-	public final void setData(String key, Object value) {
-		synchronized (this) {
-			if ( data == null) {
-				this.data = new HashMap<String, Object>();
-			}
-			this.data.put(key, value);
-		}
-	}
-	
-	public final Object getData(String key) {
-		synchronized (this) {
-			if (data == null) {
-				return null;
-			} else {
-				return data.get(key);
-			}
-		}
-	}
-	
 	protected final void setLevel(int level) {
 		this.level = level;
 	}

@@ -128,8 +128,8 @@ public class Factory {
 		// set default implementation
 		//database.put("default", ImplicitGraph_ForkJoinScheduler_None_FifoDataGroup);
 		//database.put("default", ImplicitGraph_SingleThreadPoolScheduler_LowestLevelFirstPrioritizer_FifoDataGroup);
-		database.put("default", ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup);
-		//database.put("default", ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup);
+		//database.put("default", ImplicitGraph_PollingWorkStealingScheduler_None_FifoDataGroup);
+		database.put("default", ImplicitGraph_BlockingWorkStealingScheduler_None_FifoDataGroup);
 	}
 	
 	/**

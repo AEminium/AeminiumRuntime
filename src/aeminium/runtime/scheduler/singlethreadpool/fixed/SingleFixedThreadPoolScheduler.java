@@ -9,7 +9,7 @@ import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.taskcounter.RuntimeTaskCounter;
-import aeminium.runtime.taskcounter.SimpleTaskCountThread;
+import aeminium.runtime.taskcounter.SimpleTaskCountingThread;
 
 public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 	private ExecutorService execService; 
@@ -24,7 +24,7 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 
 	@Override
 	public final void init(RuntimeTaskCounter tc) {
-		execService = Executors.newFixedThreadPool(getMaxParallelism(),SimpleTaskCountThread.getFactory(tc));
+		execService = Executors.newFixedThreadPool(getMaxParallelism(),SimpleTaskCountingThread.getFactory(tc));
 	}
 
 	@Override

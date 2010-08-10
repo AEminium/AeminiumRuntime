@@ -20,9 +20,9 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	
 	public Body getBody();
 	
-	public void setData(String key, Object value);
-	
-	public Object getData(String key);
+//	public void setData(String key, Object value);
+//	
+//	public Object getData(String key);
 	
 	public int getLevel();
 	

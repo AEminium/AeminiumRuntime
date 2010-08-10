@@ -16,7 +16,6 @@ import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
-	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
 	protected AtomicInteger counter;
@@ -33,7 +32,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	
 	@Override
 	public final void registerThread(WorkerThread<T> thread) {
-		currentThread.set(thread);
 		taskCounter.registerThread(thread);
 	}
 	
@@ -48,7 +46,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	public void init(RuntimeTaskCounter tc) {
 		taskCounter = tc;
 		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
-		currentThread = new ThreadLocal<WorkerThread<T>>();
 		threads =  new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];
 		counter = new AtomicInteger(threads.length);
@@ -78,7 +75,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		// cleanup
 		threads = null;
 		taskQueues = null;
-		currentThread = null;
 		parkedThreads = null;
 		counter = null;
 	}
@@ -88,10 +84,9 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
 		if ( taskQueue.size() < queueBufferLength ) {
-		addTask(taskQueue, task);
-		signalWork(thread);
+			addTask(taskQueue, task);
+			signalWork(thread);
 		} else {
-			task.setScheduler(this);
 			try {
 				task.call();
 			} catch (Exception e) {
@@ -117,27 +112,17 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		}
 	}
 	
-	protected final WorkerThread<T> currentThread() {
-		WorkerThread<T> current = currentThread.get();
-		if ( current == null ) {
-			current = parkedThreads.poll();
-			if ( current == null ) {
-				current = threads[0];
-			}
-		}
-		return current;
-	}
-	
 	protected final WorkerThread<T> getNextThread() {
-		WorkerThread<T> thread = currentThread.get();
-		if ( thread == null ) {
+		Thread thread = Thread.currentThread(); 
+		if ( thread instanceof WorkerThread<?>) {
+			return (WorkerThread<T>) thread;
+		} else {
 			thread = parkedThreads.poll();
 			if ( thread == null ) {
-				// TODO: should distribute work better
 				thread = threads[0];
 			}
 		}
-		return thread;
+		return (WorkerThread<T>) thread;
 	}
 	
 	public final void signalWork(WorkerThread<T> thread) {

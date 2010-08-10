@@ -36,13 +36,14 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	protected RuntimePrioritizer<T> prioritizer = null;
 	protected final boolean debug;
 	
-	public ImplicitTask( Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
+	public ImplicitTask(Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
 		super(body, hints, flags);
-		if ( flags.contains(Flags.DEBUG)) {
-			debug = true;
-		} else {
-			debug = false;
-		}
+//		if ( flags.contains(Flags.DEBUG)) {
+//			debug = true;
+//		} else {
+//			debug = false;
+//		}
+		debug = false;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -50,12 +51,12 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		return new AbstractTaskFactory<ImplicitTask>(flags) {
 			
 			@Override 
-			public void init() {}
+			public final void init() {}
 			@Override 
-			public void shutdown() {}
+			public final void shutdown() {}
 			
 			@Override
-			public final  RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
+			public final RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
 				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
 			}
 
@@ -97,20 +98,29 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 						T Tthis = (T)this;
 						 count += ((ImplicitTask<T>) t).addDependent(Tthis);
 				}
-				updateDependencyCount(count);
+				depCount += count;
 			} else {
 				scheduleTask();
 			}
 		}
 	}
 
+	public final void setGraph(RuntimeGraph<T> graph) {
+		this.graph = graph;
+	}
+	
 	public final void computeLevel() {
 		setLevel(((T)parent).getLevel()+1);
 	}
 	
 	public final void attachChild(T child) {
 		synchronized (this) {
-			updateChildCount(1);
+			childCount += 1;
+			if ( childCount == 0 ) {
+				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
+					taskCompleted();
+				}
+			}
 			if ( debug ) {
 				if ( children == null ) {
 					children = new ArrayList<T>(10);
@@ -122,24 +132,20 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	
 	public final void detachChild(T child) {
 		synchronized (this) {
-			updateChildCount(-1);
+			childCount -= 1;
+			if ( childCount == 0 ) {
+				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
+					taskCompleted();
+				}
+			}
 			if ( debug ) {
 				if ( children == null ) {
-					children = new LinkedList<T>();
+					children.remove(child);
 				}
-				children.remove(child);
 			}
 		}
 	}
-	
-	protected final void updateChildCount(int delta ) {
-		childCount += delta;
-		if ( childCount == 0 ) {
-			if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
-				taskCompleted();
-			}
-		}			
-	}
+
 	
 	public final int addDependent(T task) {
 		synchronized (this) {
@@ -147,7 +153,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 				return 0;
 			}
 			if ( dependents == null ) {
-				dependents = new ArrayList<T>(5);
+				dependents = new ArrayList<T>();
 			}
 			dependents.add(task);
 			return 1;
@@ -166,7 +172,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 						 count += t.addDependent(Tthis);						
 					}
 				}
-				updateDependencyCount(count);
+				depCount += count;
 			} else {
 				scheduleTask();
 			}
@@ -175,36 +181,18 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	
 	public final void decDepencenyCount() {
 		synchronized (this) {
-			updateDependencyCount(-1);
+			depCount -= 1;
+			if ( depCount == 0 ) {
+				scheduleTask();
+			}
 		}
 	}
 	
-	protected final void updateDependencyCount(int delta) {
-		depCount += delta;
-		if ( depCount == 0 ) {
-			scheduleTask();
-		}			
-	}
-
 	@SuppressWarnings("unchecked")
 	protected final void scheduleTask() {
-		synchronized (this) {
-			assert( state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES );
-			state = ImplicitTaskState.RUNNING;
-			prioritizer.scheduleTask((T)this);			
-		}
-	}
-	
-	public final boolean hasDependecies() {
-		synchronized (this) {
-			return (depCount != 0);			
-		}
-	}
-	
-	public final boolean hasChildren() {
-		synchronized (this) {
-			return (childCount != 0);			
-		}
+		assert( state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES );
+		state = ImplicitTaskState.RUNNING;
+		prioritizer.scheduleTask((T)this);	
 	}
 	
 	public final void taskFinished() {
@@ -212,7 +200,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			assert( state == ImplicitTaskState.RUNNING );
 			state = ImplicitTaskState.WAITING_FOR_CHILDREN;
 			
-			if ( !hasChildren() ) {
+			if ( childCount == 0 ) {
 				taskCompleted();
 			}
 		}
@@ -233,27 +221,27 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			@SuppressWarnings("unchecked")
 			T Tthis = (T)this;
 			parent.detachChild(Tthis);
+			this.parent = null;
 		}
 
 		if ( dependents != null ) {
 			for ( ImplicitTask<T> t : dependents) {
 				t.decDepencenyCount();
 			}
+			this.dependents = null;
 		}
 
 		// cleanup references 
 		if ( dependents != null ) {
-			this.dependents = null;
+			
 		}
 		
 		this.body = null;
-		this.parent = null;
-		if ( this.children != null ) {
-			this.children = null;
-		}
+		this.children = null;
+		
 		@SuppressWarnings("unchecked")
 		T This = (T)this;
-		graph.taskCompleted(This);
+		graph.taskCompleted(This);	
 	}
 
 	public void checkForCycles() {

@@ -39,7 +39,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	
 	protected final void updateTaskCount(int delta) {
 		Thread thread = Thread.currentThread();
-		if (  thread instanceof TaskCountingThread ) {
+		if ( thread instanceof TaskCountingThread ) {
 			TaskCountingThread tct = (TaskCountingThread)thread;
 			tct.tasksAdded(delta);
 		} else {
