@@ -2,7 +2,9 @@ package aeminium.runtime.scheduler.workstealing;
 
 import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.task.RuntimeTask;
 
 public final class WorkerThread<T extends RuntimeTask> extends Thread {
@@ -10,13 +12,15 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	protected final int index;
 	protected volatile boolean shutdown = false;
 	protected final WorkStealingScheduler<T> scheduler;
-	protected final int POLL_COUNT = 5;
+	protected final int pollingCount;
+	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
 	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
 		this.taskQueue =  new LinkedBlockingDeque<T>();
 		this.index = index;
 		this.scheduler = scheduler;
-		setName("WorkerThread-"+index);
+		setName("WorkerThread-"+IdGenerator.incrementAndGet());
+		pollingCount = Configuration.getProperty(getClass(), "pollingCount", 5);
 	}
 
 	public final int getIndex() {
@@ -33,7 +37,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	
 	@Override
 	public final void run() {
-		int pollCounter = POLL_COUNT;
+		int pollCounter = pollingCount;
 		scheduler.registerThread(this);
 		while (!shutdown) {
 			T task = null;
@@ -48,7 +52,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 				} else {
 					if ( pollCounter == 0) {
 						scheduler.parkThread(this);
-						pollCounter = POLL_COUNT;
+						pollCounter = pollingCount;
 					} else {
 						pollCounter--;
 					}
