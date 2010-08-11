@@ -45,16 +45,7 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
     	task.setScheduler(this);
     	Thread thread =Thread.currentThread();
     	if (  thread instanceof AeminiumForkJoinWorkerThread ) {
-    		AeminiumForkJoinWorkerThread athread = (AeminiumForkJoinWorkerThread)thread;
-    		if ( athread.doFork() ) {
-    			ForkJoinTask.adapt(task).fork();
-    		} else {
-    			try {
-					task.call();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-    		}
+    		ForkJoinTask.adapt(task).fork();
     	} else {
     		pool.execute(ForkJoinTask.adapt(task));
     	}
