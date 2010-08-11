@@ -1,9 +1,7 @@
 package aeminium.runtime.tools.benchmark.forkjoin.logcounter;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 
-import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.tools.benchmark.Reporter;
 import aeminium.runtime.tools.benchmark.forkjoin.implementations.LogCounter;
 
@@ -26,7 +24,7 @@ public class SequentialLogCounterBenchmark extends LogCounterBenchmark {
 	}
 
 	@Override
-	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
+	public void run(Reporter reporter) {
 		String reportName = "Sequential Version";
 		reporter.startBenchmark(reportName);
 		for (String temperature : Arrays.asList("Cold", "Warm")) {

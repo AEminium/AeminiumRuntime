@@ -1,12 +1,9 @@
 package aeminium.runtime.tools.benchmark;
 
-import java.util.EnumSet;
-
 import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.implementations.Flags;
 
 
 public class TaskCreationBenchmark implements Benchmark {
@@ -14,7 +11,7 @@ public class TaskCreationBenchmark implements Benchmark {
 	private final int[] COUNTS = { 100, 1000, 10000, 100000, 1000000};
 	
 	@Override
-	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
+	public void run(Reporter reporter) {
 		Body body = new Body() {
 			@Override
 			public void execute(Task parent) {
@@ -22,7 +19,7 @@ public class TaskCreationBenchmark implements Benchmark {
 			}
 		};
 
-		Runtime rt = Factory.getRuntime(version, flags);
+		Runtime rt = Factory.getRuntime();
 		rt.init();
 
 		for ( int COUNT : COUNTS) {

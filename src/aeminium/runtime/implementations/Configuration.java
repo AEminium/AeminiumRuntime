@@ -1,42 +1,49 @@
 package aeminium.runtime.implementations;
 
-import java.util.EnumSet;
-import java.util.Map;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
 
 import aeminium.runtime.implementations.Factory.RuntimeConfiguration;
 
 public final class Configuration {
-	protected static final String RT_PREFIX = "AEMINIUM_RT_";
-	protected static final int processorCount;
-	protected static final String implementation;
-	protected static final EnumSet<Flags> flags;
+	protected static final String GLOBAL_PREFIX = "global.";
+	protected static int processorCount;
+	protected static String implementation;
+	protected static final Properties properties; 
 	
 	static {
+		String filename = System.getenv("AEMINIUMRT_CONFIG");
+		if ( filename == null ) {
+			filename = "aeminiumrt.config";
+		}
+		File file = new File(filename);
+		properties = new Properties();
+		if ( file.exists()  && file.canRead()) {
+			try {
+				properties.load(new FileReader(file));
+			} catch (FileNotFoundException e) {
+			} catch (IOException e) {
+			}
+		} 
+		
 		// processor count
-		String processorEnv = System.getenv(RT_PREFIX+"PROCESSORS");
-		if ( processorEnv != null && Integer.valueOf(processorEnv) > 0 ) {
-			processorCount = Integer.valueOf(processorEnv);
+		String processorCount = properties.getProperty(GLOBAL_PREFIX + "processorCount");
+		if (processorCount != null ) {
+			Configuration.processorCount = Integer.valueOf(processorCount);
 		} else {
-			processorCount = Runtime.getRuntime().availableProcessors();
+			Configuration.processorCount = Runtime.getRuntime().availableProcessors();
 		}
 			
 		// implementation
-		String implEnv = System.getenv(RT_PREFIX+"IMPLEMENTATION");
-		if ( implEnv != null ) {
-			implementation = implEnv;
+		String implementation = properties.getProperty(GLOBAL_PREFIX + "implementation");
+		if ( implementation != null ) {
+			Configuration.implementation = implementation;
 		} else {
-			implementation = "default";
+			Configuration.implementation = "default";
 		}
-		
-		// parse flags from environment
-		flags = EnumSet.noneOf(Flags.class);
-		for ( Flags f : Flags.values() ) {
-			Map<String, String> env = System.getenv();
-			if ( env.containsKey(RT_PREFIX + f.name())) {
-				flags.add(f);
-			}
-		}
-		
 	}
 	
 	protected Configuration() {}
@@ -48,16 +55,34 @@ public final class Configuration {
 	public final static String getImplementation() {
 		return implementation;
 	}
-	
-	/**
-	 * Computes flag set based on set environment variables.
-	 * 
-	 * @return
-	 */
-	public final static EnumSet<Flags> getFlags() {
-		return flags;
-	}
 
+	public final static String getProperty(Class<?> klazz, String key, String defaultValue) {
+		String value = properties.getProperty(klazz.getName() + "." + key);
+		if ( value != null ) {
+			return value;
+		} else {
+			return defaultValue;
+		}
+	}
+	
+	public final static int getProperty(Class<?> klazz, String key, int defaultValue) {
+		String value = properties.getProperty(klazz.getSimpleName()+ "." + key);
+		if ( value != null ) {
+			return Integer.valueOf(value);
+		} else {
+			return defaultValue;
+		}
+	}
+	
+	public final static boolean getProperty(Class<?> klazz, String key, boolean defaultValue) {
+		String value = properties.getProperty(klazz.getSimpleName()+ "." + key);
+		if ( value != null ) {
+			return Boolean.valueOf(value);
+		} else {
+			return defaultValue;
+		}
+	}
+	
 	public final static class ListImplementations {
 		public static void main(String[] args) {
 			for ( RuntimeConfiguration<?> rc : Factory.getImplementations().values()  ) {

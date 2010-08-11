@@ -1,22 +1,19 @@
 package aeminium.runtime.scheduler.linear;
 
 import java.util.Collection;
-import java.util.EnumSet;
 
-import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public class LinearScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 
-	public LinearScheduler(EnumSet<Flags> flags) {
-		super(flags);
+	public LinearScheduler() {
+		super();
 	}
 
 	@Override
-	public final void init(RuntimeTaskCounter tc) {
-		
+	public final void init(RuntimeEventManager eventManager) {
 	}
 	
 	@Override

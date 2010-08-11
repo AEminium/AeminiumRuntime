@@ -3,9 +3,7 @@ package aeminium.runtime.tools.benchmark.forkjoin.logcounter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumSet;
 
-import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.tools.benchmark.Benchmark;
 import aeminium.runtime.tools.benchmark.Reporter;
 import aeminium.runtime.tools.benchmark.forkjoin.implementations.LogCounter;
@@ -40,7 +38,6 @@ public abstract class LogCounterBenchmark implements Benchmark {
 	}
 
 	@Override
-	public abstract void run(String version, EnumSet<Flags> flags,
-			Reporter reporter);
+	public abstract void run(Reporter reporter);
 
 }

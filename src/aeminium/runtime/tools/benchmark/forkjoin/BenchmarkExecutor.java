@@ -1,6 +1,5 @@
 package aeminium.runtime.tools.benchmark.forkjoin;
 
-import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.tools.benchmark.Benchmark;
 import aeminium.runtime.tools.benchmark.StringBuilderReporter;
 
@@ -42,7 +41,7 @@ public abstract class BenchmarkExecutor {
 				StringBuilderReporter reporter = new StringBuilderReporter();
 				reporter.startBenchmark(benchmark.getName());
 				reporter.reportLn("#       CPU#         COLD         WARM");
-				benchmark.run(Configuration.getImplementation(), Configuration.getFlags(), reporter);
+				benchmark.run(reporter);
 				reporter.stopBenchmark(benchmark.getName());
 				reporter.flush();
 			} else {

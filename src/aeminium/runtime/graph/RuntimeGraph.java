@@ -3,12 +3,12 @@ package aeminium.runtime.graph;
 import java.util.Collection;
 
 import aeminium.runtime.Task;
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public interface RuntimeGraph <T extends RuntimeTask> {
 
-	public void init(RuntimeTaskCounter tc);
+	public void init(RuntimeEventManager eventManager);
 	
 	public void shutdown();
 	

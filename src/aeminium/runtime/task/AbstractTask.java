@@ -1,13 +1,11 @@
 package aeminium.runtime.task;
 
 import java.util.Collection;
-import java.util.EnumSet;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.Hints;
 import aeminium.runtime.RuntimeError;
 import aeminium.runtime.graph.RuntimeGraph;
-import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
@@ -24,7 +22,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	};
 	protected int level = 0;
 	
-	public AbstractTask(Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
+	public AbstractTask(Body body, Collection<Hints> hints) {
 		this.body = body;
 		this.hints = hints;
 	}

@@ -2,49 +2,48 @@ package aeminium.runtime.scheduler.workstealing.blocking;
 
 import java.util.Collection;
 import java.util.Deque;
-import java.util.EnumSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
-import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkerThread;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
+	protected RuntimeEventManager eventManager = null;
 	protected AtomicInteger counter;
-	protected RuntimeTaskCounter taskCounter;
-	protected int queueBufferLength = 3;
+	protected final int maxQueueLength;
 	
-	public BlockingWorkStealingScheduler(EnumSet<Flags> flags) {
-		super(flags);
+	public BlockingWorkStealingScheduler() {
+		super();
+		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
 	}
 
-	public BlockingWorkStealingScheduler(int maxParallelism, EnumSet<Flags> flags) {
-		super(maxParallelism, flags);
+	public BlockingWorkStealingScheduler(int maxParallelism) {
+		super(maxParallelism);
+		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
 	}
 	
 	@Override
 	public final void registerThread(WorkerThread<T> thread) {
-		taskCounter.registerThread(thread);
 	}
 	
 	@Override
 	public final void unregisterThread(WorkerThread<T> thread) {
 		counter.decrementAndGet();
-		taskCounter.unregisterThread(thread);
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public void init(RuntimeTaskCounter tc) {
-		taskCounter = tc;
+	public void init(RuntimeEventManager eventManager) {
+		this.eventManager = eventManager;
 		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
 		threads =  new WorkerThread[getMaxParallelism()];
 		taskQueues = new Deque[threads.length];
@@ -83,7 +82,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	public final void scheduleTask(T task) {
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
-		if ( taskQueue.size() < queueBufferLength ) {
+		if ( taskQueue.size() < maxQueueLength ) {
 			addTask(taskQueue, task);
 			signalWork(thread);
 		} else {
@@ -106,12 +105,14 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 
 	protected final void addTask(Deque<T> q, T task) {
-		task.setScheduler(this);
+		//task.setScheduler(this);
 		while ( !q.offerFirst(task) ) {
 			// loop until we could add it 
 		}
 	}
 	
+	
+	@SuppressWarnings("unchecked")
 	protected final WorkerThread<T> getNextThread() {
 		Thread thread = Thread.currentThread(); 
 		if ( thread instanceof WorkerThread<?>) {
@@ -133,12 +134,14 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		}
 	}
 	
+	
 	@Override
 	public final void parkThread(WorkerThread<T> thread) {
-		taskCounter.threadWaiting(thread);
+		eventManager.signalThreadSuspend(thread);
 		parkedThreads.add(thread);
 		LockSupport.park(thread);
 	}
+	
 
 	@Override
 	public final T scanQueues() {
@@ -150,16 +153,19 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		}
 		return null;
 	}
+	
 
 	@Override
 	public final void taskFinished(T task) {
 		// disable running count of abstract super class
 	}
+	
 
 	@Override
 	public final void taskPaused(T task) {
 		// disable paused count of abstract super class
 	}
+	
 
 	@Override
 	public final void taskResume(T task) {

@@ -1,12 +1,9 @@
 package aeminium.runtime.tools.benchmark;
 
-import java.util.EnumSet;
-
 import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.implementations.Flags;
 
 
 class FibBody implements ResultBody {
@@ -57,14 +54,14 @@ public class FibonacciBenchmark implements Benchmark {
 	}
 
 	@Override
-	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
+	public void run(Reporter reporter) {
 		for (int level : input) {
-			runTest(version, flags, reporter, level);
+			runTest(reporter, level);
 		}
 	}
 
-	public void runTest(String version, EnumSet<Flags> flags, Reporter reporter, int n) {
-		Runtime rt = Factory.getRuntime(version, flags);
+	public void runTest(Reporter reporter, int n) {
+		Runtime rt = Factory.getRuntime();
 		long start = System.nanoTime();
 		rt.init();
 

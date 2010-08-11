@@ -3,8 +3,6 @@ package aeminium.runtime.task.implicit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
 
 import aeminium.runtime.BlockingTask;
@@ -18,13 +16,14 @@ import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.graph.RuntimeGraph;
-import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
+
 
 public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTask<T> {
 	protected ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
@@ -36,19 +35,14 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	protected RuntimePrioritizer<T> prioritizer = null;
 	protected final boolean debug;
 	
-	public ImplicitTask(Body body, Collection<Hints> hints, EnumSet<Flags> flags) {
-		super(body, hints, flags);
-//		if ( flags.contains(Flags.DEBUG)) {
-//			debug = true;
-//		} else {
-//			debug = false;
-//		}
-		debug = false;
+	public ImplicitTask(Body body, Collection<Hints> hints) {
+		super(body, hints);
+		debug = Configuration.getProperty(getClass(), "debug", false);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static TaskFactory<ImplicitTask> createFactory(EnumSet<Flags> flags) {
-		return new AbstractTaskFactory<ImplicitTask>(flags) {
+	public static TaskFactory<ImplicitTask> createFactory() {
+		return new AbstractTaskFactory<ImplicitTask>() {
 			
 			@Override 
 			public final void init() {}
@@ -56,18 +50,18 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			public final void shutdown() {}
 			
 			@Override
-			public final RuntimeAtomicTask<ImplicitTask> createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
-				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints, flags);
+			public final RuntimeAtomicTask createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
+				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints);
 			}
 
 			@Override
 			public final BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
-				return new ImplicitBlockingTask(body, hints, flags);
+				return new ImplicitBlockingTask(body, hints);
 			}
 
 			@Override
 			public final NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
-				return  new ImplicitNonBlockingTask(body, hints, flags);
+				return  new ImplicitNonBlockingTask(body, hints);
 			}
 		};
 	}

@@ -1,11 +1,8 @@
 package aeminium.runtime.tools.benchmark.forkjoin.integrate;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 
 import jsr166y.ForkJoinPool;
-
-import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.tools.benchmark.Reporter;
 import aeminium.runtime.tools.benchmark.forkjoin.implementations.Integrate.FQuad;
 
@@ -28,7 +25,7 @@ public class ForkJoinIntegrateBenchmark extends IntegrateBenchmark {
 	}
 
 	@Override
-	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
+	public void run(Reporter reporter) {
 		String reportName = "ForkJoin Version";
 		reporter.startBenchmark(reportName);
 		for (String temperature : Arrays.asList("Cold", "Warm")) {

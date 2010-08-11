@@ -3,27 +3,25 @@ package aeminium.runtime.prioritizer.lowestlevelfirst;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.prioritizer.AbstractPrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.implicit.ImplicitTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 @SuppressWarnings("unchecked")
 public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends AbstractPrioritizer<T> {
 	protected PriorityQueue<T> waitingQueue = null;
 	
-	public LowestLevelFirstPrioritizer(RuntimeScheduler<T> scheduler, EnumSet<Flags> flags) {
-		super(scheduler, flags);
+	public LowestLevelFirstPrioritizer(RuntimeScheduler<T> scheduler) {
+		super(scheduler);
 		scheduler.setPrioritizer(this);
 	}
 
 	@Override
-	public void init(RuntimeTaskCounter tc) {
+	public void init(RuntimeEventManager eventManager) {
 		waitingQueue = new PriorityQueue<T>(20, new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {

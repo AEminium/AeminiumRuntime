@@ -2,49 +2,51 @@ package aeminium.runtime.scheduler.workstealing.polling;
 
 import java.util.Collection;
 import java.util.Deque;
-import java.util.EnumSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
-import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkerThread;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T> {
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
 	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
-	protected RuntimeTaskCounter taskCounter;
 	protected Deque<T>[] taskQueues;
+	protected RuntimeEventManager eventManager = null;
 	protected AtomicInteger counter;
-	protected int queueBufferLength = 3;
+	protected int maxQueueLength;
+	protected int pollingTimeout;
 	
-	public PollingWorkStealingScheduler(EnumSet<Flags> flags) {
-		super(flags);
+	public PollingWorkStealingScheduler() {
+		super();
+		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
+		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 100000);
 	}
 	
-	public PollingWorkStealingScheduler(int maxParallelism, EnumSet<Flags> flags) {
-		super(maxParallelism, flags);
+	public PollingWorkStealingScheduler(int maxParallelism) {
+		super(maxParallelism);
+		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
+		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 100000);
 	}
 
 	public final void registerThread(WorkerThread<T> thread) {
 		currentThread.set(thread);
-		taskCounter.registerThread(thread);
 	}
 	
 	public final void unregisterThread(WorkerThread<T> thread) {
 		counter.decrementAndGet();
-		taskCounter.registerThread(thread);
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public void init(RuntimeTaskCounter tc) {
-		taskCounter = tc;
+	public void init(RuntimeEventManager eventManager) {
+		this.eventManager = eventManager;
 		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
 		currentThread = new ThreadLocal<WorkerThread<T>>();
 		threads = new WorkerThread[getMaxParallelism()];
@@ -84,12 +86,12 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	public final void scheduleTask(T task) {
 		WorkerThread<T> thread = currentThread();
 		Deque<T> taskQueue = thread.getTaskList();//taskQueues[currentThread().getIndex()];
-		if ( taskQueue.size() < queueBufferLength ) {
+		if ( taskQueue.size() < maxQueueLength ) {
 			addTask(taskQueue, task);
 			signalWork();
 		} else {
 			try {
-				task.setScheduler(this);
+				//task.setScheduler(this);
 				task.call();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -107,7 +109,7 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	}
 
 	protected final void addTask(Deque<T> q, T task) {
-		task.setScheduler(this);
+		//task.setScheduler(this);
 		while ( !q.offerFirst(task) ) {
 			// loop until we could add it 
 		}
@@ -132,9 +134,9 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	}
 	
 	public final void parkThread(WorkerThread<T> thread) {
-		taskCounter.threadWaiting(thread);
+		eventManager.signalThreadSuspend(thread);
 		parkedThreads.add(thread);
-		LockSupport.parkNanos(thread, 100000);
+		LockSupport.parkNanos(thread, pollingTimeout);
 	}
 
 	@Override

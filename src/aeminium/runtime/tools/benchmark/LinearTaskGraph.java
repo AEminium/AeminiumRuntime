@@ -1,13 +1,11 @@
 package aeminium.runtime.tools.benchmark;
 
 import java.util.Arrays;
-import java.util.EnumSet;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.implementations.Flags;
 
 public class LinearTaskGraph implements Benchmark {
 	private static final String name = "LinearTaskGraph";
@@ -19,15 +17,15 @@ public class LinearTaskGraph implements Benchmark {
 	}
 
 	@Override
-	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
+	public void run(Reporter reporter) {
 		for (int COUNT : COUNTS) {
-			runTest(version, flags, reporter, COUNT);
+			runTest(reporter, COUNT);
 			reporter.flush();
 		}
 	}
 
-	private void runTest(String version, EnumSet<Flags> flags, Reporter reporter, int count) {
-		Runtime rt = Factory.getRuntime(version, flags);
+	private void runTest(Reporter reporter, int count) {
+		Runtime rt = Factory.getRuntime();
 		rt.init();
 		
 		long start = System.nanoTime();

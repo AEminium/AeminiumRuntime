@@ -1,30 +1,28 @@
 package aeminium.runtime.scheduler.singlethreadpool.fixed;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
-import aeminium.runtime.taskcounter.SimpleTaskCountingThread;
 
 public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 	private ExecutorService execService; 
 	
-	public SingleFixedThreadPoolScheduler(EnumSet<Flags> flags) {
-		super(flags);
+	public SingleFixedThreadPoolScheduler() {
+		super();
 	}
 
-	public SingleFixedThreadPoolScheduler(int maxParallelism, EnumSet<Flags> flags) {
-		super(maxParallelism, flags);
+	public SingleFixedThreadPoolScheduler(int maxParallelism) {
+		super(maxParallelism);
 	}
 
 	@Override
-	public final void init(RuntimeTaskCounter tc) {
-		execService = Executors.newFixedThreadPool(getMaxParallelism(),SimpleTaskCountingThread.getFactory(tc));
+	public final void init(RuntimeEventManager eventManager) {
+		execService = Executors.newFixedThreadPool(getMaxParallelism());
+		eventManager.signalPolling();
 	}
 
 	@Override

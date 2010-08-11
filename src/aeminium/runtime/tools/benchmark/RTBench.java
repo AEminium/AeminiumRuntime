@@ -1,6 +1,5 @@
 package aeminium.runtime.tools.benchmark;
 
-import aeminium.runtime.implementations.Configuration;
 
 public class RTBench {
 	
@@ -41,7 +40,6 @@ public class RTBench {
 			}
 			System.out.println();
 		} else if ( args[0].equals("run") && args.length == 2 ) {
-			String version = "default";
 			Benchmark benchmark = null;
 			for ( Benchmark b : benchmarks ) {
 				if ( b.getName().equals(args[1])) {
@@ -52,7 +50,7 @@ public class RTBench {
 			if ( benchmark != null ) {
 				Reporter reporter = new StringBuilderReporter();
 				reporter.startBenchmark(benchmark.getName());
-				benchmark.run(version, Configuration.getFlags(), reporter);
+				benchmark.run(reporter);
 				reporter.stopBenchmark(benchmark.getName());
 				reporter.flush();
 			} else {

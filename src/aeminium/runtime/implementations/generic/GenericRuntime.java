@@ -11,20 +11,22 @@ import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.DataGroupFactory;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
+import aeminium.runtime.events.EventManager;
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
-import aeminium.runtime.taskcounter.TaskCounter;
 
 public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
-	private final RuntimeScheduler<T> scheduler;
-	private final RuntimePrioritizer<T> prioritizer;
-	private final RuntimeGraph<T> graph;
-	private final DataGroupFactory<T> dataGroupFactory;
-	private final TaskFactory<T> taskFactory;
+	protected final RuntimeScheduler<T> scheduler;
+	protected final RuntimePrioritizer<T> prioritizer;
+	protected final RuntimeGraph<T> graph;
+	protected final DataGroupFactory<T> dataGroupFactory;
+	protected final TaskFactory<T> taskFactory;
+	protected RuntimeEventManager eventManager = null;
 
 	private enum GenericRuntimeState {
 		UNINITIALIZED,
@@ -43,6 +45,14 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		this.graph = graph;
 		this.dataGroupFactory = dataGroupFactory;
 		this.taskFactory = taskFactory;
+	}
+	
+	public GenericRuntime(GenericRuntime<T> runtime) {
+		this.scheduler = runtime.scheduler;
+		this.prioritizer = runtime.prioritizer;
+		this.graph = runtime.graph;
+		this.dataGroupFactory = runtime.dataGroupFactory;
+		this.taskFactory = runtime.taskFactory;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -70,14 +80,14 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	}
 
 	@Override
-	public void init() {
+	public final void init() {
 		assert( state == GenericRuntimeState.UNINITIALIZED);
-		TaskCounter tc = new TaskCounter();
-		graph.init(tc);
+		eventManager = new EventManager();
+		graph.init(eventManager);
 		if ( prioritizer != scheduler ) {
-			prioritizer.init(tc);
+			prioritizer.init(eventManager);
 		}
-		scheduler.init(tc);
+		scheduler.init(eventManager);
 		taskFactory.init();
 		dataGroupFactory.init();
 		state = GenericRuntimeState.INITIALIZED;
@@ -86,7 +96,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public final void schedule(Task task, Task parent, Collection<Task> deps) {
+	public void schedule(Task task, Task parent, Collection<Task> deps) {
 		assert ( state == GenericRuntimeState.INITIALIZED );
 		assert ( task instanceof RuntimeTask );
 		assert ( parent instanceof RuntimeTask );

@@ -2,12 +2,17 @@ package aeminium.runtime.scheduler;
 
 import java.util.Collection;
 
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
 
 public interface RuntimeScheduler <T extends RuntimeTask> {	
-	public void init(RuntimeTaskCounter tc);
+	public void init(RuntimeEventManager eventManager);
+	
+	/**
+	 * Shutdown internal resources. It is not legal to scheduler more tasks after 
+	 */
+	public void shutdown();
 	
 	/**
 	 * Schedules task in the order they have been passed in.
@@ -67,9 +72,5 @@ public interface RuntimeScheduler <T extends RuntimeTask> {
 	 * @param task
 	 */
 	public void taskResume(T task);
-	
-	/**
-	 * Shutdown internal resources. It is not legal to scheduler more tasks after 
-	 */
-	public void shutdown();
+
 }

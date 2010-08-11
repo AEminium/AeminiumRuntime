@@ -1,13 +1,10 @@
 package aeminium.runtime.tools.benchmark.forkjoin.fibonacci;
 
-import java.util.EnumSet;
-
 import aeminium.runtime.ResultBody;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.implementations.Flags;
 import aeminium.runtime.tools.benchmark.Reporter;
 
 public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
@@ -66,8 +63,8 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 	}
 
 	@Override
-	public void run(String version, EnumSet<Flags> flags, Reporter reporter) {
-		Runtime rt = Factory.getRuntime(version, flags);
+	public void run(Reporter reporter) {
+		Runtime rt = Factory.getRuntime();
 		long cold = runTest(rt, MAX_CALC);
 		long warm = runTest(rt, MAX_CALC);
 		reporter.reportLn(String.format(RESULT_FORMAT, Configuration.getProcessorCount(), cold, warm));

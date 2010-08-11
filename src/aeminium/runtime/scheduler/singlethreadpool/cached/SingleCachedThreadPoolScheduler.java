@@ -1,30 +1,28 @@
 package aeminium.runtime.scheduler.singlethreadpool.cached;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import aeminium.runtime.implementations.Flags;
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.taskcounter.RuntimeTaskCounter;
-import aeminium.runtime.taskcounter.SimpleTaskCountingThread;
 
 public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
 	private ExecutorService execService; 
 	
-	public SingleCachedThreadPoolScheduler(EnumSet<Flags> flags) {
-		super(flags);
+	public SingleCachedThreadPoolScheduler() {
+		super();
 	}
 
-	public SingleCachedThreadPoolScheduler(int maxParallelism, 	EnumSet<Flags> flags) {
-		super(maxParallelism, flags);
+	public SingleCachedThreadPoolScheduler(int maxParallelism) {
+		super(maxParallelism);
 	}
 	
 	@Override
-	public final void init(RuntimeTaskCounter tc) {
-		execService = Executors.newCachedThreadPool(SimpleTaskCountingThread.getFactory(tc));
+	public final void init(RuntimeEventManager eventManager) {
+		execService = Executors.newCachedThreadPool();
+		eventManager.signalPolling();
 	}
 
 	@Override
