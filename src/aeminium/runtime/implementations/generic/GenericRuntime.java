@@ -27,14 +27,14 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	protected final DataGroupFactory<T> dataGroupFactory;
 	protected final TaskFactory<T> taskFactory;
 	protected RuntimeEventManager eventManager;
-
+	private GenericRuntimeState state = GenericRuntimeState.UNINITIALIZED; 
+	
 	private enum GenericRuntimeState {
 		UNINITIALIZED,
 		INITIALIZED,
 		SHUTTING_DOWN
 	};
-	private GenericRuntimeState state = GenericRuntimeState.UNINITIALIZED; 
-	
+		
 	public GenericRuntime(RuntimeScheduler<T> scheduler,
 						  RuntimePrioritizer<T> prioritizer,
 						  RuntimeGraph<T> graph,
@@ -97,11 +97,11 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void schedule(Task task, Task parent, Collection<Task> deps) {
-		assert ( state == GenericRuntimeState.INITIALIZED );
-		assert ( task instanceof RuntimeTask );
-		assert ( parent instanceof RuntimeTask );
-		graph.addTask((T)((Object)task), parent, (Collection<T>)((Object)deps));
+	public final void schedule(Task task, Task parent, Collection<Task> deps) {
+//		assert ( state == GenericRuntimeState.INITIALIZED );
+//		assert ( task instanceof RuntimeTask );
+//		assert ( parent instanceof RuntimeTask );
+		graph.addTask((T)task, parent, (Collection<T>)deps);
 	}
 
 	@Override

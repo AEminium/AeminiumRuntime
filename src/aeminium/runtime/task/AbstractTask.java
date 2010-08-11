@@ -67,7 +67,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public Object getResult() {
-		while (result == UNSET ) ;
+		//while (result == UNSET ) ;
 		if ( result == UNSET ) {
 			throw new RuntimeError("Result has either not been set or already retrieved");
 		}

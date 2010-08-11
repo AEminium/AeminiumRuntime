@@ -20,6 +20,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	protected RuntimeEventManager eventManager = null;
 	protected AtomicInteger counter;
 	protected final int maxQueueLength;
+	protected static final boolean pollFirst = Configuration.getProperty(BlockingWorkStealingScheduler.class, "pollFirst", false);
 	
 	public BlockingWorkStealingScheduler() {
 		super();
@@ -105,7 +106,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 
 	protected final void addTask(Deque<T> q, T task) {
-		//task.setScheduler(this);
 		while ( !q.offerFirst(task) ) {
 			// loop until we could add it 
 		}
@@ -114,7 +114,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	@SuppressWarnings("unchecked")
 	protected final WorkerThread<T> getNextThread() {
 		Thread thread = Thread.currentThread(); 
-		if ( thread instanceof WorkerThread<?>) {
+		if ( thread instanceof WorkerThread<?> ) {
 			return (WorkerThread<T>) thread;
 		} else {
 			thread = parkedThreads.poll();
@@ -124,6 +124,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		}
 		return (WorkerThread<T>) thread;
 	}
+
 	
 	public final void signalWork(WorkerThread<T> thread) {
 		LockSupport.unpark(thread);
@@ -143,7 +144,12 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	@Override
 	public final T scanQueues() {
 		for ( Deque<T> q : taskQueues ) {
-			T task = q.pollLast();
+			T task;
+			if ( pollFirst ) {
+				task = q.pollFirst();
+			} else {
+				task = q.pollLast();
+			}
 			if ( task != null ) {
 				return task;
 			}

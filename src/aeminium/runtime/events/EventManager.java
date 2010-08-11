@@ -6,14 +6,13 @@ import java.util.Collection;
 public class EventManager implements RuntimeEventManager  {
 	protected Collection<RuntimeEventListener> listeners;
 	
-
 	@Override
-	public void init() {
+	public final void init() {
 		listeners =  new ArrayList<RuntimeEventListener>();
 	}
 
 	@Override
-	public void shutdown() {
+	public final void shutdown() {
 		listeners.clear();		
 	}
 	

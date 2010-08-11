@@ -68,7 +68,7 @@ public final class Configuration {
 	public final static int getProperty(Class<?> klazz, String key, int defaultValue) {
 		String value = properties.getProperty(klazz.getSimpleName()+ "." + key);
 		if ( value != null ) {
-			return Integer.valueOf(value);
+			return Integer.valueOf(value.trim());
 		} else {
 			return defaultValue;
 		}
@@ -77,7 +77,7 @@ public final class Configuration {
 	public final static boolean getProperty(Class<?> klazz, String key, boolean defaultValue) {
 		String value = properties.getProperty(klazz.getSimpleName()+ "." + key);
 		if ( value != null ) {
-			return Boolean.valueOf(value);
+			return Boolean.valueOf(value.trim());
 		} else {
 			return defaultValue;
 		}

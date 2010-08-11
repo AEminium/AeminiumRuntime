@@ -22,6 +22,7 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	protected AtomicInteger counter;
 	protected final int maxQueueLength;
 	protected final int pollingTimeout;
+	protected static final boolean pollFirst = Configuration.getProperty(PollingWorkStealingScheduler.class, "pollFirst", false);
 	
 	public PollingWorkStealingScheduler() {
 		super();
@@ -142,7 +143,12 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	@Override
 	public final T scanQueues() {
 		for ( Deque<T> q : taskQueues ) {
-			T task = q.pollLast();
+			T task;
+			if ( pollFirst ) {
+				task = q.pollFirst();
+			} else {
+				task = q.pollLast();
+			}
 			if ( task != null ) {
 				return task;
 			}
