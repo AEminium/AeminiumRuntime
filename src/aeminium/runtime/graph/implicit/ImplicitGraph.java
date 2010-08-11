@@ -12,9 +12,6 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.implicit.ImplicitTask;
 
-class TaskCounter {
-	public volatile int taskCount = 0;
-}
 
 @SuppressWarnings("unchecked")
 public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
@@ -31,10 +28,22 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	};
 	protected final boolean checkForCycles;
 	protected final int pollingTimeout;
+	protected final boolean debug;
 	protected boolean polling = false;
+	
+	private class TaskCounter {
+		public volatile int taskCount = 0;
+		
+		@Override 
+		public String toString() {
+			return "TaskCounter<"+taskCount+">";
+		}
+	}
+
 	
 	public ImplicitGraph(RuntimePrioritizer<T> prioritizer) {
 		super(prioritizer);
+		debug = Configuration.getProperty(getClass(), "debug", false);
 		checkForCycles = Configuration.getProperty(getClass(), "checkForCycles", false);
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
 	}
@@ -98,13 +107,12 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 				empty = isEmpty();
 				if ( !empty ) {
 					try {
-						if ( polling ) {
+						if ( polling || debug ) {
 							taskCounterList.wait(pollingTimeout);
 						} else {
 							taskCounterList.wait();
 						}
 					} catch (InterruptedException e) {
-						e.printStackTrace();
 					}
 				}
 			}

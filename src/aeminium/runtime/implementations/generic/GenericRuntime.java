@@ -26,7 +26,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	protected final RuntimeGraph<T> graph;
 	protected final DataGroupFactory<T> dataGroupFactory;
 	protected final TaskFactory<T> taskFactory;
-	protected RuntimeEventManager eventManager = null;
+	protected RuntimeEventManager eventManager;
 
 	private enum GenericRuntimeState {
 		UNINITIALIZED,
@@ -83,6 +83,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	public final void init() {
 		assert( state == GenericRuntimeState.UNINITIALIZED);
 		eventManager = new EventManager();
+		eventManager.init();
 		graph.init(eventManager);
 		if ( prioritizer != scheduler ) {
 			prioritizer.init(eventManager);
@@ -116,6 +117,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		scheduler.shutdown();
 		taskFactory.shutdown();
 		dataGroupFactory.shutdown();
+		eventManager.shutdown();
 		
 		state = GenericRuntimeState.UNINITIALIZED;
 		assert ( state == GenericRuntimeState.UNINITIALIZED );

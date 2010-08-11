@@ -27,12 +27,12 @@ import aeminium.runtime.task.TaskFactory;
 
 public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTask<T> {
 	protected ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
-	protected int depCount = 0;
-	protected int childCount = 0;
-	protected List<T> dependents = null;
+	protected int depCount;
+	protected int childCount;
+	protected List<T> dependents;
 	protected List<T> children;
-	protected T parent = null;
-	protected RuntimePrioritizer<T> prioritizer = null;
+	protected T parent;
+	protected RuntimePrioritizer<T> prioritizer;
 	protected static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
 	
 	public ImplicitTask(Body body, Collection<Hints> hints) {

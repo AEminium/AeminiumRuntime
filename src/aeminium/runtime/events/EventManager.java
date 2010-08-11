@@ -4,7 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class EventManager implements RuntimeEventManager  {
-	protected Collection<RuntimeEventListener> listeners = new ArrayList<RuntimeEventListener>();
+	protected Collection<RuntimeEventListener> listeners;
+	
+
+	@Override
+	public void init() {
+		listeners =  new ArrayList<RuntimeEventListener>();
+	}
+
+	@Override
+	public void shutdown() {
+		listeners.clear();		
+	}
 	
 	@Override
 	public final void registerRuntimeEventListener(RuntimeEventListener listener) {
@@ -31,5 +42,6 @@ public class EventManager implements RuntimeEventManager  {
 			}
 		}
 	}
+
 	
 }

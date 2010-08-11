@@ -20,8 +20,8 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	protected Deque<T>[] taskQueues;
 	protected RuntimeEventManager eventManager = null;
 	protected AtomicInteger counter;
-	protected int maxQueueLength;
-	protected int pollingTimeout;
+	protected final int maxQueueLength;
+	protected final int pollingTimeout;
 	
 	public PollingWorkStealingScheduler() {
 		super();

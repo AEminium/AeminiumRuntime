@@ -20,7 +20,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 			return "UNSET";
 		}
 	};
-	protected int level = 0;
+	protected int level;
 	
 	public AbstractTask(Body body, Collection<Hints> hints) {
 		this.body = body;

@@ -111,7 +111,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		}
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	protected final WorkerThread<T> getNextThread() {
 		Thread thread = Thread.currentThread(); 
@@ -134,7 +133,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		}
 	}
 	
-	
 	@Override
 	public final void parkThread(WorkerThread<T> thread) {
 		eventManager.signalThreadSuspend(thread);
@@ -142,7 +140,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		LockSupport.park(thread);
 	}
 	
-
 	@Override
 	public final T scanQueues() {
 		for ( Deque<T> q : taskQueues ) {
@@ -154,19 +151,16 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		return null;
 	}
 	
-
 	@Override
 	public final void taskFinished(T task) {
 		// disable running count of abstract super class
 	}
 	
-
 	@Override
 	public final void taskPaused(T task) {
 		// disable paused count of abstract super class
 	}
 	
-
 	@Override
 	public final void taskResume(T task) {
 		scheduleTask(task);
