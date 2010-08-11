@@ -33,11 +33,10 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	protected List<T> children;
 	protected T parent = null;
 	protected RuntimePrioritizer<T> prioritizer = null;
-	protected final boolean debug;
+	protected static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
 	
 	public ImplicitTask(Body body, Collection<Hints> hints) {
 		super(body, hints);
-		debug = Configuration.getProperty(getClass(), "debug", false);
 	}
 
 	@SuppressWarnings("unchecked")
