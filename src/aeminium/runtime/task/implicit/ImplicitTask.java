@@ -87,19 +87,20 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
-				for ( RuntimeTask t :deps) {
+				for ( RuntimeTask t : deps) {
+					synchronized (t) {
 						T Tthis = (T)this;
-						 count += ((ImplicitTask<T>) t).addDependent(Tthis);
+						count += ((ImplicitTask<T>) t).addDependent(Tthis);						
+					}
 				}
 				depCount += count;
+				if ( depCount == 0 ) {
+					scheduleTask();
+				}
 			} else {
 				scheduleTask();
 			}
 		}
-	}
-
-	public final void setGraph(RuntimeGraph<T> graph) {
-		this.graph = graph;
 	}
 	
 	public final void computeLevel() {
@@ -131,15 +132,14 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 					taskCompleted();
 				}
 			}
-			if ( debug ) {
-				if ( children == null ) {
-					children.remove(child);
-				}
-			}
+//			if ( debug ) {
+//				if ( children != null ) {
+//					children.remove(child);
+//				}
+//			}
 		}
 	}
 
-	
 	public final int addDependent(T task) {
 		synchronized (this) {
 			if ( state == ImplicitTaskState.COMPLETED ) {
@@ -153,25 +153,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
-	public final void setDependencies(Collection<T> deps) {
-		synchronized (this) {
-			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
-			if ( (Object)deps != Runtime.NO_DEPS ) {
-				int count = 0;
-				for ( T t : deps ) {
-					synchronized (t) {
-						@SuppressWarnings("unchecked")
-						T Tthis = (T)this;
-						 count += t.addDependent(Tthis);						
-					}
-				}
-				depCount += count;
-			} else {
-				scheduleTask();
-			}
-		}
-	}
-	
+
 	public final void decDepencenyCount() {
 		synchronized (this) {
 			depCount -= 1;
