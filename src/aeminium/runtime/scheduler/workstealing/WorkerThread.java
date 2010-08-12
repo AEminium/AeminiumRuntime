@@ -37,18 +37,27 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	
 	@Override
 	public final void run() {
+
 		int pollCounter = pollingCount;
 		scheduler.registerThread(this);
 		while (!shutdown) {
 			T task = null;
 			task = taskQueue.pollFirst();
 			if ( task != null ) {
-				executeTask(task);
+				try {
+					task.call();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			} else {
 				// scan for other queues
 				task = scheduler.scanQueues();
 				if ( task != null ) {
-					executeTask(task);
+					try {
+						task.call();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				} else {
 					if ( pollCounter == 0) {
 						scheduler.parkThread(this);
@@ -61,15 +70,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 		}
 		scheduler.unregisterThread(this);
 	}
-	
-	protected final void executeTask(T task) {
-		try {
-			task.call();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
+
 	public final String toString() {
 		return "WorkerThread<" + index + ">";
 	}

@@ -15,23 +15,14 @@ import aeminium.runtime.task.implicit.ImplicitTask;
 
 @SuppressWarnings("unchecked")
 public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
-	protected final List<TaskCounter> taskCounterList = new ArrayList<TaskCounter>(); 
-	protected ThreadLocal<TaskCounter> taskcounters= new ThreadLocal<TaskCounter>(){
-		@Override
-		protected TaskCounter initialValue() {
-			TaskCounter tc = new TaskCounter();
-			synchronized (taskCounterList) {
-				taskCounterList.add(tc);
-			}
-			return tc;
-		}		
-	};
+	protected List<TaskCounter> taskCounterList;
+	protected ThreadLocal<TaskCounter> taskCounters;
 	protected final boolean checkForCycles;
 	protected final int pollingTimeout;
 	protected final boolean debug;
 	protected boolean polling = false;
 	
-	private class TaskCounter {
+	private final class TaskCounter {
 		public volatile int taskCount = 0;
 		
 		@Override 
@@ -40,16 +31,26 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		}
 	}
 
-	
 	public ImplicitGraph(RuntimePrioritizer<T> prioritizer) {
 		super(prioritizer);
-		debug = Configuration.getProperty(getClass(), "debug", false);
+		debug          = Configuration.getProperty(getClass(), "debug", false);
 		checkForCycles = Configuration.getProperty(getClass(), "checkForCycles", false);
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
 	}
 	
 	@Override
 	public final void init(RuntimeEventManager eventManager) {
+		taskCounterList  = new ArrayList<TaskCounter>(); 
+		taskCounters = new ThreadLocal<TaskCounter>(){
+			@Override
+			protected TaskCounter initialValue() {
+				TaskCounter tc = new TaskCounter();
+				synchronized (taskCounterList) {
+					taskCounterList.add(tc);
+				}
+				return tc;
+			}		
+		};
 		eventManager.registerRuntimeEventListener(new RuntimeEventListener() {
 			
 			@Override
@@ -70,12 +71,14 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 
 	@Override
 	public final void shutdown() {
+		taskCounterList = null;
+		taskCounters    = null;
 	}
 	
 	@Override
 	public final void addTask(T task, Task parent, Collection<T> deps) {
 
-		taskcounters.get().taskCount++;
+		taskCounters.get().taskCount++;
 		
 		T itask = (T)task;
 
@@ -88,10 +91,10 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 
 	@Override
 	public final void taskCompleted(T task) {
-		taskcounters.get().taskCount--;
+		taskCounters.get().taskCount--;
 	}
 	
-	protected boolean isEmpty() {
+	protected final boolean isEmpty() {
 		int count = 0;
 		for(TaskCounter tc : taskCounterList ) {
 			count += tc.taskCount;
@@ -112,8 +115,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 						} else {
 							taskCounterList.wait();
 						}
-					} catch (InterruptedException e) {
-					}
+					} catch (InterruptedException e) {}
 				}
 			}
 		}

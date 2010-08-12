@@ -67,6 +67,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	
 	@SuppressWarnings("unchecked")
 	public final void init(Task parent, RuntimePrioritizer<RuntimeTask> prioritizer, RuntimeGraph<RuntimeTask> graph, Collection<RuntimeTask> deps){
+		boolean schedule = false;
 		synchronized (this) {
 			// check for double scheduling
 			if ( state != ImplicitTaskState.UNSCHEDULED) {
@@ -88,18 +89,19 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
 				for ( RuntimeTask t : deps) {
-					synchronized (t) {
-						T Tthis = (T)this;
-						count += ((ImplicitTask<T>) t).addDependent(Tthis);						
-					}
+					count += ((ImplicitTask<T>) t).addDependent((T)this);						
 				}
 				depCount += count;
 				if ( depCount == 0 ) {
-					scheduleTask();
+					schedule = true;
 				}
 			} else {
-				scheduleTask();
+				schedule = true;
 			}
+		}
+		if (schedule) {
+			state = ImplicitTaskState.RUNNING;
+			prioritizer.scheduleTask((T)this);	
 		}
 	}
 	
@@ -153,21 +155,20 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
-
 	public final void decDepencenyCount() {
+		boolean schedule = false;
 		synchronized (this) {
 			depCount -= 1;
 			if ( depCount == 0 ) {
-				scheduleTask();
+				schedule = true;
 			}
 		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	protected final void scheduleTask() {
-		assert( state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES );
-		state = ImplicitTaskState.RUNNING;
-		prioritizer.scheduleTask((T)this);	
+		if ( schedule ) {
+			state = ImplicitTaskState.RUNNING;
+			@SuppressWarnings("unchecked")
+			T This = (T)this;
+			prioritizer.scheduleTask(This);	
+		}
 	}
 	
 	public final void taskFinished() {
@@ -207,10 +208,6 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 
 		// cleanup references 
-		if ( dependents != null ) {
-			
-		}
-		
 		this.body = null;
 		this.children = null;
 		

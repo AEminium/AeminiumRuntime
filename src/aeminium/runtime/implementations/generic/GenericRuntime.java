@@ -48,11 +48,11 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	}
 	
 	public GenericRuntime(GenericRuntime<T> runtime) {
-		this.scheduler = runtime.scheduler;
-		this.prioritizer = runtime.prioritizer;
-		this.graph = runtime.graph;
+		this.scheduler        = runtime.scheduler;
+		this.prioritizer      = runtime.prioritizer;
+		this.graph            = runtime.graph;
 		this.dataGroupFactory = runtime.dataGroupFactory;
-		this.taskFactory = runtime.taskFactory;
+		this.taskFactory      = runtime.taskFactory;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -110,11 +110,11 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		state = GenericRuntimeState.SHUTTING_DOWN;
 		
 		graph.waitToEmpty();
-		graph.shutdown();
 		if ( prioritizer != scheduler ) {
 			prioritizer.shutdown();
 		}
 		scheduler.shutdown();
+		graph.shutdown();
 		taskFactory.shutdown();
 		dataGroupFactory.shutdown();
 		eventManager.shutdown();

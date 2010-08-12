@@ -84,7 +84,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
 		if ( taskQueue.size() < maxQueueLength ) {
-			addTask(taskQueue, task);
+			while ( !taskQueue.offerFirst(task) ) { /*loop until we could add it*/}
 			signalWork(thread);
 		} else {
 			try {
@@ -100,17 +100,11 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.getIndex()];
 		for ( T task : tasks ) {
-			addTask(taskQueue, task);
+			while ( !taskQueue.offerFirst(task) ) { /*loop until we could add it*/}
 		}
 		signalWork(thread);
 	}
 
-	protected final void addTask(Deque<T> q, T task) {
-		while ( !q.offerFirst(task) ) {
-			// loop until we could add it 
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	protected final WorkerThread<T> getNextThread() {
 		Thread thread = Thread.currentThread(); 
@@ -125,7 +119,6 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		return (WorkerThread<T>) thread;
 	}
 
-	
 	public final void signalWork(WorkerThread<T> thread) {
 		LockSupport.unpark(thread);
 		WorkerThread<T> threadParked = parkedThreads.poll();
@@ -143,6 +136,7 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	
 	@Override
 	public final T scanQueues() {
+		// TODO: do not use sequential order all the time, because that causes high contention 
 		for ( Deque<T> q : taskQueues ) {
 			T task;
 			if ( pollFirst ) {

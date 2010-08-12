@@ -54,6 +54,11 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 				rt.schedule(t2, current, Runtime.NO_DEPS);
 			} 
 		}
+		
+		@Override
+		public String toString() {
+			return "FibBody("+n+")";
+		}
 	}
 	
 	protected long runTest(Runtime rt, int n) {

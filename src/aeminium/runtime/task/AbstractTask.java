@@ -53,7 +53,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void setScheduler(RuntimeScheduler scheduler) {
+	public final void setScheduler(RuntimeScheduler scheduler) {
 		this.scheduler = scheduler;
 	}
 	
@@ -66,7 +66,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 	
 	@Override
-	public Object getResult() {
+	public final Object getResult() {
 		//while (result == UNSET ) ;
 		if ( result == UNSET ) {
 			throw new RuntimeError("Result has either not been set or already retrieved");
