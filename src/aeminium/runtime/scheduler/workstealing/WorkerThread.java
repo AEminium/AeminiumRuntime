@@ -5,9 +5,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.implementations.Configuration;
-import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.task.implicit.ImplicitTask;
 
-public final class WorkerThread<T extends RuntimeTask> extends Thread {
+public final class WorkerThread<T extends ImplicitTask> extends Thread {
 	protected final Deque<T> taskQueue;
 	public final int index;
 	protected volatile boolean shutdown = false;
@@ -35,7 +35,6 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 	
 	@Override
 	public final void run() {
-
 		int pollCounter = pollingCount;
 		scheduler.registerThread(this);
 		while (!shutdown) {
@@ -43,6 +42,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 			task = taskQueue.pollFirst();
 			if ( task != null ) {
 				try {
+					queueLevel = task.level;
 					task.call();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -53,6 +53,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 				if ( task != null ) {
 					//System.out.println("Thread-"+index + " stole " + task);
 					try {
+						queueLevel = task.level;
 						task.call();
 					} catch (Exception e) {
 						e.printStackTrace();

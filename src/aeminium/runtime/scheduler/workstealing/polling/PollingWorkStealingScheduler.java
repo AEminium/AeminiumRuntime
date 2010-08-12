@@ -11,29 +11,25 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkerThread;
-import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.task.implicit.ImplicitTask;
 
-public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T> {
+public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T> {
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
 	protected ThreadLocal<WorkerThread<T>> currentThread;
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
 	protected RuntimeEventManager eventManager = null;
 	protected AtomicInteger counter;
-	protected final int maxQueueLength;
-	protected final int pollingTimeout;
+	protected final int maxQueueLength       = Configuration.getProperty(PollingWorkStealingScheduler.class, "maxQueueLength", 3);
+	protected final int pollingTimeout       = Configuration.getProperty(PollingWorkStealingScheduler.class, "pollingTimeout", 100000);;
 	protected static final boolean pollFirst = Configuration.getProperty(PollingWorkStealingScheduler.class, "pollFirst", false);
 	
 	public PollingWorkStealingScheduler() {
 		super();
-		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
-		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 100000);
 	}
 	
 	public PollingWorkStealingScheduler(int maxParallelism) {
 		super(maxParallelism);
-		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
-		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 100000);
 	}
 
 	public final void registerThread(WorkerThread<T> thread) {

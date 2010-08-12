@@ -14,6 +14,7 @@ import aeminium.runtime.scheduler.workstealing.WorkerThread;
 import aeminium.runtime.task.implicit.ImplicitTask;
 
 public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
+	protected Deque<WorkerThread<T>> parkedThreads;
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
 	protected RuntimeEventManager eventManager;
@@ -47,6 +48,7 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 		taskQueues        = new Deque[threads.length];
 		counter           = new AtomicInteger(threads.length);
 		globalQueue       = new LinkedBlockingDeque<T>();
+		parkedThreads     = new LinkedBlockingDeque<WorkerThread<T>>();
 				
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
@@ -87,7 +89,7 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 			@SuppressWarnings("unchecked")
 			WorkerThread<T> wthread = (WorkerThread<T>)thread;
 			Deque<T> q = wthread.getTaskList();
-			if ( wthread.queueLevel < task.level ) {
+			if ( wthread.queueLevel < task.level && q.size() < maxQueueLength ) {
 				q.addFirst(task);
 				wthread.queueLevel = task.level;
 				signalWork(wthread);
@@ -123,12 +125,14 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 	}
 
 	public final void signalWork(WorkerThread<T> thread) {
-		LockSupport.unpark(threads[(thread.index+1) % threads.length]);
+		//LockSupport.unpark(threads[(thread.index+1) % threads.length]);
+		LockSupport.unpark(parkedThreads.poll());
 	}
 	
 	@Override
 	public final void parkThread(WorkerThread<T> thread) {
 		eventManager.signalThreadSuspend(thread);
+		parkedThreads.add(thread);
 		LockSupport.park(thread);
 	}
 	
