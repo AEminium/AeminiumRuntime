@@ -51,7 +51,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 				// scan for other queues
 				task = scheduler.scanQueues(this);
 				if ( task != null ) {
-					System.out.println("Thread-"+index + " stole " + task);
+					//System.out.println("Thread-"+index + " stole " + task);
 					try {
 						task.call();
 					} catch (Exception e) {
