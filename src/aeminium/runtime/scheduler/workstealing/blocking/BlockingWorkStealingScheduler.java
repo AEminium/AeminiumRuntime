@@ -2,7 +2,7 @@ package aeminium.runtime.scheduler.workstealing.blocking;
 
 import java.util.Collection;
 import java.util.Deque;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
@@ -11,25 +11,23 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkerThread;
-import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.task.implicit.ImplicitTask;
 
-public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
-	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;
+public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T>{
 	protected WorkerThread<T>[] threads;
 	protected Deque<T>[] taskQueues;
-	protected RuntimeEventManager eventManager = null;
+	protected RuntimeEventManager eventManager;
 	protected AtomicInteger counter;
-	protected final int maxQueueLength;
+	protected final int maxQueueLength       = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 3);
 	protected static final boolean pollFirst = Configuration.getProperty(BlockingWorkStealingScheduler.class, "pollFirst", false);
+	protected Deque<T> globalQueue;
 	
 	public BlockingWorkStealingScheduler() {
 		super();
-		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
 	}
 
 	public BlockingWorkStealingScheduler(int maxParallelism) {
 		super(maxParallelism);
-		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
 	}
 	
 	@Override
@@ -45,10 +43,10 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	@SuppressWarnings("unchecked")
 	public void init(RuntimeEventManager eventManager) {
 		this.eventManager = eventManager;
-		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
-		threads =  new WorkerThread[getMaxParallelism()];
-		taskQueues = new Deque[threads.length];
-		counter = new AtomicInteger(threads.length);
+		threads           = new WorkerThread[getMaxParallelism()];
+		taskQueues        = new Deque[threads.length];
+		counter           = new AtomicInteger(threads.length);
+		globalQueue       = new LinkedBlockingDeque<T>();
 				
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
@@ -73,32 +71,40 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		}
 
 		// cleanup
-		threads = null;
-		taskQueues = null;
-		parkedThreads = null;
-		counter = null;
+		threads     = null;
+		taskQueues  = null;
+		counter     = null;
+		globalQueue = null;
 	}
 
 	@Override
 	public final void scheduleTask(T task) {
-		WorkerThread<T> thread = getNextThread();
-		Deque<T> taskQueue = taskQueues[thread.getIndex()];
-		if ( taskQueue.size() < maxQueueLength ) {
-			while ( !taskQueue.offerFirst(task) ) { /*loop until we could add it*/}
-			signalWork(thread);
+		Thread thread = Thread.currentThread();
+		if ( ! (thread instanceof WorkerThread<?> ) ) {
+			globalQueue.add(task);
+			LockSupport.unpark(threads[0]);
 		} else {
-			try {
-				task.call();
-			} catch (Exception e) {
-				e.printStackTrace();
+			@SuppressWarnings("unchecked")
+			WorkerThread<T> wthread = (WorkerThread<T>)thread;
+			Deque<T> q = wthread.getTaskList();
+			if ( wthread.queueLevel < task.level ) {
+				q.addFirst(task);
+				wthread.queueLevel = task.level;
+				signalWork(wthread);
+			} else {
+				try {
+					task.call();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
-
+	
 	@Override
 	public final void scheduleTasks(Collection<T> tasks) {
 		WorkerThread<T> thread = getNextThread();
-		Deque<T> taskQueue = taskQueues[thread.getIndex()];
+		Deque<T> taskQueue = taskQueues[thread.index];
 		for ( T task : tasks ) {
 			while ( !taskQueue.offerFirst(task) ) { /*loop until we could add it*/}
 		}
@@ -111,48 +117,26 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 		if ( thread instanceof WorkerThread<?> ) {
 			return (WorkerThread<T>) thread;
 		} else {
-			thread = parkedThreads.poll();
-			if ( thread == null ) {
-				thread = threads[0];
-			}
+			thread = threads[0];
 		}
 		return (WorkerThread<T>) thread;
 	}
 
 	public final void signalWork(WorkerThread<T> thread) {
-//		LockSupport.unpark(thread);
-//		WorkerThread<T> threadParked = parkedThreads.poll();
-//		if ( threadParked != null ) {
-//			LockSupport.unpark(threadParked);
-//		}
-		// wakup next thread
-		LockSupport.unpark(threads[(thread.getIndex()+1) % threads.length]);
+		LockSupport.unpark(threads[(thread.index+1) % threads.length]);
 	}
 	
 	@Override
 	public final void parkThread(WorkerThread<T> thread) {
 		eventManager.signalThreadSuspend(thread);
-		parkedThreads.add(thread);
 		LockSupport.park(thread);
 	}
 	
 	@Override
 	public final T scanQueues(WorkerThread<T> thread) {
-//		// TODO: do not use sequential order all the time, because that causes high contention 
-//		for ( Deque<T> q : taskQueues ) {
-//			T task;
-//			if ( pollFirst ) {
-//				task = q.pollFirst();
-//			} else {
-//				task = q.pollLast();
-//			}
-//			if ( task != null ) {
-//				return task;
-//			}
-//		}
-//		return null;
+		int index = thread.index;
 		for(int i = threads.length; i > 0 ; i--) {
-			Deque<T> q = taskQueues[(thread.getIndex()+i)%taskQueues.length];
+			Deque<T> q = taskQueues[(index+i)%taskQueues.length];
 			T task;
 			if ( pollFirst ) {
 				task = q.pollFirst();
@@ -163,6 +147,11 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 				return task;
 			}
 		}
+		T task = globalQueue.pollFirst();
+		if ( task != null ) {
+			return task;
+		}
+
 		return null;
 	}
 	

@@ -11,29 +11,25 @@ import aeminium.runtime.CyclicDependencyError;
 import aeminium.runtime.Hints;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.ResultBody;
-import aeminium.runtime.Runtime;
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
-import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
-import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.TaskFactory;
 
 
 public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTask<T> {
-	protected ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
-	protected int depCount;
-	protected int childCount;
-	protected List<T> dependents;
-	protected List<T> children;
-	protected T parent;
-	protected RuntimePrioritizer<T> prioritizer;
-	protected static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
+	public ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
+	public int depCount;
+	public int childCount;
+	public List<T> dependents;
+	public List<T> children;
+	public T parent;
+	public RuntimePrioritizer<T> prioritizer;
+	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
 	
 	public ImplicitTask(Body body, Collection<Hints> hints) {
 		super(body, hints);
@@ -65,54 +61,6 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		};
 	}
 	
-	@SuppressWarnings("unchecked")
-	public final void init(Task parent, RuntimePrioritizer<RuntimeTask> prioritizer, RuntimeGraph<RuntimeTask> graph, Collection<RuntimeTask> deps){
-		boolean schedule = false;
-		synchronized (this) {
-			// check for double scheduling
-			if ( state != ImplicitTaskState.UNSCHEDULED) {
-				throw new RuntimeError("Cannot schedule task twice: " + this);
-			}
-			
-			// setup parent connection
-			if ( parent != Runtime.NO_PARENT ) {
-				this.parent = (T) parent;
-				this.parent.attachChild((T)this);
-			}
-			
-			// initialize references
-			this.prioritizer = (RuntimePrioritizer) prioritizer;
-			this.graph = (RuntimeGraph) graph;
-			
-			// setup dependencies
-			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
-			if ( (Object)deps != Runtime.NO_DEPS ) {
-				int count = 0;
-				for ( RuntimeTask t : deps) {
-					count += ((ImplicitTask<T>) t).addDependent((T)this);						
-				}
-				depCount += count;
-				if ( depCount == 0 ) {
-					schedule = true;
-				}
-			} else {
-				schedule = true;
-			}
-		}
-		if (schedule) {
-			state = ImplicitTaskState.RUNNING;
-			prioritizer.scheduleTask((T)this);	
-		}
-	}
-	
-	public final void computeLevel() {
-		synchronized (this) {
-			if ( parent != null) {
-				setLevel(((T)parent).getLevel()+1);			
-			}
-		}
-	}
-	
 	public final void attachChild(T child) {
 		synchronized (this) {
 			childCount += 1;
@@ -138,11 +86,6 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 					taskCompleted();
 				}
 			}
-//			if ( debug ) {
-//				if ( children != null ) {
-//					children.remove(child);
-//				}
-//			}
 		}
 	}
 
@@ -160,29 +103,16 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	}
 	
 	public final void decDepencenyCount() {
-		boolean schedule = false;
 		synchronized (this) {
 			depCount -= 1;
 			if ( depCount == 0 ) {
-				schedule = true;
+				state = ImplicitTaskState.RUNNING;
 			}
 		}
-		if ( schedule ) {
-			state = ImplicitTaskState.RUNNING;
+		if ( state == ImplicitTaskState.RUNNING ) {
 			@SuppressWarnings("unchecked")
 			T This = (T)this;
 			prioritizer.scheduleTask(This);	
-		}
-	}
-	
-	public final void taskFinished() {
-		synchronized (this) {
-			assert( state == ImplicitTaskState.RUNNING );
-			state = ImplicitTaskState.WAITING_FOR_CHILDREN;
-			
-			if ( childCount == 0 ) {
-				taskCompleted();
-			}
 		}
 	}
 	
@@ -214,10 +144,6 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		// cleanup references 
 		this.body = null;
 		this.children = null;
-		
-		@SuppressWarnings("unchecked")
-		T This = (T)this;
-		graph.taskCompleted(This);	
 	}
 
 	public void checkForCycles() {

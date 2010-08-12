@@ -25,7 +25,7 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 		waitingQueue = new PriorityQueue<T>(20, new Comparator<T>() {
 			@Override
 			public int compare(T o1, T o2) {
-				return o2.getLevel() - o1.getLevel();
+				return o2.level - o1.level;
 			}
 		});
 	}
@@ -37,9 +37,6 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	@Override
 	public final void scheduleTasks(Collection<T> tasks) {
 		synchronized (this) {
-			for ( T task : tasks ) {
-				task.computeLevel();
-			}
 			waitingQueue.addAll(tasks);
 			schedule();
 		}
@@ -48,7 +45,6 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	@Override
 	public  final void scheduleTask(T task) {
 		synchronized (this) {
-			task.computeLevel();
 			waitingQueue.add(task);
 			schedule();
 		}

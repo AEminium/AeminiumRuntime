@@ -11,8 +11,8 @@ import aeminium.runtime.scheduler.RuntimeScheduler;
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
 	protected volatile Object result = UNSET;
 	protected Body body;
-	protected RuntimeGraph<T> graph;
-	protected RuntimeScheduler<T> scheduler;
+	public RuntimeGraph<T> graph;
+	public RuntimeScheduler<T> scheduler;
 	protected final Collection<Hints> hints;
 	protected static final Object UNSET = new Object() {
 		@Override
@@ -20,7 +20,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 			return "UNSET";
 		}
 	};
-	protected int level;
+	public int level;
 	
 	public AbstractTask(Body body, Collection<Hints> hints) {
 		this.body = body;
@@ -36,7 +36,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		} finally {
 			@SuppressWarnings("unchecked")
 			T Tthis = (T)this;
-			taskFinished();
+			graph.taskFinished(Tthis);
 			if ( scheduler != null ) {
 				scheduler.taskFinished(Tthis);
 			}
@@ -76,17 +76,17 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return value;
 	}
 
-	protected final void setLevel(int level) {
-		this.level = level;
-	}
-	
-	public final int getLevel() {
-		return this.level;
-	}
+//	protected final void setLevel(int level) {
+//		this.level = level;
+//	}
+//	
+//	public final int getLevel() {
+//		return this.level;
+//	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void taskCompleted() {
-		graph.taskCompleted((T)this);
+		graph.taskFinished((T)this);
 	}
 }
