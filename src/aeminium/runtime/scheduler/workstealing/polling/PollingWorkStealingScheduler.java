@@ -141,7 +141,7 @@ public final class PollingWorkStealingScheduler<T extends RuntimeTask> extends A
 	}
 
 	@Override
-	public final T scanQueues() {
+	public final T scanQueues(WorkerThread<T> thread) {
 		for ( Deque<T> q : taskQueues ) {
 			T task;
 			if ( pollFirst ) {

@@ -51,7 +51,7 @@ public final class WorkerThread<T extends RuntimeTask> extends Thread {
 				}
 			} else {
 				// scan for other queues
-				task = scheduler.scanQueues();
+				task = scheduler.scanQueues(this);
 				if ( task != null ) {
 					try {
 						task.call();

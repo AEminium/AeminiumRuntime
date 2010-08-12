@@ -120,11 +120,13 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 
 	public final void signalWork(WorkerThread<T> thread) {
-		LockSupport.unpark(thread);
-		WorkerThread<T> threadParked = parkedThreads.poll();
-		if ( threadParked != null ) {
-			LockSupport.unpark(threadParked);
-		}
+//		LockSupport.unpark(thread);
+//		WorkerThread<T> threadParked = parkedThreads.poll();
+//		if ( threadParked != null ) {
+//			LockSupport.unpark(threadParked);
+//		}
+		// wakup next thread
+		LockSupport.unpark(threads[(thread.getIndex()+1) % threads.length]);
 	}
 	
 	@Override
@@ -135,16 +137,29 @@ public final class BlockingWorkStealingScheduler<T extends RuntimeTask> extends 
 	}
 	
 	@Override
-	public final T scanQueues() {
-		// TODO: do not use sequential order all the time, because that causes high contention 
-		for ( Deque<T> q : taskQueues ) {
+	public final T scanQueues(WorkerThread<T> thread) {
+//		// TODO: do not use sequential order all the time, because that causes high contention 
+//		for ( Deque<T> q : taskQueues ) {
+//			T task;
+//			if ( pollFirst ) {
+//				task = q.pollFirst();
+//			} else {
+//				task = q.pollLast();
+//			}
+//			if ( task != null ) {
+//				return task;
+//			}
+//		}
+//		return null;
+		for(int i = threads.length; i > 0 ; i--) {
+			Deque<T> q = taskQueues[(thread.getIndex()+i)%taskQueues.length];
 			T task;
 			if ( pollFirst ) {
 				task = q.pollFirst();
 			} else {
 				task = q.pollLast();
 			}
-			if ( task != null ) {
+			if ( task != null) {
 				return task;
 			}
 		}
