@@ -31,14 +31,9 @@ public class RTBench {
 		}
 
 		if ( args[0].equals("list") ) {
-			System.out.println();
-			System.out.println("#=================================================");
-			System.out.println("# Available Benchmarks:");
-			System.out.println("#=================================================");
 			for( Benchmark benchmark : benchmarks ) {
 				System.out.println(benchmark.getName());
 			}
-			System.out.println();
 		} else if ( args[0].equals("run") && args.length == 2 ) {
 			Benchmark benchmark = null;
 			for ( Benchmark b : benchmarks ) {

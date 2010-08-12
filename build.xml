@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<project name="AEminium Runtime" default="build">	
+    <target name="build">
+    	<mkdir dir="bin"/>
+    	<javac srcdir="src" 
+    		   destdir="bin">
+    	     <classpath id="rt.classpath">
+    	            <pathelement path="lib/jsr166y.jar"/>
+    	            <pathelement path="lib/junit-4.8.2.jar"/>
+    	        </classpath>
+    	</javac>
+	</target>
+    	
+    <target name="clean">
+        <delete verbose="yes" dir="bin/aeminium">
+    	</delete>
+	</target>
+</project>

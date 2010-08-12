@@ -81,8 +81,8 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			}
 			
 			// initialize references
-			this.prioritizer = (RuntimePrioritizer<T>) prioritizer;
-			this.graph = (RuntimeGraph<T>) graph;
+			this.prioritizer = (RuntimePrioritizer) prioritizer;
+			this.graph = (RuntimeGraph) graph;
 			
 			// setup dependencies
 			state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
