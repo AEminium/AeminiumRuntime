@@ -132,15 +132,8 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	}
 
 	@Override
-	public final void taskFinished(T task) {
+	public final void taskCompleted(T task) {
 		taskCounters.get().taskCount--;
-		synchronized (task) {
-			task.state = ImplicitTaskState.WAITING_FOR_CHILDREN;
-
-			if ( task.childCount == 0 ) {
-				task.taskCompleted();
-			}
-		}
 	}
 	
 	protected final boolean isEmpty() {

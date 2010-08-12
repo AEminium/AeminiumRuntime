@@ -16,5 +16,7 @@ public interface RuntimeTask extends Task, Callable<Object> {
 	
 	public Body getBody();
 	
+	public void taskFinished();
+	
 	public void taskCompleted();
 }

@@ -34,9 +34,9 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		} catch (Throwable e) {
 			setResult(e);
 		} finally {
+			taskFinished();
 			@SuppressWarnings("unchecked")
 			T Tthis = (T)this;
-			graph.taskFinished(Tthis);
 			if ( scheduler != null ) {
 				scheduler.taskFinished(Tthis);
 			}
@@ -87,6 +87,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	@SuppressWarnings("unchecked")
 	@Override
 	public void taskCompleted() {
-		graph.taskFinished((T)this);
+		graph.taskCompleted((T)this);
 	}
 }

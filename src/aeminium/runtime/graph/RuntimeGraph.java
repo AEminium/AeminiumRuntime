@@ -23,7 +23,7 @@ public interface RuntimeGraph <T extends RuntimeTask> {
 	 * 
 	 * @param task
 	 */
-	public abstract void taskFinished(T task);
+	public abstract void taskCompleted(T task);
 		
 	/**
 	 * Method to wait until all task have completed.

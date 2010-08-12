@@ -116,6 +116,16 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		}
 	}
 	
+	public final void taskFinished() {
+		synchronized (this) {
+			state = ImplicitTaskState.WAITING_FOR_CHILDREN;
+
+			if ( childCount == 0 ) {
+				taskCompleted();
+			}
+		}
+	}
+	
 	@Override
 	public void taskCompleted() {
 		assert( state == ImplicitTaskState.WAITING_FOR_CHILDREN );
@@ -144,6 +154,8 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		// cleanup references 
 		this.body = null;
 		this.children = null;
+		
+		graph.taskCompleted((T)this);
 	}
 
 	public void checkForCycles() {
