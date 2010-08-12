@@ -106,7 +106,11 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	}
 	
 	public final void computeLevel() {
-		setLevel(((T)parent).getLevel()+1);
+		synchronized (this) {
+			if ( parent != null) {
+				setLevel(((T)parent).getLevel()+1);			
+			}
+		}
 	}
 	
 	public final void attachChild(T child) {
