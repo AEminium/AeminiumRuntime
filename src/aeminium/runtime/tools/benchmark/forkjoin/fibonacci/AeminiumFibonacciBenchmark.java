@@ -21,6 +21,14 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 			this.rt = rt;
 		}
 		
+		public int seqFib(int n) {
+			if (n <= 2) {
+				return 1;
+			} else {
+				return seqFib(n-1) + seqFib(n-2);
+			}
+		}
+		
 		@Override
 		public final void completed() {
 			if ( b1 != null && b2 != null ) {
@@ -35,7 +43,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		@Override
 		public final void execute(Task current) {
 			if ( n <= THRESHOLD  ) {
-				Fibonacci.fibOf(n);
+				seqFib(n);
 			} else {
 				b1 = new FibBody(n-1, rt);
 				Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);

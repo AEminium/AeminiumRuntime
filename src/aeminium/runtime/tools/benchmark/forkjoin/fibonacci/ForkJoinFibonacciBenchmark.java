@@ -13,13 +13,21 @@ public class ForkJoinFibonacciBenchmark extends FibonacciBenchmark {
 		
 		public FibonacciAction(int n) { number = n; }
 
+		public int seqFib(int n) {
+			if (n <= 2) {
+				return 1;
+			} else {
+				return seqFib(n-1) + seqFib(n-2);
+			}
+		}
+		
 		@Override
 		protected final void compute() {
 			int n = number;
 			if (n <= 1) { 
 				/* do nothing */ 
 			} else if (n <= THRESHOLD) { 
-				number = Fibonacci.fibOf(n);
+				number = seqFib(n);
 			} else {
 				FibonacciAction f1 = new FibonacciAction(n - 1);	
 				FibonacciAction f2 = new FibonacciAction(n - 2);

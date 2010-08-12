@@ -5,10 +5,18 @@ import aeminium.runtime.tools.benchmark.Reporter;
 
 public class SequentialFibonacciBenchmark extends FibonacciBenchmark {
 
+	public int seqFib(int n) {
+		if (n <= 2) {
+			return 1;
+		} else {
+			return seqFib(n-1) + seqFib(n-2);
+		}
+	}
+	
 	protected long runTest(int n) {
 		long start = System.nanoTime();
 		
-		Fibonacci.fibOf(n);
+		seqFib(n);
 
 		long end = System.nanoTime();
 		return (end-start);
