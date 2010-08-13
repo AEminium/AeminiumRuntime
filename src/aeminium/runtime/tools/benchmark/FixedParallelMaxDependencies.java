@@ -10,8 +10,8 @@ import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
 
 public class FixedParallelMaxDependencies implements Benchmark {
-	private static final String name = "FixedParallelMaxDependencies";
-	private final int[] COUNTS = {100, 1000, 10000};
+	private static final String name = FixedParallelMaxDependencies.class.getSimpleName();
+	private final int[] COUNTS = {100, 1000, 10000, 100000};
 	private static final int taskCount = 16;
 	
 	@Override
@@ -46,7 +46,7 @@ public class FixedParallelMaxDependencies implements Benchmark {
 		rt.shutdown();
 		long end = System.nanoTime();
 
-		String result = String.format("Run %10d tasks in %12d ns ==> %10d ns per task | %6d tasks/second.", count, (end-start), ((end-start)/count),  (1000000000/((end-start)/count)));
+		String result = String.format("Run %10d tasks in %12d ns ==> %10d ns per task | %6d tasks/second.", (count*taskCount), (end-start), ((end-start)/(count*taskCount)),  (1000000000/((end-start)/(count*taskCount))));
 		reporter.reportLn(result);
 
 	}

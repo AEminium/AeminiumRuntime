@@ -2,13 +2,15 @@ package aeminium.runtime.scheduler.singlethreadpool.fixed;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
 public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
-	private ExecutorService execService; 
+	protected ExecutorService execService; 
+	protected AtomicInteger counter = new AtomicInteger();
 	
 	public SingleFixedThreadPoolScheduler() {
 		super();
@@ -33,6 +35,7 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 	}
 	
 	public final void scheduleTask(T task) {
+		counter.incrementAndGet();
 		runningCount.incrementAndGet();
 		task.setScheduler(this);
 		execService.submit(task);

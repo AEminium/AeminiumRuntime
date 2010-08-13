@@ -52,7 +52,25 @@ public class Factory {
 		Factory f = new Factory();
 
 		@SuppressWarnings("unchecked")
-		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_LowestLevelFirstPrioritizer_SingleThreadPoolScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.LowestLevelFirstPrioritizer.SingleThreadPoolScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.LowestLevelFirstPrioritizer.SingleThreadPoolScheduler.ImplicitTask.FifoDataGroup") {
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup") {
+			@Override
+			public final AbstractRuntime instanciate() {
+				SingleFixedThreadPoolScheduler<ImplicitTask> scheduler = new SingleFixedThreadPoolScheduler<ImplicitTask>();
+				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory();
+				return new GenericRuntime<ImplicitTask>(scheduler, 
+														scheduler, 
+													    graph,
+													    dgFactory,
+													    taskFactory);
+			}
+		};
+		database.put(ImplicitGraph_None_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup.getName(), ImplicitGraph_None_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup);
+		
+		
+		@SuppressWarnings("unchecked")
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_LowestLevelFirstPrioritizer_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.LowestLevelFirstPrioritizer.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.LowestLevelFirstPrioritizer.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup") {
 			@Override
 			public final AbstractRuntime instanciate() {
 				SingleFixedThreadPoolScheduler<ImplicitTask> scheduler = new SingleFixedThreadPoolScheduler<ImplicitTask>();
@@ -67,7 +85,7 @@ public class Factory {
 													     taskFactory);
 			}
 		};
-		database.put(ImplicitGraph_LowestLevelFirstPrioritizer_SingleThreadPoolScheduler_ImplicitTask_FifoDataGroup.getName(), ImplicitGraph_LowestLevelFirstPrioritizer_SingleThreadPoolScheduler_ImplicitTask_FifoDataGroup);
+		database.put(ImplicitGraph_LowestLevelFirstPrioritizer_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup.getName(), ImplicitGraph_LowestLevelFirstPrioritizer_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup);
 
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_ForkJoinScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.ForkJoinScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.ForkJoinScheduler.ImplicitTask.FifoDataGroup") {
