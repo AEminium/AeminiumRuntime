@@ -22,11 +22,13 @@ public final class Configuration {
 		File file = new File(filename);
 		properties = new Properties();
 		if ( file.exists()  && file.canRead()) {
+			FileReader freader;
 			try {
-				properties.load(new FileReader(file));
-			} catch (FileNotFoundException e) {
-			} catch (IOException e) {
-			}
+				freader = new FileReader(file);
+				properties.load(freader);
+				freader.close();
+			}  catch (IOException e) {
+			} 
 		} 
 		
 		// processor count

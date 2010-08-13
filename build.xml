@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
-<project name="AEminium Runtime" default="build">	
-    <property name="compiler" value="javac1.6"/> 
-    <property name="ant.build.javac.target" value="1.6"/> 
-    <property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6"/>
+<project name="AEminium Runtime" default="build">
+    <property name="compiler" value="javac1.6" />
+    <property name="ant.build.javac.target" value="1.6" />
+    <property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6" />
 
     <target name="build">
-    	<mkdir dir="bin"/>
-    	<javac srcdir="src" destdir="bin" fork="false" compiler="javac1.5">
-    	     <classpath id="rt.classpath">
-    	            <pathelement path="lib/jsr166y.jar"/>
-    	            <pathelement path="lib/junit-4.8.2.jar"/>
-    	        </classpath>
-    	</javac>
-	</target>
-    	
+        <mkdir dir="bin" />
+        <javac srcdir="src" destdir="bin" fork="false" compiler="javac1.5">
+            <classpath id="rt.classpath">
+                <pathelement path="lib/jsr166y.jar" />
+                <pathelement path="lib/junit-4.8.2.jar" />
+            </classpath>
+        </javac>
+    </target>
+
     <target name="clean">
         <delete verbose="yes" dir="bin/aeminium">
-    	</delete>
-	</target>
+        </delete>
+    </target>
 </project>

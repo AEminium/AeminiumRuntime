@@ -24,8 +24,8 @@ public class SequentialFibonacciBenchmark extends FibonacciBenchmark {
 
 	@Override
 	public void run(Reporter reporter) {
-		long cold = runTest(MAX_CALC);
-		long warm = runTest(MAX_CALC);
+		final long cold = runTest(MAX_CALC);
+		final long warm = runTest(MAX_CALC);
 		reporter.reportLn(String.format(RESULT_FORMAT, Configuration.getProcessorCount(), cold, warm));
 	}
 }

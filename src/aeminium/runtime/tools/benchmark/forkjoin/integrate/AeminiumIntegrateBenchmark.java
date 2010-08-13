@@ -29,7 +29,7 @@ public class AeminiumIntegrateBenchmark extends IntegrateBenchmark {
 	public void run(Reporter reporter) {
 		Runtime rt = Factory.getRuntime();
 		for (String temperature : Arrays.asList("Cold", "Warm")) {
-			String reportName = String.format("Aeminium %s %s %s",  temperature);
+			String reportName = String.format("Aeminium %s",  temperature);
 			reporter.startBenchmark(reportName);
 			runTest(rt, reporter);
 

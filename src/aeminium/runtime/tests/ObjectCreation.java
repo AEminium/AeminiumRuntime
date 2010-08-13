@@ -13,6 +13,8 @@ public class ObjectCreation extends BaseTest {
 		
 		@SuppressWarnings("unused")
 		DataGroup dg = rt.createDataGroup();
+		// to calm findbugs
+		dg = null;
 		
 		rt.shutdown();
 	}
