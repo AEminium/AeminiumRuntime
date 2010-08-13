@@ -86,6 +86,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		// update thread specific task counter
 		taskCounters.get().taskCount++;
 		
+		boolean schedule = false;
 		T itask = (T)task;
 		synchronized (itask) {			
 			// check for double scheduling
@@ -114,15 +115,17 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 				}
 				itask.depCount += count;
 				if ( itask.depCount == 0 ) {
-					itask.state = ImplicitTaskState.RUNNING;
+					//itask.state = ImplicitTaskState.RUNNING;
+					schedule = true;
 				}
 			} else {
-				itask.state = ImplicitTaskState.RUNNING;
+				//itask.state = ImplicitTaskState.RUNNING;
+				schedule = true;
 			}			
 		}
 		
 		// schedule task if it's marked as running
-		if (itask.state == ImplicitTaskState.RUNNING) {
+		if (schedule) {
 			prioritizer.scheduleTask(itask);	
 		}
 

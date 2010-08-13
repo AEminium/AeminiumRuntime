@@ -103,13 +103,15 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	}
 	
 	public final void decDepencenyCount() {
+		boolean schedule = false;
 		synchronized (this) {
 			depCount -= 1;
 			if ( depCount == 0 ) {
 				state = ImplicitTaskState.RUNNING;
+				schedule = true;
 			}
 		}
-		if ( state == ImplicitTaskState.RUNNING ) {
+		if ( schedule ) {
 			@SuppressWarnings("unchecked")
 			T This = (T)this;
 			prioritizer.scheduleTask(This);	
