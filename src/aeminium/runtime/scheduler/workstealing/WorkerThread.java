@@ -59,6 +59,7 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 						pollCounter = pollingCount;
 					} else {
 						pollCounter--;
+						Thread.yield();
 					}
 				}
 			}
