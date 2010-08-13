@@ -8,7 +8,6 @@ import java.util.List;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
 import aeminium.runtime.CyclicDependencyError;
-import aeminium.runtime.Hints;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.ResultBody;
 import aeminium.runtime.Task;
@@ -31,7 +30,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	public RuntimePrioritizer<T> prioritizer;
 	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
 	
-	public ImplicitTask(Body body, Collection<Hints> hints) {
+	public ImplicitTask(Body body, long hints) {
 		super(body, hints);
 	}
 
@@ -45,17 +44,17 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			public final void shutdown() {}
 			
 			@Override
-			public final RuntimeAtomicTask createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, Collection<Hints> hints) {
+			public final RuntimeAtomicTask createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, long hints) {
 				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints);
 			}
 
 			@Override
-			public final BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
+			public final BlockingTask createBlockingTask(Body body,long hints) {
 				return new ImplicitBlockingTask(body, hints);
 			}
 
 			@Override
-			public final NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
+			public final NonBlockingTask createNonBlockingTask(Body body, long hints) {
 				return  new ImplicitNonBlockingTask(body, hints);
 			}
 		};

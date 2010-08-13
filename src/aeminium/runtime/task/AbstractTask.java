@@ -1,9 +1,6 @@
 package aeminium.runtime.task;
 
-import java.util.Collection;
-
 import aeminium.runtime.Body;
-import aeminium.runtime.Hints;
 import aeminium.runtime.RuntimeError;
 import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.scheduler.RuntimeScheduler;
@@ -13,7 +10,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	protected Body body;
 	public RuntimeGraph<T> graph;
 	public RuntimeScheduler<T> scheduler;
-	protected final Collection<Hints> hints;
+	public final long hints;
 	protected static final Object UNSET = new Object() {
 		@Override
 		public String toString() {
@@ -22,7 +19,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	};
 	public int level;
 	
-	public AbstractTask(Body body, Collection<Hints> hints) {
+	public AbstractTask(Body body, long hints) {
 		this.body = body;
 		this.hints = hints;
 	}
@@ -48,9 +45,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return body;
 	}
 	
-	public final Collection<Hints> getHints() {
-		return hints;
-	}
 	
 	@SuppressWarnings("unchecked")
 	public final void setScheduler(RuntimeScheduler scheduler) {

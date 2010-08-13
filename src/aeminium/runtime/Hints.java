@@ -1,47 +1,44 @@
 package aeminium.runtime;
 
-/* interface for base hint */
-public class Hints {
-	private static Hints.Loops loopsHint = new Loops();
-	private static Hints.Recursion recursionHint = new Recursion();
+/**
+ * Task hints.
+ * 
+ * @author sven
+ *
+ */
+public final class Hints {
+	private Hints() {}
 	
-	/* private protected constructor to prevent instantiation */
-	protected Hints() {}
-	
-	public static Hints createLoopsHint() {
-		return loopsHint;
-	}
-	
-	public static Hints createRecursionHint() {
-		return recursionHint;
-	}
-	
-	public static Hints createStepsHint(long count) {
-		return new Steps(count);
-	}
-	
-	/* task contains loops */
-	public static class Loops extends Hints {
-		/* private protected constructor to prevent instantiation from outside */
-		protected Loops() {}
-	};
+	/**
+	 * Base offset to leave the lower bits unused.
+	 */
+	protected static final long OFFSET     = 10;
+	/**
+	 * Task has no dependencies.
+	 */
+	public static final long NO_HINTS       = 0;
+	/**
+	 * Task has loops.
+	 */
+	public static final long LOOPS          = 1<<(OFFSET+1);
+	/**
+	 * Task has recursions.
+	 */
+	public static final long RECURSION      = 1<<(OFFSET+2);
 
-	/* task contains recursion */
-	public static class Recursion extends Hints  {
-		/* private protected constructor to prevent instantiation from outside */
-		protected Recursion() {}
-	};
-
-	/* estimated virtual execution steps */
-	public static class Steps extends Hints {
-		private long stepCount = 0;
-	
-		/* private protected constructor to prevent instantiation from outside */
-		protected Steps(long count){
-			this.stepCount = count;
-		}
-		public long getStepCount() {
-			return stepCount;
-		}
-	};
+	/**
+	 * Convert hints to string representation.
+	 *  
+	 * @param hints
+	 * @return
+	 */
+	public static String toString(long hints) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		if ( (hints & LOOPS) == LOOPS )         sb.append("LOOPS|");
+		if ( (hints & RECURSION) == RECURSION ) sb.append("RECURSION|");
+		if ( sb.length() > 1 ) sb.deleteCharAt(sb.length()-1);
+		sb.append("]");
+		return sb.toString();
+	}
 }

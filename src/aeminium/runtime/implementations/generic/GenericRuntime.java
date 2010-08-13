@@ -6,7 +6,6 @@ import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
 import aeminium.runtime.DataGroup;
-import aeminium.runtime.Hints;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.DataGroupFactory;
@@ -57,19 +56,19 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public final AtomicTask createAtomicTask(Body body, DataGroup group, Collection<Hints> hints) {
+	public final AtomicTask createAtomicTask(Body body, DataGroup group, long hints) {
 		assert( state == GenericRuntimeState.INITIALIZED);
 		return taskFactory.createAtomicTask(body, (RuntimeDataGroup<T>)group, hints);
 	}
 
 	@Override
-	public final BlockingTask createBlockingTask(Body body, Collection<Hints> hints) {
+	public final BlockingTask createBlockingTask(Body body, long hints) {
 		assert( state == GenericRuntimeState.INITIALIZED);
 		return taskFactory.createBlockingTask(body, hints);
 	}
 
 	@Override
-	public final NonBlockingTask createNonBlockingTask(Body body, Collection<Hints> hints) {
+	public final NonBlockingTask createNonBlockingTask(Body body, long hints) {
 		return taskFactory.createNonBlockingTask(body, hints);
 	}
 	
