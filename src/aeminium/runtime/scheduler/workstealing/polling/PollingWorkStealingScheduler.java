@@ -84,11 +84,10 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 		WorkerThread<T> thread = currentThread();
 		Deque<T> taskQueue = thread.getTaskList();//taskQueues[currentThread().getIndex()];
 		if ( taskQueue.size() < maxQueueLength ) {
-			addTask(taskQueue, task);
+			taskQueue.addFirst(task);
 			signalWork();
 		} else {
 			try {
-				//task.setScheduler(this);
 				task.call();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -96,22 +95,6 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 		}
 	}
 
-	@Override
-	public final void scheduleTasks(Collection<T> tasks) {
-		Deque<T> taskQueue = taskQueues[currentThread().index];
-		for ( T task : tasks ) {
-			addTask(taskQueue, task);
-		}
-		signalWork();
-	}
-
-	protected final void addTask(Deque<T> q, T task) {
-		//task.setScheduler(this);
-		while ( !q.offerFirst(task) ) {
-			// loop until we could add it 
-		}
-	}
-	
 	protected final WorkerThread<T> currentThread() {
 		WorkerThread<T> current = currentThread.get();
 		if ( current == null ) {

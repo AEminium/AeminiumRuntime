@@ -14,7 +14,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		private final int n;
 		private FibBody b1;
 		private FibBody b2;
-		public volatile int value = 0;
+		public volatile int value = 1;
 		
 		FibBody(int n, Runtime rt) {
 			this.n = n;
@@ -33,11 +33,9 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		public final void completed() {
 			if ( b1 != null && b2 != null ) {
 				value = b1.value + b2.value;
-			} else {
-				value = 1;
+				b1 = null;
+				b2 = null;
 			}
-			b1 = null;
-			b2 = null;
 		}
 		
 		@Override

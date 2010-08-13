@@ -1,6 +1,5 @@
 package aeminium.runtime.scheduler.workstealing.blocking;
 
-import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -81,6 +80,14 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 
 	@Override
 	public final void scheduleTask(T task) {
+		if ( task.level > 20 ) {
+			try {
+				task.call();				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return;
+		}
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.index];
 		if ( taskQueue.size() < maxQueueLength ) {
@@ -93,16 +100,6 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 				e.printStackTrace();
 			}
 		}
-	}
-
-	@Override
-	public final void scheduleTasks(Collection<T> tasks) {
-		WorkerThread<T> thread = getNextThread();
-		Deque<T> taskQueue = taskQueues[thread.index];
-		for ( T task : tasks ) {
-			while ( !taskQueue.offerFirst(task) ) { /*loop until we could add it*/}
-		}
-		signalWork(thread);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -145,6 +142,7 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 				task = q.pollLast();
 			}
 			if ( task != null ) {
+				//System.out.println("Thread-" + thread.index + " stole " + task);
 				return task;
 			}
 		}

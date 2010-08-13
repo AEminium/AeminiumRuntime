@@ -1,9 +1,6 @@
 package aeminium.runtime.prioritizer.lowestlevelfirst;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.PriorityQueue;
 
 import aeminium.runtime.events.RuntimeEventManager;
@@ -35,14 +32,6 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	}
 	
 	@Override
-	public final void scheduleTasks(Collection<T> tasks) {
-		synchronized (this) {
-			waitingQueue.addAll(tasks);
-			schedule();
-		}
-	}
-
-	@Override
 	public  final void scheduleTask(T task) {
 		synchronized (this) {
 			waitingQueue.add(task);
@@ -60,11 +49,9 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 				if ( count == 1 ) {
 					scheduler.scheduleTask(waitingQueue.remove());
 				} else {
-					List<T> tasks = new ArrayList<T>(count);
 					for ( int i = 0; i < count; i++ ) {
-						tasks.add(waitingQueue.remove());
+						scheduler.scheduleTask(waitingQueue.remove());
 					}
-					scheduler.scheduleTasks(tasks);
 				}
 			}
 		}

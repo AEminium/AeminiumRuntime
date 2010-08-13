@@ -1,7 +1,5 @@
 package aeminium.runtime.scheduler.forkjoin;
 
-import java.util.Collection;
-
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
 import aeminium.runtime.events.RuntimeEventManager;
@@ -33,13 +31,6 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 		}
 	}
 
-	@Override
-    public final void scheduleTasks(Collection<T> tasks) {
-    	for ( T t : tasks ) {
-    		scheduleTask(t);
-    	}
-    }
-	
     @Override
     public final void scheduleTask(T task) {
     	task.setScheduler(this);

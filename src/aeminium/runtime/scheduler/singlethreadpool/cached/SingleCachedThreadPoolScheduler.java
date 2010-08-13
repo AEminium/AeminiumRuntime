@@ -1,6 +1,5 @@
 package aeminium.runtime.scheduler.singlethreadpool.cached;
 
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,13 +32,6 @@ public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends Abst
 		}
 	}
 
-	@Override
-	public final void scheduleTasks(Collection<T> tasks) {
-		for ( T t : tasks ) {
-			scheduleTask(t);
-		}
-	}
-	
 	public final void scheduleTask(T task) {
 		runningCount.incrementAndGet();
 		task.setScheduler(this);

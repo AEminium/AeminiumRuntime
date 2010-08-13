@@ -11,7 +11,7 @@ class FibBody implements ResultBody {
 	private final int n;
 	private FibBody b1;
 	private FibBody b2;
-	public volatile int value = 0;
+	public volatile int value = 1;
 	
 	FibBody(int n, Runtime rt) {
 		this.n = n;
@@ -22,11 +22,9 @@ class FibBody implements ResultBody {
 	public final void completed() {
 		if ( b1 != null && b2 != null ) {
 			value = b1.value + b2.value;
-		} else {
-			value = 1;
+			b1 = null;
+			b2 = null;
 		}
-		b1 = null;
-		b2 = null;
 	}
 
 	@Override
@@ -40,6 +38,11 @@ class FibBody implements ResultBody {
 			Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
 			rt.schedule(t2, current, Runtime.NO_DEPS);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "FibBody("+n+")";
 	}
 }
 

@@ -1,6 +1,5 @@
 package aeminium.runtime.scheduler;
 
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.implementations.Configuration;
@@ -64,6 +63,6 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 	public void taskResume(T task) {
 		pausedCount.decrementAndGet();
 		// runningCount must be incremented by the schedule function
-		scheduleTasks(Collections.singleton(task));
+		scheduleTask(task);
 	}
 }

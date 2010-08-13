@@ -1,6 +1,5 @@
 package aeminium.runtime.scheduler.singlethreadpool.fixed;
 
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,14 +29,6 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 		if ( execService != null ) {
 			execService.shutdown();
 			execService = null;
-		}
-	}
-	
-	
-    @Override
-	public final void scheduleTasks(Collection<T> tasks) {
-		for ( T t : tasks ) {
-			scheduleTask(t);
 		}
 	}
 	

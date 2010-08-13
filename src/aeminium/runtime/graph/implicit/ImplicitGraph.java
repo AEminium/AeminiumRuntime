@@ -31,7 +31,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		public volatile int taskCount = 0;
 		
 		@Override 
-		public String toString() {
+		public final String toString() {
 			return "TaskCounter<"+taskCount+">";
 		}
 	}
