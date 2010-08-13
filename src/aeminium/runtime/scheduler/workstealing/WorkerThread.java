@@ -14,7 +14,6 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 	protected final WorkStealingScheduler<T> scheduler;
 	protected final int pollingCount;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
-	public int queueLevel = 0;
 	
 	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
 		this.taskQueue =  new LinkedBlockingDeque<T>();
@@ -23,7 +22,6 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 		setName("WorkerThread-"+IdGenerator.incrementAndGet());
 		pollingCount = Configuration.getProperty(getClass(), "pollingCount", 5);
 	}
-
 	
 	public final Deque<T> getTaskList() {
 		return taskQueue;
@@ -42,7 +40,6 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 			task = taskQueue.pollFirst();
 			if ( task != null ) {
 				try {
-					queueLevel = task.level;
 					task.call();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -51,9 +48,7 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 				// scan for other queues
 				task = scheduler.scanQueues(this);
 				if ( task != null ) {
-					//System.out.println("Thread-"+index + " stole " + task);
 					try {
-						queueLevel = task.level;
 						task.call();
 					} catch (Exception e) {
 						e.printStackTrace();

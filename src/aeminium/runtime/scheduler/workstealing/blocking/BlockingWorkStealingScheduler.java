@@ -20,6 +20,7 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 	protected AtomicInteger counter;
 	protected final int maxQueueLength;
 	protected static final boolean pollFirst = Configuration.getProperty(BlockingWorkStealingScheduler.class, "pollFirst", false);
+	protected static final int cutOffLevel = Configuration.getProperty(BlockingWorkStealingScheduler.class, "cutOffLevel", 8);
 	
 	public BlockingWorkStealingScheduler() {
 		super();
@@ -80,7 +81,8 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 
 	@Override
 	public final void scheduleTask(T task) {
-		if ( task.level > 20 ) {
+		// if we reach the cut-off level, we simply execute tasks without sharing them
+		if ( task.level > cutOffLevel ) {
 			try {
 				task.call();				
 			} catch (Exception e) {
@@ -88,18 +90,24 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 			}
 			return;
 		}
+		
 		WorkerThread<T> thread = getNextThread();
 		Deque<T> taskQueue = taskQueues[thread.index];
-		if ( taskQueue.size() < maxQueueLength ) {
-			while ( !taskQueue.offerFirst(task) ) { /*loop until we could add it*/}
-			signalWork(thread);
-		} else {
-			try {
-				task.call();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		taskQueue.addFirst(task);
+		signalWork(thread);
+		
+//		WorkerThread<T> thread = getNextThread();
+//		Deque<T> taskQueue = taskQueues[thread.index];
+//		if ( taskQueue.size() < maxQueueLength ) {
+//			taskQueue.addFirst(task);
+//			signalWork(thread);
+//		} else {
+//			try {
+//				task.call();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -1,6 +1,5 @@
 package aeminium.runtime.scheduler.workstealing.polling;
 
-import java.util.Collection;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
