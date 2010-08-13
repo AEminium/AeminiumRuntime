@@ -115,11 +115,11 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 				}
 				itask.depCount += count;
 				if ( itask.depCount == 0 ) {
-					//itask.state = ImplicitTaskState.RUNNING;
+					itask.state = ImplicitTaskState.RUNNING;
 					schedule = true;
 				}
 			} else {
-				//itask.state = ImplicitTaskState.RUNNING;
+				itask.state = ImplicitTaskState.RUNNING;
 				schedule = true;
 			}			
 		}
