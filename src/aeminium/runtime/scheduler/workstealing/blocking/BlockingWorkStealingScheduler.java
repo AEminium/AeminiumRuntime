@@ -18,18 +18,17 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 	protected Deque<T>[] taskQueues;
 	protected RuntimeEventManager eventManager = null;
 	protected AtomicInteger counter;
-	protected final int maxQueueLength;
+	protected static final int maxQueueLength = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 3);
 	protected static final boolean pollFirst = Configuration.getProperty(BlockingWorkStealingScheduler.class, "pollFirst", false);
-	protected static final int cutOffLevel = Configuration.getProperty(BlockingWorkStealingScheduler.class, "cutOffLevel", 8);
+	//protected static final int cutOffLevel = Configuration.getProperty(BlockingWorkStealingScheduler.class, "cutOffLevel", 8);
 	
 	public BlockingWorkStealingScheduler() {
 		super();
-		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
 	}
 
 	public BlockingWorkStealingScheduler(int maxParallelism) {
 		super(maxParallelism);
-		maxQueueLength = Configuration.getProperty(getClass(), "maxQueueLength", 3);
+		
 	}
 	
 	@Override
@@ -81,33 +80,33 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 
 	@Override
 	public final void scheduleTask(T task) {
-		// if we reach the cut-off level, we simply execute tasks without sharing them
-		if ( task.level > cutOffLevel ) {
-			try {
-				task.call();				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return;
-		}
-		
-		WorkerThread<T> thread = getNextThread();
-		Deque<T> taskQueue = taskQueues[thread.index];
-		taskQueue.addFirst(task);
-		signalWork(thread);
-		
-//		WorkerThread<T> thread = getNextThread();
-//		Deque<T> taskQueue = taskQueues[thread.index];
-//		if ( taskQueue.size() < maxQueueLength ) {
-//			taskQueue.addFirst(task);
-//			signalWork(thread);
-//		} else {
+//		// if we reach the cut-off level, we simply execute tasks without sharing them
+//		if ( task.level > cutOffLevel ) {
 //			try {
-//				task.call();
+//				task.call();				
 //			} catch (Exception e) {
 //				e.printStackTrace();
 //			}
+//			return;
 //		}
+//		
+//		WorkerThread<T> thread = getNextThread();
+//		Deque<T> taskQueue = taskQueues[thread.index];
+//		taskQueue.addFirst(task);
+//		signalWork(thread);
+		
+		WorkerThread<T> thread = getNextThread();
+		Deque<T> taskQueue = taskQueues[thread.index];
+		if ( taskQueue.size() < maxQueueLength ) {
+			taskQueue.addFirst(task);
+			signalWork(thread);
+		} else {
+			try {
+				task.call();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
