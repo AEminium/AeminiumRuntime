@@ -6,7 +6,7 @@ import aeminium.runtime.task.RuntimeNonBlockingTask;
 
 public final class ImplicitNonBlockingTask<T extends ImplicitTask<T>> extends ImplicitTask<T> implements RuntimeNonBlockingTask {
 
-	public ImplicitNonBlockingTask(Body body, long hints) {
+	public ImplicitNonBlockingTask(Body body, short hints) {
 		super(body, hints);
 	}
 

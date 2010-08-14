@@ -121,7 +121,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 			if ( parent != Runtime.NO_PARENT ) {
 				T Tparent = (T) parent;
 				itask.parent = Tparent;
-				itask.level = Tparent.level + 1;
+				itask.level = (short) (Tparent.level + 1);
 				itask.parent.attachChild(itask);
 			}
 

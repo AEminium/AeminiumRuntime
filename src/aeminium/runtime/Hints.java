@@ -12,19 +12,19 @@ public final class Hints {
 	/**
 	 * Base offset to leave the lower bits unused.
 	 */
-	protected static final long OFFSET     = 10;
+	protected static final short OFFSET     = 8;
 	/**
 	 * Task has no dependencies.
 	 */
-	public static final long NO_HINTS       = 0;
+	public static final short NO_HINTS       = 0;
 	/**
 	 * Task has loops.
 	 */
-	public static final long LOOPS          = 1<<(OFFSET+1);
+	public static final short LOOPS          = 1<<(OFFSET+1);
 	/**
 	 * Task has recursions.
 	 */
-	public static final long RECURSION      = 1<<(OFFSET+2);
+	public static final short RECURSION      = 1<<(OFFSET+2);
 
 	/**
 	 * Convert hints to string representation.
@@ -32,7 +32,7 @@ public final class Hints {
 	 * @param hints
 	 * @return
 	 */
-	public static String toString(long hints) {
+	public static String toString(short hints) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 		if ( (hints & LOOPS) == LOOPS )         sb.append("LOOPS|");

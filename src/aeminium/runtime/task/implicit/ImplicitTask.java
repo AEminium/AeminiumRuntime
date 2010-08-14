@@ -21,16 +21,15 @@ import aeminium.runtime.task.TaskFactory;
 
 
 public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTask<T> {
-	public ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;
-	public int depCount;
-	public int childCount;
-	public List<T> dependents;
+	public ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
+	public byte depCount;
+	public byte childCount;
+	public List<T> dependents;  // we could merge those two fields because they are used mutual exclusive
 	public List<T> children;
 	public T parent;
-	public RuntimePrioritizer<T> prioritizer;
 	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
 	
-	public ImplicitTask(Body body, long hints) {
+	public ImplicitTask(Body body, short hints) {
 		super(body, hints);
 	}
 
@@ -44,17 +43,17 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 			public final void shutdown() {}
 			
 			@Override
-			public final RuntimeAtomicTask createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, long hints) {
+			public final RuntimeAtomicTask createAtomicTask(Body body, RuntimeDataGroup<ImplicitTask> datagroup, short hints) {
 				return new ImplicitAtomicTask(body, (RuntimeDataGroup<ImplicitTask>) datagroup, hints);
 			}
 
 			@Override
-			public final BlockingTask createBlockingTask(Body body,long hints) {
+			public final BlockingTask createBlockingTask(Body body, short hints) {
 				return new ImplicitBlockingTask(body, hints);
 			}
 
 			@Override
-			public final NonBlockingTask createNonBlockingTask(Body body, long hints) {
+			public final NonBlockingTask createNonBlockingTask(Body body, short hints) {
 				return  new ImplicitNonBlockingTask(body, hints);
 			}
 		};

@@ -13,7 +13,7 @@ public interface Runtime {
 			return "NO_DEPS"; 
 		}
 	};
-	public final static long NO_HINTS = Hints.NO_HINTS;
+	public final static short NO_HINTS = Hints.NO_HINTS;
     public final static Task NO_PARENT = new Task() {
 		@Override
 		public Body getBody() {
@@ -45,9 +45,9 @@ public interface Runtime {
     /* create a new data group object */
     public DataGroup createDataGroup() throws RuntimeError;
     /* create a new Blocking task */
-    public BlockingTask createBlockingTask(Body b, long hints) throws RuntimeError;
+    public BlockingTask createBlockingTask(Body b, short hints) throws RuntimeError;
     /* create a new NonBlocking task */
-    public NonBlockingTask createNonBlockingTask(Body b, long hints) throws RuntimeError;
+    public NonBlockingTask createNonBlockingTask(Body b, short hints) throws RuntimeError;
     /* create a new Atomic task */
-    public AtomicTask createAtomicTask(Body b, DataGroup g, long hints) throws RuntimeError;
+    public AtomicTask createAtomicTask(Body b, DataGroup g, short hints) throws RuntimeError;
 }

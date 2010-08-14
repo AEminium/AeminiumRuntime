@@ -10,7 +10,7 @@ public class HintCreation extends BaseTest {
 	
 	@Test
 	public void hintsString() {
-		long hints = Hints.LOOPS + Hints.RECURSION;
+		short hints = Hints.LOOPS + Hints.RECURSION;
 		assertTrue( Hints.toString(hints).equals("[LOOPS|RECURSION]") );
 	}
 

@@ -12,6 +12,7 @@ import aeminium.runtime.graph.implicit.ImplicitGraph;
 import aeminium.runtime.implementations.generic.GenericRuntime;
 import aeminium.runtime.prioritizer.lowestlevelfirst.LowestLevelFirstPrioritizer;
 import aeminium.runtime.scheduler.forkjoin.ForkJoinScheduler;
+import aeminium.runtime.scheduler.linear.LinearScheduler;
 import aeminium.runtime.scheduler.singlethreadpool.fixed.SingleFixedThreadPoolScheduler;
 import aeminium.runtime.scheduler.workstealing.blocking.BlockingWorkStealingScheduler;
 import aeminium.runtime.scheduler.workstealing.polling.PollingWorkStealingScheduler;
@@ -51,6 +52,24 @@ public class Factory {
 		 */
 		Factory f = new Factory();
 
+		@SuppressWarnings("unchecked")
+		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_LinearScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.LinearScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.LinearScheduler.ImplicitTask.FifoDataGroup") {
+			@Override
+			public final AbstractRuntime instanciate() {
+				LinearScheduler<ImplicitTask> scheduler = new LinearScheduler<ImplicitTask>();
+				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler);
+				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
+				TaskFactory<ImplicitTask> taskFactory = ImplicitTask.createFactory();
+				return new GenericRuntime<ImplicitTask>(scheduler, 
+														scheduler, 
+													    graph,
+													    dgFactory,
+													    taskFactory);
+			}
+		};
+		database.put(ImplicitGraph_None_LinearScheduler_ImplicitTask_FifoDataGroup.getName(), ImplicitGraph_None_LinearScheduler_ImplicitTask_FifoDataGroup);
+
+		
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup") {
 			@Override

@@ -56,19 +56,19 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public final AtomicTask createAtomicTask(Body body, DataGroup group, long hints) {
+	public final AtomicTask createAtomicTask(Body body, DataGroup group, short hints) {
 		assert( state == GenericRuntimeState.INITIALIZED);
 		return taskFactory.createAtomicTask(body, (RuntimeDataGroup<T>)group, hints);
 	}
 
 	@Override
-	public final BlockingTask createBlockingTask(Body body, long hints) {
+	public final BlockingTask createBlockingTask(Body body, short hints) {
 		assert( state == GenericRuntimeState.INITIALIZED);
 		return taskFactory.createBlockingTask(body, hints);
 	}
 
 	@Override
-	public final NonBlockingTask createNonBlockingTask(Body body, long hints) {
+	public final NonBlockingTask createNonBlockingTask(Body body, short hints) {
 		return taskFactory.createNonBlockingTask(body, hints);
 	}
 	

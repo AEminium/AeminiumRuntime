@@ -9,7 +9,7 @@ import aeminium.runtime.datagroup.RuntimeDataGroup;
 public interface TaskFactory<T extends RuntimeTask> {
 	public void init();
 	public void shutdown();
-	public BlockingTask createBlockingTask(Body body, long hints);
-	public NonBlockingTask createNonBlockingTask(Body body, long hints);
-	public AtomicTask createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, long hints);
+	public BlockingTask createBlockingTask(Body body, short hints);
+	public NonBlockingTask createNonBlockingTask(Body body, short hints);
+	public AtomicTask createAtomicTask(Body body, RuntimeDataGroup<T> datagroup, short hints);
 }
