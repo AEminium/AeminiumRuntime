@@ -11,7 +11,7 @@ import aeminium.runtime.scheduler.workstealing.WorkStealingQueue;
 public class ConcurrentWorkStealingQueueTests {
 	@Test
 	public void testGrowQueue() {
-		WorkStealingQueue<String> wsq = new ConcurrentWorkStealingQueue<String>(1);
+		WorkStealingQueue<String> wsq = new ConcurrentWorkStealingQueue<String>(2);
 		String control = "Hello World!";
 		for( char c: control.toCharArray() ) {
 			wsq.push(""+c);
@@ -26,7 +26,7 @@ public class ConcurrentWorkStealingQueueTests {
 
 	@Test
 	public void testOrdering() {
-		WorkStealingQueue<String> wsq = new ConcurrentWorkStealingQueue<String>(1);
+		WorkStealingQueue<String> wsq = new ConcurrentWorkStealingQueue<String>(2);
 		String control = "Hello World!";
 		for( char c: control.toCharArray() ) {
 			wsq.push(""+c);

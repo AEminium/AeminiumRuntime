@@ -42,5 +42,13 @@ public class EventManager implements RuntimeEventManager  {
 		}
 	}
 
+	@Override
+	public final void signalNewThread(Thread thread) {
+		synchronized (listeners) {
+			for (RuntimeEventListener listener : listeners) {
+				listener.onNewThread(thread);
+			}
+		}
+	}
 	
 }

@@ -50,7 +50,7 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 				
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
-			threads[i] = new WorkerThread<T>(i, this);
+			threads[i] = new WorkerThread<T>(i, this, eventManager);
 		}
 		
 		// start and register threads threads
@@ -78,33 +78,6 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 
 	@Override
 	public final void scheduleTask(T task) {
-//		// if we reach the cut-off level, we simply execute tasks without sharing them
-//		if ( task.level > cutOffLevel ) {
-//			try {
-//				task.call();				
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//			return;
-//		}
-//		
-//		WorkerThread<T> thread = getNextThread();
-//		Deque<T> taskQueue = taskQueues[thread.index];
-//		taskQueue.addFirst(task);
-//		signalWork(thread);
-		
-//		WorkerThread<T> thread = getNextThread();
-//		Deque<T> taskQueue = taskQueues[thread.index];
-//		if ( taskQueue.size() < maxQueueLength ) {
-//			taskQueue.addFirst(task);
-//			signalWork(thread);
-//		} else {
-//			try {
-//				task.call();
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
 		Thread thread = Thread.currentThread();
 		if ( thread instanceof WorkerThread<?> ) {
 			// worker thread 

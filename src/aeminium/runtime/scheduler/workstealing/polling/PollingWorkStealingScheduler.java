@@ -33,6 +33,7 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 	}
 
 	public final void registerThread(WorkerThread<T> thread) {
+		eventManager.signalNewThread(thread);
 	}
 	
 	public final void unregisterThread(WorkerThread<T> thread) {
@@ -50,7 +51,8 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 		
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
-			threads[i] = new WorkerThread<T>(i, this);
+			threads[i] = new WorkerThread<T>(i, this, eventManager);
+			eventManager.signalNewThread(threads[i]);
 		}
 		
 		// start and register threads threads

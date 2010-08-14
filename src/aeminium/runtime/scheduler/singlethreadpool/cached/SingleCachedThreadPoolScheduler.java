@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 
 import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
+import aeminium.runtime.scheduler.AeminiumThread;
 import aeminium.runtime.task.RuntimeTask;
 
 public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
@@ -20,7 +21,7 @@ public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends Abst
 	
 	@Override
 	public final void init(RuntimeEventManager eventManager) {
-		execService = Executors.newCachedThreadPool();
+		execService = Executors.newCachedThreadPool(AeminiumThread.getFactory(eventManager));
 		eventManager.signalPolling();
 	}
 

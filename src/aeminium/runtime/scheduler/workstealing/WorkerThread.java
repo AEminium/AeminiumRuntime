@@ -1,13 +1,13 @@
 package aeminium.runtime.scheduler.workstealing;
 
-import java.util.Deque;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.implementations.Configuration;
+import aeminium.runtime.scheduler.AeminiumThread;
 import aeminium.runtime.task.implicit.ImplicitTask;
 
-public final class WorkerThread<T extends ImplicitTask> extends Thread {
+public final class WorkerThread<T extends ImplicitTask> extends AeminiumThread {
 	public final int index;
 	protected volatile boolean shutdown = false;
 	protected final WorkStealingScheduler<T> scheduler;
@@ -15,7 +15,8 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 	protected WorkStealingQueue<T> taskQueue;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
-	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
+	public WorkerThread(int index, WorkStealingScheduler<T> scheduler, RuntimeEventManager eventManager) {
+		super(eventManager);
 		this.index = index;
 		this.scheduler = scheduler;
 		setName("WorkerThread-"+IdGenerator.incrementAndGet());
@@ -32,6 +33,7 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 	
 	@Override
 	public final void run() {
+		super.run();
 		taskQueue = new ConcurrentWorkStealingQueue<T>(13);
 		int pollCounter = pollingCount;
 		scheduler.registerThread(this);

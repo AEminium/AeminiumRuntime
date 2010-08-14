@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
+import aeminium.runtime.scheduler.AeminiumThread;
 import aeminium.runtime.task.RuntimeTask;
 
 public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends AbstractScheduler<T> {
@@ -22,7 +23,7 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 
 	@Override
 	public final void init(RuntimeEventManager eventManager) {
-		execService = Executors.newFixedThreadPool(getMaxParallelism());
+		execService = Executors.newFixedThreadPool(getMaxParallelism(), AeminiumThread.getFactory(eventManager));
 		eventManager.signalPolling();
 	}
 
