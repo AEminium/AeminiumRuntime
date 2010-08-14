@@ -8,22 +8,21 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.task.implicit.ImplicitTask;
 
 public final class WorkerThread<T extends ImplicitTask> extends Thread {
-	protected final Deque<T> taskQueue;
 	public final int index;
 	protected volatile boolean shutdown = false;
 	protected final WorkStealingScheduler<T> scheduler;
 	protected final int pollingCount;
+	protected WorkStealingQueue<T> taskQueue;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
 	public WorkerThread(int index, WorkStealingScheduler<T> scheduler) {
-		this.taskQueue =  new LinkedBlockingDeque<T>();
 		this.index = index;
 		this.scheduler = scheduler;
 		setName("WorkerThread-"+IdGenerator.incrementAndGet());
 		pollingCount = Configuration.getProperty(getClass(), "pollingCount", 5);
 	}
 	
-	public final Deque<T> getTaskList() {
+	public final WorkStealingQueue<T> getTaskQueue() {
 		return taskQueue;
 	}
 	
@@ -33,11 +32,12 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 	
 	@Override
 	public final void run() {
+		taskQueue = new ConcurrentWorkStealingQueue<T>(13);
 		int pollCounter = pollingCount;
 		scheduler.registerThread(this);
 		while (!shutdown) {
 			T task = null;
-			task = taskQueue.pollFirst();
+			task = taskQueue.pop();
 			if ( task != null ) {
 				try {
 					task.call();
@@ -65,8 +65,17 @@ public final class WorkerThread<T extends ImplicitTask> extends Thread {
 			}
 		}
 		scheduler.unregisterThread(this);
+		taskQueue = null;
 	}
 
+	public final T scan() {
+		WorkStealingQueue<T> queue = taskQueue;
+		if ( queue != null ) {
+			return queue.tryStealing();
+		}
+		return null;
+	}
+	
 	public final String toString() {
 		return "WorkerThread<" + index + ">";
 	}
