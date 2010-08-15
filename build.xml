@@ -4,6 +4,54 @@
     <property name="ant.build.javac.target" value="1.6" />
     <property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6" />
 
+    <target name="RTBench-Fibonacci">
+        <java fork="yes" classname="aeminium.runtime.tools.benchmark.RTBench">
+            <arg value="run"/>
+            <arg value="FibonacciBenchmark"/>
+            <classpath id="rt.classpath">
+                <pathelement path="bin/"/>
+                <pathelement path="lib/jsr166y.jar" />
+                <pathelement path="lib/junit-4.8.2.jar" />
+            </classpath>        
+        </java>
+    </target>
+
+    <target name="Fibonacci-Aeminium">
+        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
+            <arg value="run"/>
+            <arg value="AeminiumFibonacciBenchmark"/>
+            <classpath id="rt.classpath">
+                <pathelement path="bin/"/>
+                <pathelement path="lib/jsr166y.jar" />
+                <pathelement path="lib/junit-4.8.2.jar" />
+            </classpath>        
+        </java>
+    </target>
+
+    <target name="Fibonacci-ForkJoin">
+        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
+            <arg value="run"/>
+            <arg value="ForkJoinFibonacciBenchmark"/>
+            <classpath id="rt.classpath">
+                <pathelement path="bin/"/>
+                <pathelement path="lib/jsr166y.jar" />
+                <pathelement path="lib/junit-4.8.2.jar" />
+            </classpath>        
+        </java>
+    </target>
+    
+    <target name="Fibonacci-Sequential">
+        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
+            <arg value="run"/>
+            <arg value="SequentialFibonacciBenchmark"/>
+            <classpath id="rt.classpath">
+                <pathelement path="bin/"/>
+                <pathelement path="lib/jsr166y.jar" />
+                <pathelement path="lib/junit-4.8.2.jar" />
+            </classpath>        
+        </java>
+    </target>
+    
     <target name="build">
         <mkdir dir="bin" />
         <javac srcdir="src" destdir="bin" fork="false" compiler="javac1.5">
