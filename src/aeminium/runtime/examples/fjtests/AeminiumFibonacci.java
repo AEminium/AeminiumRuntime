@@ -31,7 +31,7 @@ public class AeminiumFibonacci  implements FibonacciConstants{
 		
 		public int seqFib(int n) {
 			if (n <= 2) return 1;
-			else return (seqFib(n-1) + seqFib(n-2));
+			else return (seqFib(n - 1) + seqFib(n - 2));
 		}
 		
 		@Override
@@ -39,11 +39,11 @@ public class AeminiumFibonacci  implements FibonacciConstants{
 			if ( value <= THRESHOLD  ) {
 				value = seqFib(value);
 			} else {
-				b1 = new FibBody(value-1);
+				b1 = new FibBody(value - 1);
 				Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
 				rt.schedule(t1, current, Runtime.NO_DEPS);
 
-				b2 = new FibBody(value-2);
+				b2 = new FibBody(value - 2);
 				Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
 				rt.schedule(t2, current, Runtime.NO_DEPS);
 			} 

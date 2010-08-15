@@ -4,15 +4,17 @@
     <property name="ant.build.javac.target" value="1.6" />
     <property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6" />
 
+    <path id="rt.classpath">
+        <pathelement path="bin/" />
+        <pathelement path="lib/jsr166y.jar" />
+        <pathelement path="lib/junit-4.8.2.jar" />
+    </path>
+
     <target name="RTBench-Fibonacci">
         <java fork="yes" classname="aeminium.runtime.tools.benchmark.RTBench">
             <arg value="run"/>
             <arg value="FibonacciBenchmark"/>
-            <classpath id="rt.classpath">
-                <pathelement path="bin/"/>
-                <pathelement path="lib/jsr166y.jar" />
-                <pathelement path="lib/junit-4.8.2.jar" />
-            </classpath>        
+            <classpath refid="rt.classpath"/>
         </java>
     </target>
 
@@ -20,11 +22,7 @@
         <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
             <arg value="run"/>
             <arg value="AeminiumFibonacciBenchmark"/>
-            <classpath id="rt.classpath">
-                <pathelement path="bin/"/>
-                <pathelement path="lib/jsr166y.jar" />
-                <pathelement path="lib/junit-4.8.2.jar" />
-            </classpath>        
+            <classpath refid="rt.classpath"/>
         </java>
     </target>
 
@@ -32,36 +30,38 @@
         <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
             <arg value="run"/>
             <arg value="ForkJoinFibonacciBenchmark"/>
-            <classpath id="rt.classpath">
-                <pathelement path="bin/"/>
-                <pathelement path="lib/jsr166y.jar" />
-                <pathelement path="lib/junit-4.8.2.jar" />
-            </classpath>        
+            <classpath refid="rt.classpath"/>
         </java>
     </target>
-    
+
     <target name="Fibonacci-Sequential">
         <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
             <arg value="run"/>
             <arg value="SequentialFibonacciBenchmark"/>
-            <classpath id="rt.classpath">
-                <pathelement path="bin/"/>
-                <pathelement path="lib/jsr166y.jar" />
-                <pathelement path="lib/junit-4.8.2.jar" />
-            </classpath>        
+            <classpath refid="rt.classpath"/>
         </java>
     </target>
-    
+
     <target name="build">
         <mkdir dir="bin" />
         <javac srcdir="src" destdir="bin" fork="false" compiler="javac1.5">
-            <classpath id="rt.classpath">
-                <pathelement path="lib/jsr166y.jar" />
-                <pathelement path="lib/junit-4.8.2.jar" />
-            </classpath>
+            <classpath refid="rt.classpath"/>
         </javac>
     </target>
 
+    <target name="tests">
+        <junit fork="yes" dir="src/aeminium/runtime/tests">
+            <formatter type="xml"/>
+            <classpath refid="rt.classpath"/>
+            <batchtest>
+                <fileset dir="src/">
+                    <include name="aeminium/runtime/tests/*.java"/>
+                    <exclude name="aeminium/runtime/tests/BaseTest.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+    
     <target name="clean">
         <delete verbose="yes" dir="bin/aeminium">
         </delete>

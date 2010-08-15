@@ -6,7 +6,6 @@ import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.task.implicit.ImplicitTask;
 
 public abstract class AbstractScheduler<T extends RuntimeTask> implements RuntimeScheduler<T>, RuntimePrioritizer<T> {
 	protected final AtomicInteger runningCount = new AtomicInteger();

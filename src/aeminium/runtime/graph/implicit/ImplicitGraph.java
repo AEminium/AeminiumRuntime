@@ -10,7 +10,6 @@ import aeminium.runtime.Task;
 import aeminium.runtime.events.RuntimeEventListener;
 import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.graph.AbstractGraph;
-import aeminium.runtime.graph.RuntimeGraph;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.scheduler.AeminiumThread;
@@ -88,7 +87,8 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 
 			@Override
 			public final void onNewThread(Thread thread) {
-				TaskCounter tc = taskCounters.get();
+				// make sure we created initial value inside the thread
+				taskCounters.get();
 			}
 		});
 	}

@@ -14,6 +14,7 @@ import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.implementations.Configuration;
+import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
@@ -112,7 +113,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		if ( schedule ) {
 			@SuppressWarnings("unchecked")
 			T This = (T)this;
-			AbstractRuntime.prioritizer.scheduleTask(This);	
+			((RuntimePrioritizer<T>)AbstractRuntime.prioritizer).scheduleTask(This);	
 		}
 	}
 	

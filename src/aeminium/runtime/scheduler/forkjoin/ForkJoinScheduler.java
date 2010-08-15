@@ -2,11 +2,9 @@ package aeminium.runtime.scheduler.forkjoin;
 
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
-import aeminium.runtime.events.EventManager;
 import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.task.implicit.ImplicitTask;
 
 public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<T>{
     private ForkJoinPool pool = null;
