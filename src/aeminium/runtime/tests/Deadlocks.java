@@ -42,7 +42,7 @@ public class Deadlocks extends BaseTest {
 
 	public Body createBody(final int i) {
 		return new Body() {
-			public void execute(Task parent) {
+			public void execute(Runtime rt, Task parent) {
 				System.out.println("Task " + i);
 			}
 			

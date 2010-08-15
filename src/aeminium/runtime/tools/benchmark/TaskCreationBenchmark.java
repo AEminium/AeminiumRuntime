@@ -14,7 +14,7 @@ public class TaskCreationBenchmark implements Benchmark {
 	public void run(Reporter reporter) {
 		Body body = new Body() {
 			@Override
-			public void execute(Task parent) {
+			public void execute(Runtime rt, Task parent) {
 				// DO NOTHING				
 			}
 		};

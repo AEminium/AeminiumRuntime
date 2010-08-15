@@ -12,8 +12,8 @@ import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.ResultBody;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
+import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.implementations.Configuration;
-import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.AbstractTask;
 import aeminium.runtime.task.AbstractTaskFactory;
 import aeminium.runtime.task.RuntimeAtomicTask;
@@ -112,7 +112,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		if ( schedule ) {
 			@SuppressWarnings("unchecked")
 			T This = (T)this;
-			prioritizer.scheduleTask(This);	
+			AbstractRuntime.prioritizer.scheduleTask(This);	
 		}
 	}
 	
@@ -155,7 +155,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		this.body = null;
 		this.children = null;
 		
-		graph.taskCompleted((T)this);
+		AbstractRuntime.graph.taskCompleted((T)this);
 	}
 
 	public void checkForCycles() {

@@ -23,6 +23,7 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 
 	@Override
 	public final void init(RuntimeEventManager eventManager) {
+		super.init();
 		execService = Executors.newFixedThreadPool(getMaxParallelism(), AeminiumThread.getFactory(eventManager));
 		eventManager.signalPolling();
 	}
@@ -38,7 +39,6 @@ public class SingleFixedThreadPoolScheduler<T extends RuntimeTask> extends Abstr
 	public final void scheduleTask(T task) {
 		counter.incrementAndGet();
 		runningCount.incrementAndGet();
-		task.setScheduler(this);
 		execService.submit(task);
 	}
 

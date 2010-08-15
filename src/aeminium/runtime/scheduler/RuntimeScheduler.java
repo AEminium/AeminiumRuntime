@@ -1,7 +1,6 @@
 package aeminium.runtime.scheduler;
 
 import aeminium.runtime.events.RuntimeEventManager;
-import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
 
 public interface RuntimeScheduler <T extends RuntimeTask> {	
@@ -13,14 +12,7 @@ public interface RuntimeScheduler <T extends RuntimeTask> {
 	public void shutdown();
 	
 	public void scheduleTask(T task);
-	
-	/**
-	 * Set the prioritizer to callback when tasks are finished.
-	 * 
-	 * @param prioritizer
-	 */
-	public void setPrioritizer(RuntimePrioritizer<T> prioritizer );
-	
+
 	/**
 	 * Return the number of task that can be executed in parallel.
 	 * @return

@@ -15,7 +15,7 @@ public class DoubleScheduleTask extends BaseTest {
 		
 		Task t = rt.createNonBlockingTask(new Body() {
 			@Override
-			public void execute(Task current) {	
+			public void execute(Runtime rt, Task current) {	
 			}
 		}, Runtime.NO_HINTS);
 		

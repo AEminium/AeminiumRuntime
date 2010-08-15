@@ -25,11 +25,21 @@ public class Factory {
 	public abstract class RuntimeConfiguration<T extends RuntimeTask> {
 		protected final String name;
 		protected final String description;
+		protected Runtime runtime;
 		
 		public RuntimeConfiguration(String name, String description) {
 			this.name=name;
 			this.description = description;
 		}
+		
+		public final Runtime getInstance() {
+			if ( runtime == null ) {
+				runtime = createInstance();
+			}
+			return runtime;
+		}
+		
+		abstract Runtime createInstance();
 		
 		public final String getName() {
 			return name;
@@ -39,7 +49,6 @@ public class Factory {
 			return description;
 		}
 		
-		public abstract AbstractRuntime instanciate();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -55,7 +64,7 @@ public class Factory {
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_LinearScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.LinearScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.LinearScheduler.ImplicitTask.FifoDataGroup") {
 			@Override
-			public final AbstractRuntime instanciate() {
+			public final AbstractRuntime createInstance() {
 				LinearScheduler<ImplicitTask> scheduler = new LinearScheduler<ImplicitTask>();
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler);
 				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
@@ -73,7 +82,7 @@ public class Factory {
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup") {
 			@Override
-			public final AbstractRuntime instanciate() {
+			public final AbstractRuntime createInstance() {
 				SingleFixedThreadPoolScheduler<ImplicitTask> scheduler = new SingleFixedThreadPoolScheduler<ImplicitTask>();
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler);
 				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
@@ -91,7 +100,7 @@ public class Factory {
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_LowestLevelFirstPrioritizer_SingleFixedThreadPoolScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.LowestLevelFirstPrioritizer.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.LowestLevelFirstPrioritizer.SingleFixedThreadPoolScheduler.ImplicitTask.FifoDataGroup") {
 			@Override
-			public final AbstractRuntime instanciate() {
+			public final AbstractRuntime createInstance() {
 				SingleFixedThreadPoolScheduler<ImplicitTask> scheduler = new SingleFixedThreadPoolScheduler<ImplicitTask>();
 				LowestLevelFirstPrioritizer<ImplicitTask> prioritizer = new LowestLevelFirstPrioritizer<ImplicitTask>(scheduler);
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(prioritizer);
@@ -109,7 +118,7 @@ public class Factory {
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_ForkJoinScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.ForkJoinScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.ForkJoinScheduler.ImplicitTask.FifoDataGroup") {
 			@Override
-			public final AbstractRuntime instanciate() {
+			public final AbstractRuntime createInstance() {
 				ForkJoinScheduler<ImplicitTask> scheduler = new ForkJoinScheduler<ImplicitTask>();
 				//LowestLevelFirstPrioritizer<ImplicitForkJoinTask> prioritizer = new LowestLevelFirstPrioritizer<ImplicitTask>(scheduler, flags);
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler);
@@ -127,7 +136,7 @@ public class Factory {
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_PollingWorkStealingScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.PollingWorkStealingScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.PollingWorkStealingScheduler.ImplicitTask.FifoDataGroup") {
 			@Override
-			public final AbstractRuntime instanciate() {
+			public final AbstractRuntime createInstance() {
 				PollingWorkStealingScheduler<ImplicitTask> scheduler = new PollingWorkStealingScheduler<ImplicitTask>();
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler);
 				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
@@ -144,7 +153,7 @@ public class Factory {
 		@SuppressWarnings("unchecked")
 		final RuntimeConfiguration<ImplicitTask> ImplicitGraph_None_BlockingWorkStealingScheduler_ImplicitTask_FifoDataGroup = f.new RuntimeConfiguration<ImplicitTask>("ImplicitGraph.None.BlockingWorkStealingScheduler.ImplicitTask.FifoDataGroup", "ImplicitGraph.None.BlockingWorkStealingScheduler.ImplicitTask.FifoDataGroup") {
 			@Override
-			public final AbstractRuntime instanciate() {
+			public final AbstractRuntime createInstance() {
 				BlockingWorkStealingScheduler<ImplicitTask> scheduler = new BlockingWorkStealingScheduler<ImplicitTask>();
 				ImplicitGraph<ImplicitTask> graph = new ImplicitGraph<ImplicitTask>(scheduler);
 				DataGroupFactory<ImplicitTask> dgFactory = FifoDataGroup.createFactory(scheduler);
@@ -197,7 +206,7 @@ public class Factory {
 	 */
 	protected final static Runtime getRuntime(String name) {
 		if ( database.containsKey(name)) {
-			return database.get(name).instanciate();
+			return database.get(name).getInstance();
 		} else {
 			System.out.println("WARNING: Cannot find implementation '" + name + "', falling back to 'default'.");
 			return getRuntime("default");

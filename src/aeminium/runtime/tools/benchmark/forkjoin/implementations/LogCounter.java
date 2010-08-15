@@ -210,7 +210,7 @@ public class LogCounter {
 			final Task uncompress = rt.createBlockingTask(new Body() {
 		
 				@Override
-				public void execute(Task current) {
+				public void execute(Runtime rt, Task current) {
 					try {
 						current.setResult(uncompressGZip(logfile));
 					} catch (IOException e) {
@@ -224,7 +224,7 @@ public class LogCounter {
 			Task count = rt.createBlockingTask(new Body() {
 				
 				@Override
-				public void execute(Task current) {
+				public void execute(Runtime rt, Task current) {
 					try {
 						current.setResult(countAccesses((String) uncompress.getResult()));
 					} catch (IOException e) {
@@ -240,7 +240,7 @@ public class LogCounter {
 		Task merge = rt.createBlockingTask(new Body() {
 			
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 				int n = 0;
 				for (Task t : counterTasks) {
 					Integer r = (Integer) t.getResult();

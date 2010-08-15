@@ -1,5 +1,6 @@
 package aeminium.runtime.graph;
 
+import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
 
@@ -8,5 +9,9 @@ public abstract class AbstractGraph<T extends RuntimeTask> implements RuntimeGra
 
 	public AbstractGraph(RuntimePrioritizer<T> prioritizer) {
 		this.prioritizer = prioritizer;
+	}
+
+	public void init() {
+		AbstractRuntime.graph = this;
 	}
 }

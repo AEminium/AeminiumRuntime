@@ -7,15 +7,12 @@ import aeminium.runtime.implementations.Factory;
 
 
 class FibBody implements ResultBody {
-	private final Runtime rt;
-	private final int n;
 	private FibBody b1;
 	private FibBody b2;
-	public volatile int value = 1;
+	public volatile int value;
 	
-	FibBody(int n, Runtime rt) {
-		this.n = n;
-		this.rt = rt;
+	FibBody(int n) {
+		value = n;
 	}
 	
 	@Override
@@ -28,21 +25,23 @@ class FibBody implements ResultBody {
 	}
 
 	@Override
-	public final void execute(Task current) {
-		if ( 2 < n ) {
-			b1 = new FibBody(n-1, rt);
+	public final void execute(Runtime rt, Task current) {
+		if ( 2 < value ) {
+			b1 = new FibBody(value-1);
 			Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
 			rt.schedule(t1, current, Runtime.NO_DEPS);
 			
-			b2 = new FibBody(n-2, rt);
+			b2 = new FibBody(value-2);
 			Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
 			rt.schedule(t2, current, Runtime.NO_DEPS);
+		} else {
+			value = 1;
 		}
 	}
 
 	@Override
 	public String toString() {
-		return "FibBody("+n+")";
+		return "FibBody("+value+")";
 	}
 }
 
@@ -68,7 +67,7 @@ public class FibonacciBenchmark implements Benchmark {
 		long start = System.nanoTime();
 		rt.init();
 
-		FibBody rootBody = new FibBody(n, rt);
+		FibBody rootBody = new FibBody(n);
 		Task root = rt.createNonBlockingTask(rootBody, Runtime.NO_HINTS);
 		rt.schedule(root, Runtime.NO_PARENT, Runtime.NO_DEPS);
 

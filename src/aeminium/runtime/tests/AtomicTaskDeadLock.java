@@ -30,7 +30,7 @@ public class AtomicTaskDeadLock  extends BaseTest {
 		return rt.createAtomicTask(new Body() {
 			
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 				getLogger().info("Atomic Task for data group : " + dg1);
 				try {
 					Thread.sleep(500);
@@ -47,7 +47,7 @@ public class AtomicTaskDeadLock  extends BaseTest {
 		return rt.createAtomicTask(new Body() {
 			
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 				getLogger().info("Atomic Sub-Task for data group : " + dg);				
 			}
 		},  dg, Runtime.NO_HINTS);

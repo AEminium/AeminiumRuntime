@@ -81,6 +81,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@Override
 	public final void init() {
 		assert( state == GenericRuntimeState.UNINITIALIZED);
+		AbstractRuntime.runtime = this;
 		eventManager = new EventManager();
 		eventManager.init();
 		graph.init(eventManager);
@@ -97,9 +98,6 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@SuppressWarnings("unchecked")
 	@Override
 	public final void schedule(Task task, Task parent, Collection<Task> deps) {
-//		assert ( state == GenericRuntimeState.INITIALIZED );
-//		assert ( task instanceof RuntimeTask );
-//		assert ( parent instanceof RuntimeTask );
 		graph.addTask((T)task, parent, (Collection)deps);
 	}
 

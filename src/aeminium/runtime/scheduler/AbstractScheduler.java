@@ -2,16 +2,18 @@ package aeminium.runtime.scheduler;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.prioritizer.RuntimePrioritizer;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.task.implicit.ImplicitTask;
 
 public abstract class AbstractScheduler<T extends RuntimeTask> implements RuntimeScheduler<T>, RuntimePrioritizer<T> {
 	protected final AtomicInteger runningCount = new AtomicInteger();
 	protected final AtomicInteger pausedCount = new AtomicInteger();
 	protected RuntimePrioritizer<T> prioritizer = null;
 	protected final int maxParallelism;
-
+	
 	public AbstractScheduler() {
 		this.maxParallelism = Configuration.getProcessorCount();
 	}
@@ -20,9 +22,11 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 		this.maxParallelism = maxParallelism;
 	}
 	
-	@Override
-	public void setPrioritizer(RuntimePrioritizer<T> prioritizer ) {
-		this.prioritizer = prioritizer;
+	public void init () {
+    	if ( AbstractRuntime.prioritizer == null ) {
+    		AbstractRuntime.prioritizer = this;
+    	}
+    	AbstractRuntime.scheduler = this;
 	}
 	
 	@Override 

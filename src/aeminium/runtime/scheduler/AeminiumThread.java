@@ -2,7 +2,9 @@ package aeminium.runtime.scheduler;
 
 import java.util.concurrent.ThreadFactory;
 
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.task.RuntimeTask;
 
 public class AeminiumThread extends Thread {
 	public volatile int taskCount = 0;
@@ -31,6 +33,5 @@ public class AeminiumThread extends Thread {
 		eventManager.signalNewThread(this);
 		super.run();
 	}
-	
 	
 }

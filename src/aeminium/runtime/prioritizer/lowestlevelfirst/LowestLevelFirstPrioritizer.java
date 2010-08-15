@@ -14,7 +14,6 @@ public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends Abstrac
 	
 	public LowestLevelFirstPrioritizer(RuntimeScheduler<T> scheduler) {
 		super(scheduler);
-		scheduler.setPrioritizer(this);
 	}
 
 	@Override

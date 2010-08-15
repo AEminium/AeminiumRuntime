@@ -2,25 +2,19 @@ package aeminium.runtime.task;
 
 import aeminium.runtime.Body;
 import aeminium.runtime.RuntimeError;
-import aeminium.runtime.graph.RuntimeGraph;
-import aeminium.runtime.prioritizer.RuntimePrioritizer;
-import aeminium.runtime.scheduler.RuntimeScheduler;
+import aeminium.runtime.implementations.AbstractRuntime;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
-	protected volatile Object result = UNSET;
+	protected volatile Object result = UNSET;  // merge result with body to because 
 	protected Body body;
-	public Runtime runtime;
-	public RuntimeGraph<T> graph;
-	public RuntimeScheduler<T> scheduler;
-	public RuntimePrioritizer<T> prioritizer;
 	public final short hints;
+	public short level;
 	protected static final Object UNSET = new Object() {
 		@Override
 		public String toString() {
 			return "UNSET";
 		}
 	};
-	public short level;
 	
 	public AbstractTask(Body body, short hints) {
 		this.body = body;
@@ -30,15 +24,15 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	@Override
 	public Object call() throws Exception {
 		try {
-			body.execute(this);
+			body.execute(AbstractRuntime.runtime, this);
 		} catch (Throwable e) {
 			setResult(e);
 		} finally {
 			taskFinished();
 			@SuppressWarnings("unchecked")
 			T Tthis = (T)this;
-			if ( scheduler != null ) {
-				scheduler.taskFinished(Tthis);
+			if ( AbstractRuntime.scheduler != null ) {
+				AbstractRuntime.scheduler.taskFinished(Tthis);
 			}
 		}
 		return null;		
@@ -47,12 +41,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	public final Body getBody() {
 		return body;
 	}
-	
-	@SuppressWarnings("unchecked")
-	public final void setScheduler(RuntimeScheduler scheduler) {
-		this.scheduler = scheduler;
-	}
-	
+
 	@Override
 	public void setResult(Object result) {
 		if ( result == null ) {
@@ -63,7 +52,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public final Object getResult() {
-		//while (result == UNSET ) ;
+		
 		if ( result == UNSET ) {
 			throw new RuntimeError("Result has either not been set or already retrieved");
 		}
@@ -71,18 +60,10 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		result = UNSET;
 		return value;
 	}
-
-//	protected final void setLevel(int level) {
-//		this.level = level;
-//	}
-//	
-//	public final int getLevel() {
-//		return this.level;
-//	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void taskCompleted() {
-		graph.taskCompleted((T)this);
+		AbstractRuntime.graph.taskCompleted((T)this);
 	}
 }

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkStealingQueue;
@@ -31,17 +32,10 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 	}
 	
 	@Override
-	public final void registerThread(WorkerThread<T> thread) {
-	}
-	
-	@Override
-	public final void unregisterThread(WorkerThread<T> thread) {
-		counter.decrementAndGet();
-	}
-	
-	@Override
 	@SuppressWarnings("unchecked")
 	public void init(RuntimeEventManager eventManager) {
+		super.init();
+		AbstractRuntime.scheduler = null;
 		this.eventManager = eventManager;
 		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
 		threads =  new WorkerThread[getMaxParallelism()];
@@ -75,6 +69,17 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 		counter         = null;
 		submissionQueue = null;
 	}
+	
+	
+	@Override
+	public final void registerThread(WorkerThread<T> thread) {
+	}
+	
+	@Override
+	public final void unregisterThread(WorkerThread<T> thread) {
+		counter.decrementAndGet();
+	}
+
 
 	@Override
 	public final void scheduleTask(T task) {

@@ -34,11 +34,11 @@ public class AtomicTaskWaiting extends BaseTest {
 	public Task createAtomicTask(final Runtime rt, DataGroup group, final int delay) {
 		return rt.createAtomicTask(new Body() {
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 				// let's create some sub tasks
 				Task t1 = rt.createNonBlockingTask(new Body() {
 					@Override
-					public void execute(Task current) {
+					public void execute(Runtime rt, Task current) {
 						getLogger().info("Sub Task waiting for "+ (delay+1) + " ms");
 						try {
 							Thread.sleep(delay);
@@ -56,7 +56,7 @@ public class AtomicTaskWaiting extends BaseTest {
 				
 				Task t2 = rt.createNonBlockingTask(new Body() {
 					@Override
-					public void execute(Task current) {
+					public void execute(Runtime rt, Task current) {
 						getLogger().info("Sub Task waiting for "+ (delay+2) + " ms");
 						try {
 							Thread.sleep(delay);

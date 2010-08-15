@@ -21,7 +21,7 @@ public class AtomicTest {
         	final int ii = i;
         	Task ti = rt.createAtomicTask(new Body() {
 				@Override
-				public void execute(Task current) {
+				public void execute(Runtime rt, Task current) {
 					System.out.println("i:" + ii);
 					for (int j=0; j < MAX_ITEMS/2; j++) {
 						System.out.print(j + " ");

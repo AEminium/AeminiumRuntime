@@ -43,7 +43,7 @@ public class ChildTaskBenchmark implements Benchmark {
 		return rt.createNonBlockingTask(new Body() {
 			
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 //				StringBuilder sb = new StringBuilder();
 //				for ( int i =  0; i < (MAX_LEVEL - level) ; i++) {
 //					sb.append(" ");

@@ -22,7 +22,7 @@ public class ChildTasks extends BaseTest {
 		return rt.createNonBlockingTask(new Body() {
 			
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 				if ( level > 0 ) {
 					rt.schedule(createTask(rt, level-1), current, Runtime.NO_DEPS);
 				}

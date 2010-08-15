@@ -1,5 +1,6 @@
 package aeminium.runtime.prioritizer;
 
+import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.scheduler.RuntimeScheduler;
 import aeminium.runtime.task.RuntimeTask;
 
@@ -8,6 +9,10 @@ public abstract class AbstractPrioritizer<T extends RuntimeTask> implements Runt
 	
 	public AbstractPrioritizer(RuntimeScheduler<T> scheduler) {
 		this.scheduler = scheduler;
+	}
+	
+	public void init() {
+		AbstractRuntime.prioritizer = this;
 	}
 	
 	@Override 

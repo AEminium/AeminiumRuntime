@@ -1,12 +1,12 @@
 package aeminium.runtime.scheduler.workstealing.polling;
 
-import java.util.Deque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.workstealing.WorkStealingQueue;
@@ -32,17 +32,11 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 		super(maxParallelism);
 	}
 
-	public final void registerThread(WorkerThread<T> thread) {
-		eventManager.signalNewThread(thread);
-	}
-	
-	public final void unregisterThread(WorkerThread<T> thread) {
-		counter.decrementAndGet();
-	}
-	
 	@Override
 	@SuppressWarnings("unchecked")
 	public void init(RuntimeEventManager eventManager) {
+		super.init();
+		AbstractRuntime.scheduler = null;
 		this.eventManager = eventManager;
 		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
 		threads = new WorkerThread[getMaxParallelism()];
@@ -76,7 +70,15 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 		counter         = null;
 		submissionQueue = null;
 	}
-
+	
+	public final void registerThread(WorkerThread<T> thread) {
+		eventManager.signalNewThread(thread);
+	}
+	
+	public final void unregisterThread(WorkerThread<T> thread) {
+		counter.decrementAndGet();
+	}
+	
 	@Override
 	public final void scheduleTask(T task) {
 		Thread thread = Thread.currentThread();
@@ -99,8 +101,6 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 			signalWork();
 		}
 	}
-
-
 	
 	public final void signalWork() {
 		WorkerThread<T> thread = parkedThreads.poll();
@@ -108,7 +108,6 @@ public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends 
 			LockSupport.unpark(thread);
 		}
 	}
-	
 	
 	public final void parkThread(WorkerThread<T> thread) {
 		eventManager.signalThreadSuspend(thread);

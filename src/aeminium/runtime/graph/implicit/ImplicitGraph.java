@@ -59,6 +59,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 	
 	@Override
 	public final void init(RuntimeEventManager eventManager) {
+		super.init();
 		taskCounterList  = new ArrayList<TaskCounter>(); 
 		taskCounters     = new ThreadLocal<TaskCounter>(){
 			@Override
@@ -124,10 +125,6 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 				itask.level = (short) (Tparent.level + 1);
 				itask.parent.attachChild(itask);
 			}
-
-			// initialize references
-			itask.prioritizer = (RuntimePrioritizer) prioritizer;
-			itask.graph       = (RuntimeGraph) this;
 
 			// setup dependencies
 			itask.state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;

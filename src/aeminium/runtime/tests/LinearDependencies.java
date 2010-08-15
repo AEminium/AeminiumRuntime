@@ -16,7 +16,7 @@ public class LinearDependencies extends BaseTest {
 		
 		Task t1 = rt.createNonBlockingTask(new Body() {
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 				// wait some time to allow other task to be inserted 
 				try {
 					Thread.sleep(300);
@@ -33,7 +33,7 @@ public class LinearDependencies extends BaseTest {
 		
 		Task t2 = rt.createNonBlockingTask(new Body() {
 			@Override
-			public void execute(Task current) {
+			public void execute(Runtime rt, Task current) {
 			}
 			@Override
 			public String toString() {

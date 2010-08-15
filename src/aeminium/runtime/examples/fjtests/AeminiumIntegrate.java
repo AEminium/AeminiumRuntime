@@ -78,7 +78,7 @@ public class AeminiumIntegrate {
 			}
 
 			@Override
-			public void execute(final Task current) {
+			public void execute(Runtime rt, final Task current) {
 				double fl = (l * l + 1.0) * l;
 				double fr = (r * r + 1.0) * r;
 				double h = (r - l) * 0.5;
@@ -105,7 +105,7 @@ public class AeminiumIntegrate {
 				final Task branch2 = recursiveCall(rt, current, c, r, ar);
 
 				Task merge = rt.createNonBlockingTask(new Body() {
-					public void execute(Task p) {
+					public void execute(Runtime rt, Task p) {
 						double r1 = (Double) branch1.getResult();
 						double r2 = (Double) branch2.getResult();
 						current.setResult(r1 + r2);
@@ -128,13 +128,13 @@ public class AeminiumIntegrate {
 		Task t1 = rt.createNonBlockingTask(new Body() {
 
 			@Override
-			public void execute(Task p) {
+			public void execute(Runtime rt, Task p) {
 				final Task calc = recursiveCall(rt, p, start, end, 0);
 				;
 
 				Task print = rt.createBlockingTask(new Body() {
 					@Override
-					public void execute(Task p) {
+					public void execute(Runtime rt, Task p) {
 						System.out.println("Final result:" + calc.getResult());
 					}
 				}, Runtime.NO_HINTS);

@@ -6,6 +6,7 @@ import aeminium.runtime.events.EventManager;
 import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
+import aeminium.runtime.task.implicit.ImplicitTask;
 
 public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<T>{
     private ForkJoinPool pool = null;
@@ -20,6 +21,7 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
     
 	@Override
     public final void init(RuntimeEventManager eventManager) {
+		super.init();
     	pool = new ForkJoinPool(AeminiumForkJoinWorkerThread.getFactory(eventManager));
     	eventManager.signalPolling();
     }
@@ -34,7 +36,6 @@ public class ForkJoinScheduler<T extends RuntimeTask> extends AbstractScheduler<
 
     @Override
     public final void scheduleTask(T task) {
-    	task.setScheduler(this);
     	Thread thread =Thread.currentThread();
     	if (  thread instanceof AeminiumForkJoinWorkerThread ) {
     		ForkJoinTask.adapt(task).fork();

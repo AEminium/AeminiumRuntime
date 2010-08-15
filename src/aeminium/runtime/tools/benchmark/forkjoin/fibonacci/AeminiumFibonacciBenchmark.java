@@ -10,15 +10,12 @@ import aeminium.runtime.tools.benchmark.Reporter;
 public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 
 	public static class FibBody implements ResultBody {
-		private final Runtime rt;
-		private final int n;
 		private FibBody b1;
 		private FibBody b2;
-		public volatile int value = 1;
+		public volatile int value;
 		
-		FibBody(int n, Runtime rt) {
-			this.n = n;
-			this.rt = rt;
+		FibBody(int n) {
+			this.value = n;
 		}
 		
 		public int seqFib(int n) {
@@ -39,15 +36,15 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		}
 		
 		@Override
-		public final void execute(Task current) {
-			if ( n <= THRESHOLD  ) {
-				seqFib(n);
+		public final void execute(Runtime rt, Task current) {
+			if ( value <= THRESHOLD  ) {
+				value = seqFib(value);
 			} else {
-				b1 = new FibBody(n-1, rt);
+				b1 = new FibBody(value-1);
 				Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
 				rt.schedule(t1, current, Runtime.NO_DEPS);
 
-				b2 = new FibBody(n-2, rt);
+				b2 = new FibBody(value-2);
 				Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
 				rt.schedule(t2, current, Runtime.NO_DEPS);
 			} 
@@ -55,7 +52,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		
 		@Override
 		public String toString() {
-			return "FibBody("+n+")";
+			return "FibBody("+value+")";
 		}
 	}
 	
@@ -63,8 +60,7 @@ public class AeminiumFibonacciBenchmark extends FibonacciBenchmark {
 		long start = System.nanoTime();
 		rt.init();
 		
-		Task t1 = rt.createNonBlockingTask(new FibBody(n, rt),
-				                           Runtime.NO_HINTS);
+		Task t1 = rt.createNonBlockingTask(new FibBody(n), Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
 		rt.shutdown();

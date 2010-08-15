@@ -35,7 +35,6 @@ public class SingleCachedThreadPoolScheduler<T extends RuntimeTask> extends Abst
 
 	public final void scheduleTask(T task) {
 		runningCount.incrementAndGet();
-		task.setScheduler(this);
 		execService.submit(task);
 	}
 

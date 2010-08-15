@@ -71,7 +71,7 @@ public class FixedParallelMaxDependencies implements Benchmark {
 		return rt.createNonBlockingTask(new Body() {
 			
 			@Override
-			public void execute(Task parent) {
+			public void execute(Runtime rt, Task parent) {
 				// DO NOTHING
 			}
 			
