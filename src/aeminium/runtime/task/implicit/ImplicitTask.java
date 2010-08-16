@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.LockSupport;
 
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
 import aeminium.runtime.CyclicDependencyError;
 import aeminium.runtime.NonBlockingTask;
-import aeminium.runtime.ResultBody;
 import aeminium.runtime.Task;
 import aeminium.runtime.datagroup.RuntimeDataGroup;
 import aeminium.runtime.implementations.AbstractRuntime;
@@ -132,12 +132,6 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		assert( state == ImplicitTaskState.WAITING_FOR_CHILDREN );
 		state = ImplicitTaskState.COMPLETED;	
 
-		// callback to ResultBody to compute final result 
-		// BEFORE we trigger parent/dependents 
-		if ( body instanceof ResultBody) {
-			((ResultBody) body).completed();
-		}
-
 		if ( parent != null) {
 			@SuppressWarnings("unchecked")
 			T Tthis = (T)this;
@@ -157,8 +151,16 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 		this.children = null;
 		
 		AbstractRuntime.graph.taskCompleted((T)this);
+		
+		if ( waiter != null ) {
+			notifyAll();
+		}
 	}
 
+	public final boolean isCompleted() {
+		return state == ImplicitTaskState.COMPLETED;
+	}
+	
 	public void checkForCycles() {
 		synchronized (this) {
 			@SuppressWarnings("unchecked")

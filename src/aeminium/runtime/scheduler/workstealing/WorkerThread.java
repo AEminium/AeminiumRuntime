@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.scheduler.AeminiumThread;
+import aeminium.runtime.task.RuntimeTask;
 import aeminium.runtime.task.implicit.ImplicitTask;
 
 public final class WorkerThread<T extends ImplicitTask> extends AeminiumThread {
@@ -76,6 +77,42 @@ public final class WorkerThread<T extends ImplicitTask> extends AeminiumThread {
 			return queue.tryStealing();
 		}
 		return null;
+	}
+	
+	public final void progressToCompletion(RuntimeTask taskToComplete) {
+		@SuppressWarnings("unchecked")
+		T toComplete = (T)taskToComplete;
+		int pollCounter = pollingCount;
+		while ( !toComplete.isCompleted() ) {
+			T task = null;
+			task = taskQueue.pop();
+			if ( task != null ) {
+				try {
+					task.call();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else {
+				// scan for other queues
+				task = scheduler.scanQueues(this);
+				if ( task != null ) {
+					try {
+						task.call();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} else {
+					if ( pollCounter == 0) {
+						// reset counter
+						// do not 
+						pollCounter = pollingCount;
+					} else {
+						pollCounter--;
+						Thread.yield();
+					}
+				}
+			}
+		}
 	}
 	
 	public final String toString() {

@@ -45,7 +45,6 @@ public class ConcurrentWorkStealingQueueTests {
 		assertEquals(control, hello+sb.reverse());
 	}
 
-	
 	@Test
 	public void checkSize() {
 		WorkStealingQueue<String> wsq = new ConcurrentWorkStealingQueue<String>(2);

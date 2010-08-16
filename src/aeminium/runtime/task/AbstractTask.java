@@ -3,18 +3,21 @@ package aeminium.runtime.task;
 import aeminium.runtime.Body;
 import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.AbstractRuntime;
+import aeminium.runtime.scheduler.AeminiumThread;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
-	protected volatile Object result = UNSET;  // could merge result with body  
-	protected Body body;
-	public final short hints;
-	public short level;
 	protected static final Object UNSET = new Object() {
 		@Override
 		public String toString() {
 			return "UNSET";
 		}
 	};
+	protected volatile Object result = UNSET;  // could merge result with body  
+	protected Body body;
+	public final short hints;
+	public short level;
+	public Thread waiter;    // we could same this and just mention that there is someone waiting
+
 	
 	public AbstractTask(Body body, short hints) {
 		this.body = body;
@@ -52,15 +55,26 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public final Object getResult() {
-		if ( result == UNSET ) {
-			throw new RuntimeError("Result has either not been set or already retrieved");
+		if ( isCompleted() ) {
+			return result;
+		} else {
+			Thread thread = Thread.currentThread();
+			if ( thread instanceof AeminiumThread ) {
+				((AeminiumThread)thread).progressToCompletion(this);
+			} else {
+				synchronized (thread) {
+					waiter = thread;
+					try {
+						this.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			return result;
 		}
-		Object value = result;
-		result = UNSET;
-		return value;
 	}
 	
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public void taskCompleted() {

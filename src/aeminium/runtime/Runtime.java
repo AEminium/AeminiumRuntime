@@ -16,10 +16,6 @@ public interface Runtime {
 	public final static short NO_HINTS = Hints.NO_HINTS;
     public final static Task NO_PARENT = new Task() {
 		@Override
-		public Body getBody() {
-			throw new RuntimeError("Cannot get body fom NO_PARENT");
-		}
-		@Override
 		public void setResult(Object value) {
 			throw new RuntimeError("Cannot set result on NO_PARENT");
 		}
