@@ -115,6 +115,11 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		synchronized (itask) {			
 			// check for double scheduling
 			if ( itask.state != ImplicitTaskState.UNSCHEDULED) {
+				if ( thread instanceof AeminiumThread ) {
+					((AeminiumThread)thread).taskCount--;
+				} else {
+					taskCounters.get().taskCount--;
+				}
 				throw new RuntimeError("Cannot schedule task twice: " + this);
 			}
 
