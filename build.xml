@@ -51,7 +51,6 @@
 
     <target name="tests">
         <junit fork="yes" dir="src/aeminium/runtime/tests" printsummary="yes">
-            <formatter type="plain"/>
             <classpath refid="rt.classpath"/>
             <batchtest>
                 <fileset dir="src/">

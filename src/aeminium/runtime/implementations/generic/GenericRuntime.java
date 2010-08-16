@@ -81,7 +81,7 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 	@Override
 	public final void init() {
 		assert( state == GenericRuntimeState.UNINITIALIZED);
-		AbstractRuntime.runtime = this;
+		AbstractRuntime.setRuntime(this);
 		eventManager = new EventManager();
 		eventManager.init();
 		graph.init(eventManager);
@@ -120,4 +120,8 @@ public class GenericRuntime<T extends RuntimeTask> extends AbstractRuntime {
 		assert ( state == GenericRuntimeState.UNINITIALIZED );
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

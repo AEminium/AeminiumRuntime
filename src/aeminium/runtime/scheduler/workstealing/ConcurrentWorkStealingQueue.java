@@ -7,7 +7,9 @@ import aeminium.runtime.RuntimeError;
 
 /**
  * Work stealing queue that has only one thread adding elements to it
- * at the begining while multiple threads can steal elements 
+ * at the beginning while multiple threads can steal elements from the 
+ * end. The design was heavily inspired by the work stealing queue 
+ * implementation of the fork/join framework.  
  * 
  * @author sven
  *

@@ -46,7 +46,7 @@ public class FixedParallelMaxDependencies implements Benchmark {
 		rt.shutdown();
 		long end = System.nanoTime();
 
-		String result = String.format("Run %10d tasks in %12d ns ==> %10d ns per task | %6d tasks/second.", (count*taskCount), (end-start), ((end-start)/(count*taskCount)),  (1000000000/((end-start)/(count*taskCount))));
+		String result = String.format("Run %10d tasks in %12d ns ==> %10d ns per task | %6d tasks/second.", (count*(long)taskCount), (end-start), ((end-start)/(count*(long)taskCount)),  (1000000000/((end-start)/(count*(long)taskCount))));
 		reporter.reportLn(result);
 
 	}

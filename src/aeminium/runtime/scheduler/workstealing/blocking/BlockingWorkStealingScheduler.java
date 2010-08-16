@@ -35,7 +35,7 @@ public final class BlockingWorkStealingScheduler<T extends ImplicitTask> extends
 	@SuppressWarnings("unchecked")
 	public void init(RuntimeEventManager eventManager) {
 		super.init();
-		AbstractRuntime.scheduler = null;
+		AbstractRuntime.setScheduler(this);
 		this.eventManager = eventManager;
 		parkedThreads = new ConcurrentLinkedQueue<WorkerThread<T>>();
 		threads =  new WorkerThread[getMaxParallelism()];

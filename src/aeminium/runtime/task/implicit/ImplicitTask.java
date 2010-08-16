@@ -25,8 +25,8 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	public ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
 	public byte depCount;
 	public byte childCount;
-	public List<T> dependents;  // we could merge those two fields because they are used mutual exclusive
-	public List<T> children;
+	public List<T> dependents;  
+	public List<T> children;     // children are only used for debugging purposes => could be removed
 	public T parent;
 	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
 	

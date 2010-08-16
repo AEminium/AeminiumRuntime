@@ -5,7 +5,7 @@ import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.AbstractRuntime;
 
 public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask {
-	protected volatile Object result = UNSET;  // merge result with body to because 
+	protected volatile Object result = UNSET;  // could merge result with body  
 	protected Body body;
 	public final short hints;
 	public short level;
@@ -43,7 +43,7 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	}
 
 	@Override
-	public void setResult(Object result) {
+	public final void setResult(Object result) {
 		if ( result == null ) {
 			throw new RuntimeError("Cannot set result to 'null'.");
 		}
@@ -52,7 +52,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 	
 	@Override
 	public final Object getResult() {
-		
 		if ( result == UNSET ) {
 			throw new RuntimeError("Result has either not been set or already retrieved");
 		}
@@ -61,8 +60,9 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		return value;
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	@Override
+	@SuppressWarnings("unchecked")
 	public void taskCompleted() {
 		AbstractRuntime.graph.taskCompleted((T)this);
 	}

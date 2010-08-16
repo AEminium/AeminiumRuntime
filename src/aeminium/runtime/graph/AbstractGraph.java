@@ -12,6 +12,11 @@ public abstract class AbstractGraph<T extends RuntimeTask> implements RuntimeGra
 	}
 
 	public void init() {
-		AbstractRuntime.graph = this;
+		AbstractRuntime.setGraph(this);
+	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
 	}
 }

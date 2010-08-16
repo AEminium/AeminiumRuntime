@@ -12,7 +12,7 @@ public abstract class AbstractPrioritizer<T extends RuntimeTask> implements Runt
 	}
 	
 	public void init() {
-		AbstractRuntime.prioritizer = this;
+		AbstractRuntime.setPrioritizer(this);
 	}
 	
 	@Override 
@@ -22,5 +22,10 @@ public abstract class AbstractPrioritizer<T extends RuntimeTask> implements Runt
 	@Override 
 	public void taskPaused(T task) {
 		
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
 	}
 }

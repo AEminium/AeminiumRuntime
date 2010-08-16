@@ -42,4 +42,9 @@ public abstract class BaseTest {
 	protected Logger getLogger() {
 		return log;
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

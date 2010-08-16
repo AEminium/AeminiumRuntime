@@ -23,9 +23,9 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 	
 	public void init () {
     	if ( AbstractRuntime.prioritizer == null ) {
-    		AbstractRuntime.prioritizer = this;
+    		AbstractRuntime.setPrioritizer(this);
     	}
-    	AbstractRuntime.scheduler = this;
+    	AbstractRuntime.setScheduler(this);
 	}
 	
 	@Override 
@@ -67,5 +67,10 @@ public abstract class AbstractScheduler<T extends RuntimeTask> implements Runtim
 		pausedCount.decrementAndGet();
 		// runningCount must be incremented by the schedule function
 		scheduleTask(task);
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
 	}
 }
