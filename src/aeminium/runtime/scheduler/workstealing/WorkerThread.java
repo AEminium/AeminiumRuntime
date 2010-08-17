@@ -104,7 +104,6 @@ public final class WorkerThread<T extends ImplicitTask> extends AeminiumThread {
 				} else {
 					if ( pollCounter == 0) {
 						// reset counter
-						// do not 
 						pollCounter = pollingCount;
 					} else {
 						pollCounter--;
@@ -116,6 +115,6 @@ public final class WorkerThread<T extends ImplicitTask> extends AeminiumThread {
 	}
 	
 	public final String toString() {
-		return "WorkerThread<" + index + ">";
+		return getName();
 	}
 }

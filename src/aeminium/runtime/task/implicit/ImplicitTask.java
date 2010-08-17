@@ -61,7 +61,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 	}
 	
 	public final void attachChild(T child) {
-		synchronized (this) {
+		//synchronized (this) {
 			childCount += 1;
 			if ( childCount == 0 ) {
 				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
@@ -74,7 +74,7 @@ public abstract class ImplicitTask<T extends ImplicitTask<T>> extends AbstractTa
 				}
 				children.add(child);
 			}
-		}
+		//}
 	}
 	
 	public final void detachChild(T child) {
