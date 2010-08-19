@@ -40,10 +40,6 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 		}
 		return null;		
 	}
-	
-	public final Body getBody() {
-		return body;
-	}
 
 	@Override
 	public final void setResult(Object result) {
@@ -62,12 +58,14 @@ public abstract class AbstractTask<T extends RuntimeTask> implements RuntimeTask
 			if ( thread instanceof AeminiumThread ) {
 				((AeminiumThread)thread).progressToCompletion(this);
 			} else {
-				synchronized (thread) {
-					waiter = thread;
-					try {
-						this.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+				synchronized (this) {
+					while ( !isCompleted() ) {
+						waiter = thread;
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
