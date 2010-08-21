@@ -8,30 +8,36 @@ import jsr166y.*;
 @SuppressWarnings("serial")
 public class MergeSort extends RecursiveAction {
 
-	int THRESHOLD = 1000;
-
 	final long[] array;
+	final long[] tmp;
 	final int lo;
 	final int hi;
+	final int threshold;
 
 	public MergeSort(long[] array) {
-		this(array, 0, array.length);
+		this(array, new long[array.length],0, array.length, array.length/(Runtime.getRuntime().availableProcessors())+1);
 	}
 	
-	public MergeSort(long[] array, int lo, int hi) {
+	public MergeSort(long[] array, int threshold) {
+		this(array, new long[array.length],0, array.length, threshold);
+	}
+	
+	public MergeSort(long[] array, long[] tmp, int lo, int hi, int thre) {
 		this.array = array;
+		this.tmp = tmp;
 		this.lo = lo;
 		this.hi = hi;
+		this.threshold = thre;
 	}
 
 	@Override
 	protected void compute() {
-		if (hi - lo < THRESHOLD)
-			sequentiallySort(array, lo, hi);
+		if (hi - lo < threshold)
+			quickSort(array, lo, hi);
 		else {
 			int mid = (lo + hi) >>> 1;
-			RecursiveAction m1 = new MergeSort(array, lo, mid);
-			RecursiveAction m2 = new MergeSort(array, mid, hi);
+			RecursiveAction m1 = new MergeSort(array, tmp, lo, mid, threshold);
+			RecursiveAction m2 = new MergeSort(array, tmp, mid+1, hi, threshold);
 
 			invokeAll(m1, m2);
 			merge(array, lo, mid, hi);
@@ -39,64 +45,55 @@ public class MergeSort extends RecursiveAction {
 
 	}
 
-	private void merge(long[] whole, int lo, int mid, int hi) {		
+	private void merge(long[] whole, int lo, int mid, int hi) {
+		// Code adapted from: http://blog.quibb.org/2010/03/jsr-166-the-java-forkjoin-framework/
 		
-		int leftIndex = 0;
-		int rightIndex = 0;
-		int wholeIndex = 0;
-
-		long[] left = Arrays.copyOf(whole, mid);
-		long[] right = Arrays.copyOfRange(whole, mid, hi);
-
-		// As long as neither the left nor the right array has
-		// been used up, keep taking the smaller of left[leftIndex]
-		// or right[rightIndex] and adding it at both[bothIndex].
-		while (leftIndex < left.length && rightIndex < right.length) {
-			if (left[leftIndex] < right[rightIndex]) {
-				whole[wholeIndex] = left[leftIndex];
-				leftIndex++;
-			} else {
-				whole[wholeIndex] = right[rightIndex];
-				rightIndex++;
+		if ( whole[mid] <= whole[mid+1] ) {
+			return;
+		}
+		System.arraycopy(whole, lo, tmp, lo, mid-lo+1);
+		
+		int i = lo, k=lo;
+		int j = mid+1;
+		
+		while (k < j && j < hi) {
+			if (tmp[i] <= whole[j]) {
+				whole[k++] = tmp[i++];
+			}  else {
+				whole[k++] = whole[j++];
 			}
-			wholeIndex++;
 		}
-
-		long[] rest;
-		int restIndex;
-		if (leftIndex >= left.length) {
-			// The left array has been use up...
-			rest = right;
-			restIndex = rightIndex;
-		} else {
-			// The right array has been used up...
-			rest = left;
-			restIndex = leftIndex;
-		}
-
-		// Copy the rest of whichever array (left or right) was
-		// not used up.
-		for (int i = restIndex; i < rest.length; i++) {
-			whole[wholeIndex] = rest[i];
-			wholeIndex++;
-		}
+		System.arraycopy(tmp, i, whole, k, j-k);
+		
+		
 	}
 
-	public static void sequentialSort(long[] array) {
-		Arrays.sort(array);
+	public void sequentialSort() {
+		sequentialSort(0, array.length);
 	}
 	
-	public void sequentiallySort(long[] array2, int lo2, int hi2) {
-		Arrays.sort(array2);
+	public void sequentialSort(int lo, int hi) {
+		if (hi - lo < threshold)
+			quickSort(array, lo, hi);
+		else {
+			int mid = (lo + hi) >>> 1;
+			sequentialSort(lo, mid);
+			sequentialSort(mid+1, hi);
+			merge(array, lo, mid, hi);
+		}
+	}
+	
+	public void quickSort(long[] array2, int lo2, int hi2) {
+		Arrays.sort(array2, lo2, hi2);
 	}
 	
 	public static void main(String[] args) {
 		ForkJoinPool pool = new ForkJoinPool();
-		long[] original = generateRandomArray(1000);
-		MergeSort t = new MergeSort(original, 0, original.length);
+		long[] original = generateRandomArray(100000);
+		MergeSort t = new MergeSort(original);
 		pool.invoke(t);
 		System.out.println("Sorted: " + checkArray(t.array));
-		System.out.println("Final result = " + Arrays.toString(t.array));
+		System.out.println("Array:" + Arrays.toString(t.array));
 	}
 	
 	public static boolean checkArray(long[] c) {
@@ -109,9 +106,9 @@ public class MergeSort extends RecursiveAction {
 	
 	public static long[] generateRandomArray(int size) {
 		Random r = new Random();
+		r.setSeed(1234567890);
 		long[] ar = new long[size];
 		for (int i=0; i<size; i++) {
-			if (i % 123 == 0) r.setSeed(1241431423453252L + i);
 			ar[i] = r.nextLong();
 		}
 		return ar;

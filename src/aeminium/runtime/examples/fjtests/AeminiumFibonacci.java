@@ -4,15 +4,16 @@ import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Factory;
-import aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciConstants;
 
-public class AeminiumFibonacci  implements FibonacciConstants{
+public class AeminiumFibonacci {
 
 	public static class FibBody implements Body {
 		public volatile int value;
+		private int threshold;
 		
-		FibBody(int n) {
+		public FibBody(int n, int threshold) {
 			this.value = n;
+			this.threshold = threshold;
 		}
 		
 		public int seqFib(int n) {
@@ -22,17 +23,17 @@ public class AeminiumFibonacci  implements FibonacciConstants{
 		
 		@Override
 		public void execute(Runtime rt, Task current) {
-			if ( value <= THRESHOLD  ) {
+			if ( value <= threshold  ) {
 				value = seqFib(value);
 			} else {
-				FibBody b1 = new FibBody(value - 1);
+				FibBody b1 = new FibBody(value - 1, threshold);
 				Task t1 = rt.createNonBlockingTask(b1, Runtime.NO_HINTS);
 				rt.schedule(t1, current, Runtime.NO_DEPS);
 
-				FibBody b2 = new FibBody(value - 2);
+				FibBody b2 = new FibBody(value - 2, threshold);
 				Task t2 = rt.createNonBlockingTask(b2, Runtime.NO_HINTS);
 				rt.schedule(t2, current, Runtime.NO_DEPS);
-				
+				 
 				t1.getResult();
 				t2.getResult();
 				value = b1.value + b2.value;
@@ -40,16 +41,18 @@ public class AeminiumFibonacci  implements FibonacciConstants{
 		}
 	}
 
-	public static Body createFibBody(final Runtime rt, final int n) {
-		return new  AeminiumFibonacci.FibBody(n);
+	public static Body createFibBody(final Runtime rt, final int n, int threshold) {
+		return new  AeminiumFibonacci.FibBody(n, threshold);
 	}
 
 	public static void main(String[] args) {
 		Runtime rt = Factory.getRuntime();
 		rt.init();
-
-		Task t1 = rt.createNonBlockingTask(new  AeminiumFibonacci.FibBody(MAX_CALC), Runtime.NO_HINTS);
+		FibBody body = new AeminiumFibonacci.FibBody(14, 5);
+		Task t1 = rt.createNonBlockingTask(body, Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		rt.shutdown();
+		
+		System.out.println("F(14) = " + body.value);
 	}
 }

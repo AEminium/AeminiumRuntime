@@ -7,12 +7,12 @@ public
 
 class Fibonacci extends RecursiveAction { 
 	public volatile int number;
-	// This value is the one used in Doug Lea's Paper on ForkJoin
-	private int THREASHOLD = 13;
-	private static int TARGET = 2;
+	private int threshold = 13;
 	
-	
-	public Fibonacci(int n) { number = n; }
+	public Fibonacci(int n, int thre) { 
+		number = n;
+		threshold = thre;
+	}
 
 	private int seqFib(int n) {
 		if (n <= 2) return 1;
@@ -23,11 +23,11 @@ class Fibonacci extends RecursiveAction {
 	protected void compute() {
 		int n = number;
 		if (n <= 1) { /* do nothing */ }
-		else if (n <= THREASHOLD) 
+		else if (n <= threshold) 
 			number = seqFib(n);
 		else {
-			Fibonacci f1 = new Fibonacci(n - 1);	
-			Fibonacci f2 = new Fibonacci(n - 2);
+			Fibonacci f1 = new Fibonacci(n - 1, threshold);	
+			Fibonacci f2 = new Fibonacci(n - 2, threshold);
 			invokeAll(f1,f2);
 			number = f1.number + f2.number; // compose
 		}
@@ -35,7 +35,7 @@ class Fibonacci extends RecursiveAction {
 	
 	public static void main(String[] args) {
 		ForkJoinPool pool = new ForkJoinPool();
-		Fibonacci t = new Fibonacci(TARGET);
+		Fibonacci t = new Fibonacci(14, 2);
 		pool.invoke(t);
 		System.out.println("Final result = " + t.number);
 	}
