@@ -63,7 +63,7 @@ public class LogCounter {
 	public static void cleanFiles(String path) throws IOException,
 			InterruptedException {
 		Process p;
-		p = java.lang.Runtime.getRuntime().exec("cd " + path + ".. && python restore.py");
+		p = java.lang.Runtime.getRuntime().exec("python " + path + "restore.py");
 		p.waitFor();
 	}
 	
