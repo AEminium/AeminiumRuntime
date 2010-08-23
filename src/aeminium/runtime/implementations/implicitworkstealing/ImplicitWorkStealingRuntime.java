@@ -1,7 +1,6 @@
 package aeminium.runtime.implementations.implicitworkstealing;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.File;
 import java.util.Collection;
 
 import aeminium.runtime.AtomicTask;
@@ -21,14 +20,20 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomic
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
+import aeminium.runtime.utils.graphviz.DiGraphViz;
+import aeminium.runtime.utils.graphviz.GraphViz;
+import aeminium.runtime.utils.graphviz.GraphViz.Color;
+import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
+import aeminium.runtime.utils.graphviz.GraphViz.RankDir;
 
 public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final ImplicitGraph graph;
 	public final BlockingWorkStealingScheduler scheduler;
 	protected final EventManager eventManager;
-	protected final boolean trace = Configuration.getProperty(getClass(), "trace", false);
-	protected StringBuilder tracerConnections;
-	protected StringBuilder tracerNodes;
+	protected DiGraphViz digraphviz;
+	protected final boolean enableGraphViz = Configuration.getProperty(getClass(), "enableGraphViz", false);
+	protected final int ranksep            = Configuration.getProperty(getClass(), "ranksep", 1);
+	protected final RankDir rankdir        = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
 	
 	public ImplicitWorkStealingRuntime() {
 		graph        = new ImplicitGraph(this);
@@ -41,9 +46,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		eventManager.init();
 		graph.init(eventManager);
 		scheduler.init(eventManager);
-		if ( trace ) {
-			tracerConnections = new StringBuilder();
-			tracerNodes       = new StringBuilder();
+		if ( enableGraphViz ) {
+			digraphviz = new DiGraphViz("AEminiumRT_DiGraphViz", ranksep, rankdir);
 		}
 	}
 	
@@ -53,19 +57,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		scheduler.shutdown();
 		eventManager.shutdown();
 		graph.shutdown();
-		if ( trace ) {
-			try {
-				FileWriter fw = new FileWriter("trace.dot");
-				fw.append("digraph AeminiumRT { \n");
-				fw.append("    rankdir=BT\n");
-				fw.append("    ranksep=1\n");
-				fw.append(tracerNodes.toString());
-				fw.append(tracerConnections.toString());
-				fw.append("}\n");
-				fw.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		if ( enableGraphViz ) {
+			digraphviz.dump(new File(digraphviz.getName()+".dot"));
+			digraphviz = null;
 		}
 	}
 	
@@ -95,15 +89,15 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	@Override
 	public final void schedule(Task task, Task parent, Collection<Task> deps)
 			throws RuntimeError {
-		if ( trace ) {
+		if ( enableGraphViz ) {
 			ImplicitTask itask = (ImplicitTask)task;
-			tracerNodes.append("    "+ task.hashCode()+" [label=\""+itask.body.toString()+"\"]\n");
+			digraphviz.addNode(itask.hashCode(), itask.body.toString());
 			if ( parent != NO_PARENT ) {
-				tracerConnections.append("    "+task.hashCode()+" -> "+parent.hashCode()+" [color=\"red\", style=\"dashed\"]\n");
+				digraphviz.addConnection(itask.hashCode(), parent.hashCode(), LineStyle.DASHED, Color.RED);
 			}
 			if ( deps != NO_DEPS ) {
 				for ( Task dep : deps) {
-					tracerConnections.append("    "+task.hashCode()+" -> "+dep.hashCode()+" [color=\"blue\"]\n");
+					digraphviz.addConnection(itask.hashCode(), dep.hashCode(), LineStyle.SOLID, Color.BLUE);
 				}
  			}
 		}
