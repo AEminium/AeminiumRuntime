@@ -1,4 +1,4 @@
-package aeminium.runtime.task.implicit;
+package aeminium.runtime.implementations.implicitworkstealing.task;
 
 public enum ImplicitTaskState {
 	UNSCHEDULED,

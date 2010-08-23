@@ -13,7 +13,7 @@ public interface Runtime {
 			return "NO_DEPS"; 
 		}
 	};
-	public final static short NO_HINTS = Hints.NO_HINTS;
+    public final static short NO_HINTS = Hints.NO_HINTS;
     public final static Task NO_PARENT = new Task() {
 		@Override
 		public void setResult(Object value) {
@@ -33,10 +33,11 @@ public interface Runtime {
 	
     /* initialize runtime */
     public void init() throws RuntimeError;
-    /* add a task along with it's parent and dependencies */
-    public void schedule(Task task, Task parent, Collection<Task> deps) throws RuntimeError;
     /* returns the current task object */
     public void shutdown() throws RuntimeError;
+    /* add a task along with it's parent and dependencies */
+    public void schedule(Task task, Task parent, Collection<Task> deps) throws RuntimeError;
+
 
     /* create a new data group object */
     public DataGroup createDataGroup() throws RuntimeError;

@@ -3,7 +3,7 @@ package aeminium.runtime.graph;
 import java.util.Collection;
 
 import aeminium.runtime.Task;
-import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventManager;
 import aeminium.runtime.task.RuntimeTask;
 
 public interface RuntimeGraph <T extends RuntimeTask> {

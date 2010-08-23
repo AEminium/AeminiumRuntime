@@ -5,14 +5,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
-import aeminium.runtime.events.RuntimeEventManager;
 import aeminium.runtime.implementations.AbstractRuntime;
 import aeminium.runtime.implementations.Configuration;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingQueue;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingScheduler;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkerThread;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.scheduler.AbstractScheduler;
-import aeminium.runtime.scheduler.workstealing.WorkStealingQueue;
-import aeminium.runtime.scheduler.workstealing.WorkStealingScheduler;
-import aeminium.runtime.scheduler.workstealing.WorkerThread;
-import aeminium.runtime.task.implicit.ImplicitTask;
 
 public final class PollingWorkStealingScheduler<T extends ImplicitTask> extends AbstractScheduler<T> implements WorkStealingScheduler<T> {
 	protected ConcurrentLinkedQueue<WorkerThread<T>> parkedThreads;

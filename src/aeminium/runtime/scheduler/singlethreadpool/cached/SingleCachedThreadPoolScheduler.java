@@ -3,7 +3,7 @@ package aeminium.runtime.scheduler.singlethreadpool.cached;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.scheduler.AeminiumThread;
 import aeminium.runtime.task.RuntimeTask;

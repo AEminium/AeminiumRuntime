@@ -1,6 +1,6 @@
 package aeminium.runtime.prioritizer;
 
-import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventManager;
 import aeminium.runtime.task.RuntimeTask;
 
 public interface RuntimePrioritizer<T extends RuntimeTask> {

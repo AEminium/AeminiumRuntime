@@ -1,4 +1,4 @@
-package aeminium.runtime.events;
+package aeminium.runtime.implementations.implicitworkstealing.events;
 
 public interface RuntimeEventListener {
 	public void onPolling();

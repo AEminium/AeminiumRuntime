@@ -3,10 +3,10 @@ package aeminium.runtime.prioritizer.lowestlevelfirst;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.prioritizer.AbstractPrioritizer;
 import aeminium.runtime.scheduler.RuntimeScheduler;
-import aeminium.runtime.task.implicit.ImplicitTask;
 
 @SuppressWarnings("unchecked")
 public class LowestLevelFirstPrioritizer<T extends ImplicitTask> extends AbstractPrioritizer<T> {

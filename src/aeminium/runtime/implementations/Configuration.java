@@ -5,8 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-import aeminium.runtime.implementations.Factory.RuntimeConfiguration;
-
 public final class Configuration {
 	protected static final String GLOBAL_PREFIX = "global.";
 	protected static int processorCount;
@@ -83,12 +81,5 @@ public final class Configuration {
 			return defaultValue;
 		}
 	}
-	
-	public final static class ListImplementations {
-		public static void main(String[] args) {
-			for ( RuntimeConfiguration<?> rc : Factory.getImplementations().values()  ) {
-				System.out.println(rc.getName());
-			}
-		}
-	}
+
 }

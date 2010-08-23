@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import aeminium.runtime.scheduler.workstealing.ConcurrentWorkStealingQueue;
-import aeminium.runtime.scheduler.workstealing.WorkStealingQueue;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.ConcurrentWorkStealingQueue;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingQueue;
 
 
 public class ConcurrentWorkStealingQueueTests {

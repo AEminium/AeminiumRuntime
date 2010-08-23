@@ -1,4 +1,4 @@
-package aeminium.runtime.scheduler.workstealing;
+package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
 import java.util.concurrent.atomic.AtomicReferenceArray;
 

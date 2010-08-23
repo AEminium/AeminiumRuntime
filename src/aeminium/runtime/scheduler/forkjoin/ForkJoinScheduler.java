@@ -2,7 +2,7 @@ package aeminium.runtime.scheduler.forkjoin;
 
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinTask;
-import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventManager;
 import aeminium.runtime.scheduler.AbstractScheduler;
 import aeminium.runtime.task.RuntimeTask;
 

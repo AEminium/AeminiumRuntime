@@ -1,22 +1,19 @@
-package aeminium.runtime.events;
+package aeminium.runtime.implementations.implicitworkstealing.events;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class EventManager implements RuntimeEventManager  {
+public final class EventManager  {
 	protected Collection<RuntimeEventListener> listeners;
 	
-	@Override
 	public final void init() {
 		listeners =  new ArrayList<RuntimeEventListener>();
 	}
 
-	@Override
 	public final void shutdown() {
 		listeners.clear();		
 	}
 	
-	@Override
 	public final void registerRuntimeEventListener(RuntimeEventListener listener) {
 		synchronized (listeners) {
 			listeners.add(listener);
@@ -24,7 +21,6 @@ public class EventManager implements RuntimeEventManager  {
 		
 	}
 
-	@Override
 	public final void signalPolling() {
 		synchronized (listeners) {
 			for (RuntimeEventListener listener : listeners) {
@@ -33,7 +29,6 @@ public class EventManager implements RuntimeEventManager  {
 		}
 	}
 
-	@Override
 	public final void signalThreadSuspend(Thread thread) {
 		synchronized (listeners) {
 			for (RuntimeEventListener listener : listeners) {
@@ -42,7 +37,6 @@ public class EventManager implements RuntimeEventManager  {
 		}
 	}
 
-	@Override
 	public final void signalNewThread(Thread thread) {
 		synchronized (listeners) {
 			for (RuntimeEventListener listener : listeners) {

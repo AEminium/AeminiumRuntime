@@ -1,4 +1,4 @@
-package aeminium.runtime.graph.implicit;
+package aeminium.runtime.implementations.implicitworkstealing.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,19 +7,17 @@ import java.util.List;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
-import aeminium.runtime.events.RuntimeEventListener;
-import aeminium.runtime.events.RuntimeEventManager;
-import aeminium.runtime.graph.AbstractGraph;
 import aeminium.runtime.implementations.Configuration;
-import aeminium.runtime.prioritizer.RuntimePrioritizer;
-import aeminium.runtime.scheduler.AeminiumThread;
-import aeminium.runtime.task.RuntimeTask;
-import aeminium.runtime.task.implicit.ImplicitTask;
-import aeminium.runtime.task.implicit.ImplicitTaskState;
+import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
+import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventListener;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkerThread;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
 
 
-@SuppressWarnings("unchecked")
-public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
+public class ImplicitGraph {
+	protected final ImplicitWorkStealingRuntime rt;
 	protected List<TaskCounter> taskCounterList;
 	protected ThreadLocal<TaskCounter> taskCounters;
 	protected final boolean checkForCycles;
@@ -36,8 +34,8 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		}
 		
 		public final int getTaskCount() {
-			if ( thread instanceof AeminiumThread ) {
-				return ((AeminiumThread)thread).taskCount;
+			if ( thread instanceof WorkerThread ) {
+				return ((WorkerThread)thread).taskCount;
 			} else {
 				return taskCount;
 			}
@@ -49,16 +47,14 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		}
 	}
 
-	public ImplicitGraph(RuntimePrioritizer<T> prioritizer) {
-		super(prioritizer);
+	public ImplicitGraph(ImplicitWorkStealingRuntime rt) {
+		this.rt = rt;
 		debug          = Configuration.getProperty(getClass(), "debug", false);
 		checkForCycles = Configuration.getProperty(getClass(), "checkForCycles", false);
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
 	}
 	
-	@Override
-	public final void init(RuntimeEventManager eventManager) {
-		super.init();
+	public final void init(EventManager eventManager) {
 		taskCounterList  = new ArrayList<TaskCounter>(); 
 		taskCounters     = new ThreadLocal<TaskCounter>(){
 			@Override
@@ -79,7 +75,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 					}
 				}				
 			}
-			
+
 			@Override
 			public final void onPolling() {
 				polling = true;
@@ -93,30 +89,27 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		});
 	}
 
-	@Override
 	public final void shutdown() {
 		taskCounterList = null;
 		taskCounters    = null;
 	}
 	
-	@Override
-	public final void addTask(T task, Task parent, Collection<T> deps) {
+	public final void addTask(ImplicitTask itask, Task parent, Collection<Task> deps) {
 
 		// update thread specific task counter
 		Thread thread = Thread.currentThread();
-		if ( thread instanceof AeminiumThread ) {
-			((AeminiumThread)thread).taskCount++;
+		if ( thread instanceof WorkerThread ) {
+			((WorkerThread)thread).taskCount++;
 		} else {
 			taskCounters.get().taskCount++;
 		}
 		
 		boolean schedule = false;
-		T itask = (T)task;
 		synchronized (itask) {			
 			// check for double scheduling
 			if ( itask.state != ImplicitTaskState.UNSCHEDULED) {
-				if ( thread instanceof AeminiumThread ) {
-					((AeminiumThread)thread).taskCount--;
+				if ( thread instanceof WorkerThread ) {
+					((WorkerThread)thread).taskCount--;
 				} else {
 					taskCounters.get().taskCount--;
 				}
@@ -125,18 +118,19 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 
 			// setup parent connection
 			if ( parent != Runtime.NO_PARENT ) {
-				T Tparent = (T) parent;
-				itask.parent = Tparent;
-				itask.level = (short) (Tparent.level + 1);
-				itask.parent.attachChild(itask);
+				ImplicitTask iparent = (ImplicitTask) parent;
+				itask.parent = iparent;
+				itask.level = (short) (iparent.level + 1);
+				itask.parent.attachChild(rt, itask);
 			}
 
 			// setup dependencies
 			itask.state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
-				for ( RuntimeTask t : deps) {
-					count += ((ImplicitTask) t).addDependent(itask);						
+				for ( Task t : deps) {
+					ImplicitTask it = (ImplicitTask)t;
+					count += it.addDependent(itask);						
 				}
 				itask.depCount += count;
 				if ( itask.depCount == 0 ) {
@@ -151,7 +145,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		
 		// schedule task if it's marked as running
 		if (schedule) {
-			prioritizer.scheduleTask(itask);	
+			rt.scheduler.scheduleTask(itask);
 		}
 
 		if ( checkForCycles ) {
@@ -159,11 +153,10 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		}
 	}
 
-	@Override
-	public final void taskCompleted(T task) {
+	public final void taskCompleted(ImplicitTask task) {
 		Thread thread = Thread.currentThread();
-		if ( thread instanceof AeminiumThread ) {
-			((AeminiumThread)thread).taskCount--;
+		if ( thread instanceof WorkerThread ) {
+			((WorkerThread)thread).taskCount--;
 		} else {
 			taskCounters.get().taskCount--;
 		}
@@ -176,8 +169,7 @@ public class ImplicitGraph<T extends ImplicitTask> extends AbstractGraph<T> {
 		}
 		return count == 0;
 	}
-	
-	@Override
+
 	public final void waitToEmpty() {
 		synchronized (taskCounterList) {
 			boolean empty = false;

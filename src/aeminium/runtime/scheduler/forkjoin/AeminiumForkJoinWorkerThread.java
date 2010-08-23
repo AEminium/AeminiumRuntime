@@ -3,7 +3,7 @@ package aeminium.runtime.scheduler.forkjoin;
 import jsr166y.ForkJoinPool;
 import jsr166y.ForkJoinWorkerThread;
 import jsr166y.ForkJoinPool.ForkJoinWorkerThreadFactory;
-import aeminium.runtime.events.RuntimeEventManager;
+import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventManager;
 
 public class AeminiumForkJoinWorkerThread extends ForkJoinWorkerThread {
 	

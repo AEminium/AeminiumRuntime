@@ -1,4 +1,4 @@
-package aeminium.runtime.scheduler.workstealing;
+package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
 public interface WorkStealingQueue<E> {
 	/**
@@ -24,7 +24,7 @@ public interface WorkStealingQueue<E> {
 	 */
 	public E peek();
 	/**
-	 * Tries to steal a task from the of the queue. If successfull the
+	 * Tries to steal a task from the of the queue. If successful the
 	 * method returns the stolen task otherwise null;
 	 * 
 	 * @return
