@@ -32,6 +32,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
 	protected final boolean enableGraphViz = Configuration.getProperty(getClass(), "enableGraphViz", false);
+	protected final String graphVizName    = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep            = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir        = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
 	
@@ -47,7 +48,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		graph.init(eventManager);
 		scheduler.init(eventManager);
 		if ( enableGraphViz ) {
-			digraphviz = new DiGraphViz("AEminiumRT_DiGraphViz", ranksep, rankdir);
+			digraphviz = new DiGraphViz(graphVizName, ranksep, rankdir);
 		}
 	}
 	

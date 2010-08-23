@@ -58,7 +58,7 @@ public final class Configuration {
 	public final static String getProperty(Class<?> klazz, String key, String defaultValue) {
 		String value = properties.getProperty(klazz.getSimpleName() + "." + key);
 		if ( value != null ) {
-			return value;
+			return value.trim();
 		} else {
 			return defaultValue;
 		}
