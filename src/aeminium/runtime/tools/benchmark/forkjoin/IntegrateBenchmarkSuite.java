@@ -82,7 +82,7 @@ public class IntegrateBenchmarkSuite {
 	
 	public static void main(String[] args) {
 		IntegrateBenchmarkSuite suite = new IntegrateBenchmarkSuite();
-		new BenchmarkExecutor(suite.getTests()).run();
+		new BenchmarkExecutor(suite.getTests()).run(args);
 	}
 	
 	public Benchmark[] getTests() {

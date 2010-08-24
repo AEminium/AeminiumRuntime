@@ -86,7 +86,7 @@ public class MergeSortBenchmarkSuite {
 	
 	public static void main(String[] args) {
 		MergeSortBenchmarkSuite suite = new MergeSortBenchmarkSuite();
-		new BenchmarkExecutor(suite.getTests()).run();
+		new BenchmarkExecutor(suite.getTests()).run(args);
 	}
 	
 	public Benchmark[] getTests() {

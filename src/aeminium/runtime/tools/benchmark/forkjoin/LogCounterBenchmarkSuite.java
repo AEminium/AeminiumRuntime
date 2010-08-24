@@ -89,7 +89,7 @@ public class LogCounterBenchmarkSuite {
 	
 	public static void main(String[] args) {
 		LogCounterBenchmarkSuite suite = new LogCounterBenchmarkSuite();
-		new BenchmarkExecutor(suite.getTests()).run();
+		new BenchmarkExecutor(suite.getTests()).run(args);
 	}
 	
 	public Benchmark[] getTests() {

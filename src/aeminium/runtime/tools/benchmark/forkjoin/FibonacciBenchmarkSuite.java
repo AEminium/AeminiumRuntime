@@ -88,7 +88,7 @@ public class FibonacciBenchmarkSuite {
 	
 	public static void main(String[] args) {
 		FibonacciBenchmarkSuite suite = new FibonacciBenchmarkSuite();
-		new BenchmarkExecutor(suite.getTests()).run();
+		new BenchmarkExecutor(suite.getTests()).run(args);
 	}
 	
 	public Benchmark[] getTests() {
