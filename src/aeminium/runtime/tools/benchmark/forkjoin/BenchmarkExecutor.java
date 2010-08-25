@@ -20,7 +20,11 @@ public class BenchmarkExecutor {
 				int i = Integer.parseInt(args[0]);
 				run(i);
 			} catch (NumberFormatException e) {
-				run(args[0]);
+				StringBuilder builder = new StringBuilder(args[0]);
+				for (int i=1;i<args.length;i++) {
+					builder.append(" ").append(args[i]);
+				}
+				run(builder.toString());
 			}
 		}
 	}
