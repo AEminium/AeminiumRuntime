@@ -8,8 +8,8 @@ import java.io.OutputStream;
 
 public class DiGraphViz extends GraphViz {
 	protected final String name;
-	protected final StringBuilder nodes;
-	protected final StringBuilder connections;
+	protected final StringBuffer nodes;
+	protected final StringBuffer connections;
 	protected final String EOL = System.getProperty("line.separator");
 	protected final int ranksep;
 	protected final RankDir rankdir;
@@ -18,8 +18,8 @@ public class DiGraphViz extends GraphViz {
 		this.name    = name;
 		this.ranksep = ranksep;
 		this.rankdir = rankdir;
-		nodes        = new StringBuilder();
-		connections  = new StringBuilder();
+		nodes        = new StringBuffer();
+		connections  = new StringBuffer();
 	}
 	
 	public String getName() {
