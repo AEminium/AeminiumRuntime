@@ -131,10 +131,9 @@ public final class BlockingWorkStealingScheduler {
 	public final void signalWork(WorkerThread thread) {
 		// TODO: need to fix that to wake up thread waiting for objects to complete
 		LockSupport.unpark(thread);
-		WorkerThread threadParked = parkedThreads.poll();
-		if ( threadParked != null ) {
-			LockSupport.unpark(threadParked);
-		}
+		//WorkerThread threadParked = parkedThreads.poll();
+		WorkerThread next = threads[(thread.index+1)%threads.length];
+		LockSupport.unpark(next);
 	}
 	
 	public final void signalWork() {
@@ -157,12 +156,15 @@ public final class BlockingWorkStealingScheduler {
 				return task;
 			}
 		}
-		for ( WorkerThread t : threads ) {
-			ImplicitTask task = t.scan();
+		
+		for ( int i = 0;  i < threads.length ; i++ ) {
+			WorkerThread next = threads[(thread.index+threads.length-i)%threads.length];
+			ImplicitTask task = next.scan();
 			if ( task != null ) {
 				return task;
 			}
 		}
+		
 		return null;
 	}
 }
