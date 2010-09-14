@@ -48,11 +48,11 @@ public class AeminiumFibonacci {
 	public static void main(String[] args) {
 		Runtime rt = Factory.getRuntime();
 		rt.init();
-		FibBody body = new AeminiumFibonacci.FibBody(14, 5);
+		FibBody body = new AeminiumFibonacci.FibBody(6, 1);
 		Task t1 = rt.createNonBlockingTask(body, Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		rt.shutdown();
 		
-		System.out.println("F(14) = " + body.value);
+		System.out.println("F(6) = " + body.value);
 	}
 }
