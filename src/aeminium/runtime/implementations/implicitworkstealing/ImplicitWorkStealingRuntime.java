@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +31,6 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomic
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
-import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
 import aeminium.runtime.utils.graphviz.DiGraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz.Color;
@@ -168,8 +168,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		public <T> List<Future<T>> invokeAll(
 				Collection<? extends Callable<T>> tasks, long timeout,
 				TimeUnit unit) throws InterruptedException {
-			// TODO Auto-generated method stub
-			return invokeAll(tasks);
+			List<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
+			for ( Callable<T> c : tasks) {
+				futures.add(submit(c, timeout, unit));
+			}
+			return futures;
 		}
 
 		@Override
@@ -188,10 +191,25 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		}
 
 		@Override
-		public <T> T invokeAny(Collection<? extends Callable<T>> tasks,
-				long timeout, TimeUnit unit) throws InterruptedException,
-				ExecutionException, TimeoutException {
-			// TODO Auto-generated method stub
+		public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+		        throws InterruptedException, ExecutionException, TimeoutException {
+			final long start = System.nanoTime();
+			final Iterator<?> it = tasks.iterator();
+			Callable<T> current = null;
+			while ( System.nanoTime() < start + unit.toNanos(timeout) ) {
+				if ( current == null && it.hasNext() ) {
+					current = (Callable<T>)it.next();
+				} else if ( !it.hasNext() ) {
+					break;
+				}
+				Future<T> f = submit(current);
+				T result = f.get();
+				if ( result != null && !(result instanceof Exception)) {
+					return result;
+				} else {
+					current = null;
+				}
+			}
 			return invokeAny(tasks);
 		}
 
@@ -213,12 +231,23 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		@Override
 		public List<Runnable> shutdownNow() {
 			shutdown();
-			return Collections.EMPTY_LIST;
+			return (List<Runnable>)Collections.EMPTY_LIST;
 		}
 
+		public <T> Future<T> submit(Callable<T> task, long timeout, TimeUnit unit) {
+			@SuppressWarnings("unchecked")
+			final RunnableFutureTask rft = new RunnableFutureTask((Callable<Object>)task);
+			ImplicitTask aetask = (ImplicitTask) rt.createBlockingTask(rft, NO_HINTS);
+			rft.setTask(aetask);
+			rft.setTimeOut(System.nanoTime()+unit.toNanos(timeout));
+			rt.schedule(aetask, NO_PARENT, NO_DEPS);
+			return (Future<T>)rft;
+		}
+		
 		@Override
 		public <T> Future<T> submit(Callable<T> task) {
-			RunnableFutureTask rft = new RunnableFutureTask((Callable<Object>)task);
+			@SuppressWarnings("unchecked")
+			final RunnableFutureTask rft = new RunnableFutureTask((Callable<Object>)task);
 			ImplicitTask aetask = (ImplicitTask) rt.createBlockingTask(rft, NO_HINTS);
 			rft.setTask(aetask);
 			rt.schedule(aetask, NO_PARENT, NO_DEPS);
@@ -251,26 +280,20 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		protected class RunnableFutureTask implements RunnableFuture<Object>, Body{
 			private final Callable<Object> body;
 			private ImplicitTask task;
+			private boolean cancelled = false;
+			private long timeout = 0;
 			
 			RunnableFutureTask(final Callable<Object> body) {
 				super();
 				this.body = body;
 			}
 			
-			RunnableFutureTask(final Runnable body) {
-				super();
-				this.body = new Callable<Object>() {
-					@Override
-					public Object call() throws Exception {
-						body.run();
-						return null;
-					}
-					
-				};
-			}
-			
 			public void setTask(ImplicitTask task) {
 				this.task = task;
+			}
+			
+			public void setTimeOut(long timeout) {
+				this.timeout = timeout;
 			}
 			
 			@Override
@@ -280,28 +303,44 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 			@Override
 			public boolean cancel(boolean mayInterruptIfRunning) {
-				return ImplicitWorkStealingExecutorService.this.rt.scheduler.cancelTask(task);
+				cancelled = ImplicitWorkStealingExecutorService.this.rt.scheduler.cancelTask(task);
+				return cancelled;
 			}
 
 			@Override
 			public Object get() throws InterruptedException, ExecutionException {
-				return task.getResult();
+				Object result = task.getResult();
+				if ( result instanceof Exception ) {
+					throw new ExecutionException((Exception)result);
+				} else {
+					return result;
+				}
 			}
 
 			@Override
-			public Object get(long timeout, TimeUnit unit)
-					throws InterruptedException, ExecutionException, TimeoutException {
+			public Object get(long timeout, TimeUnit unit) 	throws InterruptedException, ExecutionException, TimeoutException {
+				final long start = System.nanoTime();
+				while ( System.nanoTime() < start + unit.toNanos(timeout) ) {
+					if ( !task.isCompleted() ) {
+						// TODO: make step depending
+						Thread.sleep(1);
+					}
+				}
 				if ( task.isCompleted() ) {
-					return task.getResult();
+					Object result =  task.getResult();
+					if ( result instanceof Exception ) {
+						throw new ExecutionException((Exception)result);
+					} else {
+						return result;
+					}
 				} else {
-					throw new InterruptedException("Not completed yet, try again.");
+					throw new TimeoutException();
 				}
 			}
 
 			@Override
 			public boolean isCancelled() {
-				// TODO Auto-generated method stub
-				return task.state == ImplicitTaskState.COMPLETED;
+				return cancelled;
 			}
 
 			@Override
@@ -311,7 +350,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 			@Override
 			public void execute(Runtime rt, Task current) throws Exception {
-				current.setResult(body.call());
+				if ( timeout < System.nanoTime() ) {
+					current.setResult(body.call());
+				} else {
+					cancelled = true;
+				}
 			}
 			
 		}

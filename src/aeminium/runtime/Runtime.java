@@ -49,5 +49,6 @@ public interface Runtime {
     /* create a new Atomic task */
     public AtomicTask createAtomicTask(Body b, DataGroup g, short hints) throws RuntimeError;
 
+    /* return executor service abstraction for this runtime object */
     public ExecutorService getExecutorService();
 }

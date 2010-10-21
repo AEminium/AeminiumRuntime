@@ -1,6 +1,7 @@
 package aeminium.runtime.tests;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 
@@ -106,5 +109,65 @@ public class ExecutorServiceTests extends BaseTest {
 		
 		rt.shutdown();
 		
+	}
+
+	@Test
+	public void timeoutTest1() {
+		final String DATA = "Te$t$tring";
+		final Runtime rt = getRuntime();
+		rt.init();
+		ExecutorService es = rt.getExecutorService();
+		
+		Future<String> f = es.submit(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				Thread.sleep(300);
+				return DATA;
+			}
+		});
+		
+		try {
+			String result = f.get(100, TimeUnit.MILLISECONDS);
+			fail();
+		} catch (InterruptedException e) {
+			assertTrue(true);
+		} catch (ExecutionException e) {
+			assertTrue(  e.getCause() instanceof InterruptedException );
+		} catch (TimeoutException e) {
+			assertTrue(true);
+		}
+		
+		
+		rt.shutdown();
+	}
+	
+	@Test
+	public void timeoutTest2() {
+		final String DATA = "Te$t$tring";
+		final Runtime rt = getRuntime();
+		rt.init();
+		ExecutorService es = rt.getExecutorService();
+		
+		Future<String> f = es.submit(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				Thread.sleep(100);
+				return DATA;
+			}
+		});
+		
+		try {
+			String result = f.get(300, TimeUnit.MILLISECONDS);
+			assertTrue(result.equals(DATA));
+		} catch (InterruptedException e) {
+			assertTrue(true);
+		} catch (ExecutionException e) {
+			assertTrue(  e.getCause() instanceof InterruptedException );
+		} catch (TimeoutException e) {
+			fail();
+		}
+		
+		
+		rt.shutdown();
 	}
 }
