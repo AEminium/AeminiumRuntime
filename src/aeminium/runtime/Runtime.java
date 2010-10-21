@@ -2,6 +2,7 @@ package aeminium.runtime;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 public interface Runtime {
     /* global constants used for the */
@@ -47,4 +48,6 @@ public interface Runtime {
     public NonBlockingTask createNonBlockingTask(Body b, short hints) throws RuntimeError;
     /* create a new Atomic task */
     public AtomicTask createAtomicTask(Body b, DataGroup g, short hints) throws RuntimeError;
+
+    public ExecutorService getExecutorService();
 }

@@ -167,4 +167,12 @@ public final class BlockingWorkStealingScheduler {
 		
 		return null;
 	}
+
+	public boolean cancelTask(ImplicitTask task) {
+		boolean result = submissionQueue.remove(task);
+		if ( result ) {
+			task.taskFinished(rt);
+		}
+		return result;
+	}
 }
