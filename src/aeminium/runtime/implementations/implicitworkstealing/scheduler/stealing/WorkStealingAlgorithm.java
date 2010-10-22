@@ -25,6 +25,8 @@ public interface WorkStealingAlgorithm {
 	 * the new item. If no thread should be unpacked (e.g., all threads are 
 	 * running). 
 	 * 
+	 * This method is part of the CRITICAL PATH.
+	 * 
 	 * @return The thread that should be woken up or null.
 	 */
 	public WorkerThread singalWorkInSubmissionQueue();
@@ -33,6 +35,8 @@ public interface WorkStealingAlgorithm {
 	 * This method is called when a new item has been added into the local 
 	 * queue of a worker thread. The method should determine which thread 
 	 * should be unparked/notified about this event.
+	 * 
+	 * This method is part of the CRITICAL PATH.
 	 * 
 	 * 
 	 * @param current The thread which enqueued the new item into its
