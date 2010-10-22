@@ -68,6 +68,14 @@ public final class WorkerThread extends Thread {
 		return null;
 	}
 	
+	public final int getLocalQueueSize() {
+		WorkStealingQueue<ImplicitTask> queue = taskQueue;
+		if ( queue != null ) {
+			return queue.size();
+		}
+		return 0;
+	}
+	
 	public final void progressToCompletion(ImplicitTask toComplete) {
 		int pollCounter = pollingCount;
 		while ( !toComplete.isCompleted() ) {

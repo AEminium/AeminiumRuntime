@@ -8,6 +8,8 @@ import java.util.concurrent.locks.LockSupport;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.SequentialReverseScan;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.WorkStealingAlgorithm;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public final class BlockingWorkStealingScheduler {
@@ -18,8 +20,9 @@ public final class BlockingWorkStealingScheduler {
 	protected AtomicInteger counter;
 	protected Queue<ImplicitTask> submissionQueue;
 	protected final int maxParallelism;
+	protected WorkStealingAlgorithm wsa;
 	protected static final boolean oneTaskPerLevel = Configuration.getProperty(BlockingWorkStealingScheduler.class, "oneTaskPerLevel", true);
-	protected static final int maxQueueLength = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
+	protected static final int maxQueueLength      = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
 	
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt        = rt;
@@ -37,12 +40,16 @@ public final class BlockingWorkStealingScheduler {
 		this.threads         = new WorkerThread[maxParallelism];
 		this.counter         = new AtomicInteger(threads.length);
 		this.submissionQueue = new ConcurrentLinkedQueue<ImplicitTask>();
-				
+		this.wsa             = new SequentialReverseScan();
+		
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
 			threads[i] = new WorkerThread(rt, i);
 		}
-		
+
+		// setup WorkStealingAlgorithm
+		wsa.init(threads, submissionQueue);
+
 		// start and register threads threads
 		for ( WorkerThread thread : threads ) {
 			thread.start();
@@ -59,6 +66,8 @@ public final class BlockingWorkStealingScheduler {
 		}
 
 		// cleanup
+		wsa.shutdown();
+		wsa             = null;
 		threads         = null;
 		parkedThreads   = null;
 		counter         = null;
@@ -115,29 +124,15 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 
-	protected final WorkerThread getNextThread() {
-		Thread thread = Thread.currentThread(); 
-		if ( thread instanceof WorkerThread ) {
-			return (WorkerThread) thread;
-		} else {
-			thread = parkedThreads.poll();
-			if ( thread == null ) {
-				thread = threads[0];
-			}
-		}
-		return (WorkerThread) thread;
-	}
-
 	public final void signalWork(WorkerThread thread) {
 		// TODO: need to fix that to wake up thread waiting for objects to complete
 		LockSupport.unpark(thread);
-		//WorkerThread threadParked = parkedThreads.poll();
-		WorkerThread next = threads[(thread.index+1)%threads.length];
+		WorkerThread next = wsa.singalWorkInLocalQueue(thread);
 		LockSupport.unpark(next);
 	}
 	
 	public final void signalWork() {
-		WorkerThread threadParked = parkedThreads.poll();
+		WorkerThread threadParked = wsa.singalWorkInSubmissionQueue();
 		if ( threadParked != null ) {
 			LockSupport.unpark(threadParked);
 		}
@@ -145,27 +140,12 @@ public final class BlockingWorkStealingScheduler {
 	
 	public final void parkThread(WorkerThread thread) {
 		eventManager.signalThreadSuspend(thread);
-		parkedThreads.add(thread);
+		wsa.threadGoingToPark(thread);
 		LockSupport.park(thread);
 	}
 	
 	public final ImplicitTask scanQueues(WorkerThread thread) {
-		if ( submissionQueue != null && !submissionQueue.isEmpty() ) {
-			ImplicitTask task = submissionQueue.poll();
-			if ( task != null ) {
-				return task;
-			}
-		}
-		
-		for ( int i = 0;  i < threads.length ; i++ ) {
-			WorkerThread next = threads[(thread.index+threads.length-i)%threads.length];
-			ImplicitTask task = next.scan();
-			if ( task != null ) {
-				return task;
-			}
-		}
-		
-		return null;
+		return wsa.stealWork(thread);
 	}
 
 	public boolean cancelTask(ImplicitTask task) {
