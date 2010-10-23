@@ -5,10 +5,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
-import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.SequentialReverseScan;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.WorkStealingAlgorithm;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
@@ -23,6 +23,7 @@ public final class BlockingWorkStealingScheduler {
 	protected WorkStealingAlgorithm wsa;
 	protected static final boolean oneTaskPerLevel = Configuration.getProperty(BlockingWorkStealingScheduler.class, "oneTaskPerLevel", true);
 	protected static final int maxQueueLength      = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
+	protected static final int unparkInterval      = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 0);
 	
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt        = rt;
@@ -40,7 +41,7 @@ public final class BlockingWorkStealingScheduler {
 		this.threads         = new WorkerThread[maxParallelism];
 		this.counter         = new AtomicInteger(threads.length);
 		this.submissionQueue = new ConcurrentLinkedQueue<ImplicitTask>();
-		this.wsa             = new SequentialReverseScan();
+		this.wsa             = loadWorkStealingAlgorithm(Configuration.getProperty(BlockingWorkStealingScheduler.class, "workStealingAlgorithm", "SequentialReverseScan"));
 		
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
@@ -74,6 +75,25 @@ public final class BlockingWorkStealingScheduler {
 		submissionQueue = null;
 	}
 
+	protected WorkStealingAlgorithm loadWorkStealingAlgorithm(String name) {
+		WorkStealingAlgorithm wsa = null;
+		
+		Class<?> wsaClass = null;;
+		try {
+			wsaClass = getClass().getClassLoader().loadClass("aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing."+name);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeError("Cannot load work stealing algorithm class : aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing." + name);
+		}
+		
+		try {
+			wsa = (WorkStealingAlgorithm)wsaClass.newInstance();
+		} catch (Exception e) {
+			throw new RuntimeError("Cannot load work stealing algorithm class : aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing." + name);
+		}
+		
+		return wsa;
+	}
+	
 	public final void registerThread(WorkerThread thread) {
 		eventManager.signalNewThread(thread);
 	}
@@ -141,7 +161,11 @@ public final class BlockingWorkStealingScheduler {
 	public final void parkThread(WorkerThread thread) {
 		eventManager.signalThreadSuspend(thread);
 		wsa.threadGoingToPark(thread);
-		LockSupport.park(thread);
+		if ( 0 < unparkInterval ) {
+			LockSupport.parkNanos(thread, unparkInterval);
+		} else {
+			LockSupport.park(thread);
+		}
 	}
 	
 	public final ImplicitTask scanQueues(WorkerThread thread) {
