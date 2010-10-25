@@ -31,6 +31,8 @@ public class BenchmarkExecutor {
 
 	private void run(Benchmark test) {
 		long cold = test.run();
+		System.gc();
+		try { Thread.sleep(1000); } catch (Exception e){}
 		long warm = test.run();
 		System.out.println(String.format("%s: %d %d", test.getName(), cold,
 				warm));
