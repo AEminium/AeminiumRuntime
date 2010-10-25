@@ -53,6 +53,10 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		}
 		return value;
 	}
+	
+	public final E peekSteeling() {
+		return buffer.get(base);
+	}
 
 	public final void push(E e) {
 		if ( isFull() ) {

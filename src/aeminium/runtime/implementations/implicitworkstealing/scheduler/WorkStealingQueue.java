@@ -31,6 +31,13 @@ public interface WorkStealingQueue<E> {
 	 */
 	public E tryStealing();
 	/**
+	 * Tries to peek the task that could be stolen. The returned task is 
+	 * not removed from the queue.
+	 * 
+	 * @return
+	 */
+	public E peekSteeling();
+	/**
 	 * Checks whether the queue is empty.
 	 * 
 	 * @return

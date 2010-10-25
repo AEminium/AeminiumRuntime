@@ -58,7 +58,7 @@ public class StealFromMaxQueue implements WorkStealingAlgorithm {
 			}
 		}
 		
-		return richest.scan();
+		return richest.tryStealingTask();
 	}
 
 	@Override

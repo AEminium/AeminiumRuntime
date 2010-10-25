@@ -60,10 +60,18 @@ public final class WorkerThread extends Thread {
 		taskQueue = null;
 	}
 
-	public final ImplicitTask scan() {
+	public final ImplicitTask tryStealingTask() {
 		WorkStealingQueue<ImplicitTask> queue = taskQueue;
 		if ( queue != null ) {
 			return queue.tryStealing();
+		}
+		return null;
+	}
+	
+	public final ImplicitTask peekStealingTask() {
+		WorkStealingQueue<ImplicitTask> queue = taskQueue;
+		if ( queue != null ) {
+			return queue.peekSteeling();
 		}
 		return null;
 	}

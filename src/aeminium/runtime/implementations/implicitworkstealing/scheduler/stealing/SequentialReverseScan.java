@@ -49,7 +49,7 @@ public final class SequentialReverseScan implements WorkStealingAlgorithm {
 		
 		for ( int i = 0;  i < threads.length ; i++ ) {
 			WorkerThread next = threads[(current.index+threads.length-i)%threads.length];
-			ImplicitTask task = next.scan();
+			ImplicitTask task = next.tryStealingTask();
 			if ( task != null ) {
 				return task;
 			}
