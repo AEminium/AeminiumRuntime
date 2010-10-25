@@ -61,9 +61,25 @@
             </batchtest>
         </junit>
     </target>
+
+    <target name="jar">
+      <jar destfile="AeminiumRT.jar">
+       <fileset dir="bin/aeminium"/>
+       <zipfileset includes="**/*.class" src="lib/jsr166y.jar"/>
+       <zipfileset includes="**/*.class" src="lib/junit-4.8.2.jar"/>
+       <manifest>
+         <!-- Who is building this jar? -->
+         <attribute name="Built-By" value="${user.name}"/>
+         <!-- Information about the program itself -->
+         <attribute name="Implementation-Vendor" value="Aeminium Project"/>
+         <attribute name="Implementation-Title" value="Aeminium Runtime"/>
+       </manifest>
+      </jar>
+    </target>
     
     <target name="clean">
         <delete verbose="yes" dir="bin/aeminium">
         </delete>
+        <delete verbose="yes" file="AeminiumRT.jar"/>
     </target>
 </project>
