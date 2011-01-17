@@ -29,7 +29,7 @@ public class Deadlocks extends BaseTest {
 		rt.shutdown();
 	}
 
-	@Test(expected=CyclicDependencyError.class, timeout=2000)
+	@Test(expected=CyclicDependencyError.class, timeout=200000)
 	public void testSelfDeadlock() {
 		Runtime rt = getRuntime();
 		rt.init();

@@ -7,10 +7,11 @@ import org.junit.Test;
 import aeminium.runtime.Body;
 import aeminium.runtime.DataGroup;
 import aeminium.runtime.Runtime;
+import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 
 public class AtomicTaskDeadLock  extends BaseTest {
-	@Test(expected=Exception.class, timeout=2000)
+	@Test(expected=RuntimeError.class, timeout=2000)
 	public void SUPPOSED_TO_FAIL___createAtomicTaskDeadLock() {
 		Runtime rt = getRuntime();
 		rt.init();
