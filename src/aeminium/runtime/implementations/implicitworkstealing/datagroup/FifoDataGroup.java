@@ -36,17 +36,20 @@ public final class FifoDataGroup implements DataGroup {
 	}
 
 	public final void unlock(ImplicitWorkStealingRuntime rt) {
+		ImplicitTask head = null;
 		synchronized (this) {
 			locked = false;
 			owner = null;
 			if (!waitQueue.isEmpty()) {
-				ImplicitTask head = waitQueue.remove(0);
+				head = waitQueue.remove(0);
 				if ( checkForDeadlocks ) {
 					ImplicitAtomicTask atomicParent = ((ImplicitAtomicTask)head).getAtomicParent();
 					atomicParent.addDataGroupDependecy(this);
-				}
-				rt.scheduler.scheduleTask(head);
+				}				
 			}
+		}
+		if ( head != null ) {
+			rt.scheduler.scheduleTask(head);
 		}
 	}
 
