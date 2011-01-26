@@ -127,6 +127,7 @@ public class ExecutorServiceTests extends BaseTest {
 		});
 		
 		try {
+			@SuppressWarnings("unused")
 			String result = f.get(100, TimeUnit.MILLISECONDS);
 			fail();
 		} catch (InterruptedException e) {

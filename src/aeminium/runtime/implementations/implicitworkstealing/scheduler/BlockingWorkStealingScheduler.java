@@ -10,6 +10,7 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.WorkStealingAlgorithm;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public final class BlockingWorkStealingScheduler {
@@ -21,9 +22,11 @@ public final class BlockingWorkStealingScheduler {
 	protected Queue<ImplicitTask> submissionQueue;
 	protected final int maxParallelism;
 	protected WorkStealingAlgorithm wsa;
-	protected static final boolean oneTaskPerLevel = Configuration.getProperty(BlockingWorkStealingScheduler.class, "oneTaskPerLevel", true);
-	protected static final int maxQueueLength      = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
-	protected static final int unparkInterval      = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 0);
+	protected BlockingThreadPool blockingThreadPool;
+	protected static final boolean oneTaskPerLevel       = Configuration.getProperty(BlockingWorkStealingScheduler.class, "oneTaskPerLevel", true);
+	protected static final boolean useBlockingThreadPool = Configuration.getProperty(BlockingWorkStealingScheduler.class, "useBlockingThreadPool", false);
+	protected static final int maxQueueLength            = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
+	protected static final int unparkInterval            = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 0);
 	
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt        = rt;
@@ -42,6 +45,10 @@ public final class BlockingWorkStealingScheduler {
 		this.counter         = new AtomicInteger(threads.length);
 		this.submissionQueue = new ConcurrentLinkedQueue<ImplicitTask>();
 		this.wsa             = loadWorkStealingAlgorithm(Configuration.getProperty(BlockingWorkStealingScheduler.class, "workStealingAlgorithm", "SequentialReverseScan"));
+		if ( useBlockingThreadPool ) {
+			blockingThreadPool = new BlockingThreadPool();
+			blockingThreadPool.init(rt, eventManager);
+		}
 		
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
@@ -73,6 +80,9 @@ public final class BlockingWorkStealingScheduler {
 		parkedThreads   = null;
 		counter         = null;
 		submissionQueue = null;
+		if ( useBlockingThreadPool ) {
+			blockingThreadPool.shutdown();
+		}
 	}
 
 	protected WorkStealingAlgorithm loadWorkStealingAlgorithm(String name) {
@@ -103,6 +113,10 @@ public final class BlockingWorkStealingScheduler {
 	}
 
 	public final void scheduleTask(ImplicitTask task) {
+		if ( task instanceof ImplicitBlockingTask && useBlockingThreadPool ) {
+			blockingThreadPool.submitTask((ImplicitBlockingTask) task);
+			return;
+		}
 		if ( 0 < maxQueueLength) {
 			Thread thread = Thread.currentThread();
 			if ( thread instanceof WorkerThread) {
