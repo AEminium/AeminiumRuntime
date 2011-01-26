@@ -38,14 +38,15 @@ public class DiGraphViz extends GraphViz {
 	}
 	
 	public void addConnection(int from, int to) {
-				
+		addConnection(from, to, DEFAULT_LINE_STYLE, DEFAULT_COLOR, "");	
 	}
 	
 	public void addConnection(int from,
 							  int to,
 							  LineStyle lineStyle,
-							  Color color) {
-		connections.append(String.format("    %12d -> %12d [style=\"%s\", color=\"%s\"]"+EOL, from, to, lineStyle.name().toLowerCase(), color.name().toLowerCase()));
+							  Color color,
+							  String label) {
+		connections.append(String.format("    %12d -> %12d [style=\"%s\", color=\"%s\", label=\"%s\"]"+EOL, from, to, lineStyle.name().toLowerCase(), color.name().toLowerCase(), label));
 	}
 	
 	public boolean dump(File file) {

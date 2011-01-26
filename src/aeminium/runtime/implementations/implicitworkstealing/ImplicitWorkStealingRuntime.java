@@ -120,11 +120,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			ImplicitTask itask = (ImplicitTask)task;
 			digraphviz.addNode(itask.hashCode(), itask.body.toString());
 			if ( parent != NO_PARENT ) {
-				digraphviz.addConnection(itask.hashCode(), parent.hashCode(), LineStyle.DASHED, Color.RED);
+				digraphviz.addConnection(itask.hashCode(), parent.hashCode(), LineStyle.DASHED, Color.RED, "");
 			}
 			if ( deps != NO_DEPS ) {
 				for ( Task dep : deps) {
-					digraphviz.addConnection(itask.hashCode(), dep.hashCode(), LineStyle.SOLID, Color.BLUE);
+					digraphviz.addConnection(itask.hashCode(), dep.hashCode(), LineStyle.SOLID, Color.BLUE, "");
 				}
  			}
 		}
@@ -138,6 +138,10 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			}
 			return executorService;
 		}
+	}
+	
+	public DiGraphViz getGraphViz() {
+		return this.digraphviz;
 	}
 	
 	protected final static class ImplicitWorkStealingExecutorService implements ExecutorService {

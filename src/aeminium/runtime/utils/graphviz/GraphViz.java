@@ -26,12 +26,14 @@ public abstract class GraphViz {
 		RED,
 		GREEN,
 		BLUE,
-		BLACK
+		BLACK,
+		YELLOW
 	}
 	
 	public static enum LineStyle {
 		SOLID,
-		DASHED
+		DASHED,
+		DOTTED
 	}
 
 	public static enum Shape {

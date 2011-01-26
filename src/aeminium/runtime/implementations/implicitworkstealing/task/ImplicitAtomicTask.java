@@ -14,6 +14,7 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 	protected FifoDataGroup datagroup;
 	protected ImplicitAtomicTask atomicParent = null;
 	protected Set<DataGroup> requiredGroups;
+
 	
 	public ImplicitAtomicTask(Body body, FifoDataGroup datagroup,	short hints) {
 		super(body, hints);
@@ -71,7 +72,7 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 	
 	@Override
 	public final void invoke(ImplicitWorkStealingRuntime rt) {
-		if ( datagroup.trylock(this) ) {
+		if ( datagroup.trylock(rt, this) ) {
 			super.invoke(rt);
 		}	
 	}
