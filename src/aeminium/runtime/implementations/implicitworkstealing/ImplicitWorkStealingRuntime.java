@@ -198,7 +198,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			Callable<T> current = null;
 			while ( System.nanoTime() < start + unit.toNanos(timeout) ) {
 				if ( current == null && it.hasNext() ) {
-					current = (Callable<T>)it.next();
+					@SuppressWarnings("unchecked")
+					Callable<T> tmp = (Callable<T>)it.next();
+					current = tmp;
 				} else if ( !it.hasNext() ) {
 					break;
 				}
@@ -231,7 +233,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		@Override
 		public List<Runnable> shutdownNow() {
 			shutdown();
-			return (List<Runnable>)Collections.EMPTY_LIST;
+			@SuppressWarnings("unchecked")
+			List<Runnable> result = (List<Runnable>)Collections.EMPTY_LIST;
+			return result;
 		}
 
 		public <T> Future<T> submit(Callable<T> task, long timeout, TimeUnit unit) {
@@ -241,7 +245,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			rft.setTask(aetask);
 			rft.setTimeOut(System.nanoTime()+unit.toNanos(timeout));
 			rt.schedule(aetask, NO_PARENT, NO_DEPS);
-			return (Future<T>)rft;
+			@SuppressWarnings("unchecked")
+			Future<T> result = (Future<T>) rft;
+			return result;
 		}
 		
 		@Override
@@ -251,7 +257,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			ImplicitTask aetask = (ImplicitTask) rt.createBlockingTask(rft, NO_HINTS);
 			rft.setTask(aetask);
 			rt.schedule(aetask, NO_PARENT, NO_DEPS);
-			return (Future<T>)rft;
+			@SuppressWarnings("unchecked")
+			Future<T> result = (Future<T>)rft;
+			return result;
 		}
 
 		@Override
@@ -269,7 +277,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 		@Override
 		public <T> Future<T> submit(Runnable task, T result) {
-			return (Future<T>) submit(task);
+			@SuppressWarnings("unchecked")
+			Future<T> tmp = (Future<T>) submit(task);
+			return tmp;
 		}
 
 		@Override

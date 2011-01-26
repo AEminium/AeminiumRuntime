@@ -12,7 +12,6 @@ import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealin
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventListener;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.AeminiumThread;
-import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
 
