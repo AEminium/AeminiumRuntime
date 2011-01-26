@@ -11,7 +11,8 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventListener;
-import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkerThread;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.AeminiumThread;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
 
@@ -34,8 +35,8 @@ public class ImplicitGraph {
 		}
 		
 		public final int getTaskCount() {
-			if ( thread instanceof WorkerThread ) {
-				return ((WorkerThread)thread).taskCount;
+			if ( thread instanceof AeminiumThread ) {
+				return ((AeminiumThread)thread).taskCount;
 			} else {
 				return taskCount;
 			}
@@ -98,8 +99,8 @@ public class ImplicitGraph {
 
 		// update thread specific task counter
 		Thread thread = Thread.currentThread();
-		if ( thread instanceof WorkerThread ) {
-			((WorkerThread)thread).taskCount++;
+		if ( thread instanceof AeminiumThread ) {
+			((AeminiumThread)thread).taskCount++;
 		} else {
 			taskCounters.get().taskCount++;
 		}
@@ -108,8 +109,8 @@ public class ImplicitGraph {
 		synchronized (itask) {			
 			// check for double scheduling
 			if ( itask.state != ImplicitTaskState.UNSCHEDULED) {
-				if ( thread instanceof WorkerThread ) {
-					((WorkerThread)thread).taskCount--;
+				if ( thread instanceof AeminiumThread ) {
+					((AeminiumThread)thread).taskCount--;
 				} else {
 					taskCounters.get().taskCount--;
 				}
@@ -155,8 +156,8 @@ public class ImplicitGraph {
 
 	public final void taskCompleted(ImplicitTask task) {
 		Thread thread = Thread.currentThread();
-		if ( thread instanceof WorkerThread ) {
-			((WorkerThread)thread).taskCount--;
+		if ( thread instanceof AeminiumThread ) {
+			((AeminiumThread)thread).taskCount--;
 		} else {
 			taskCounters.get().taskCount--;
 		}

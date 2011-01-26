@@ -15,8 +15,8 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public final class BlockingWorkStealingScheduler {
 	protected final ImplicitWorkStealingRuntime rt;
-	protected ConcurrentLinkedQueue<WorkerThread> parkedThreads;
-	protected WorkerThread[] threads;
+	protected ConcurrentLinkedQueue<WorkStealingThread> parkedThreads;
+	protected WorkStealingThread[] threads;
 	protected EventManager eventManager = null;
 	protected AtomicInteger counter;
 	protected Queue<ImplicitTask> submissionQueue;
@@ -40,8 +40,8 @@ public final class BlockingWorkStealingScheduler {
 	
 	public void init(EventManager eventManager) {
 		this.eventManager    = eventManager;
-		this.parkedThreads   = new ConcurrentLinkedQueue<WorkerThread>();
-		this.threads         = new WorkerThread[maxParallelism];
+		this.parkedThreads   = new ConcurrentLinkedQueue<WorkStealingThread>();
+		this.threads         = new WorkStealingThread[maxParallelism];
 		this.counter         = new AtomicInteger(threads.length);
 		this.submissionQueue = new ConcurrentLinkedQueue<ImplicitTask>();
 		this.wsa             = loadWorkStealingAlgorithm(Configuration.getProperty(BlockingWorkStealingScheduler.class, "workStealingAlgorithm", "SequentialReverseScan"));
@@ -52,14 +52,14 @@ public final class BlockingWorkStealingScheduler {
 		
 		// initialize data structures
 		for ( int i = 0; i < threads.length; i++ ) {
-			threads[i] = new WorkerThread(rt, i);
+			threads[i] = new WorkStealingThread(rt, i);
 		}
 
 		// setup WorkStealingAlgorithm
 		wsa.init(threads, submissionQueue);
 
 		// start and register threads threads
-		for ( WorkerThread thread : threads ) {
+		for ( WorkStealingThread thread : threads ) {
 			thread.start();
 		}
 	}
@@ -67,7 +67,7 @@ public final class BlockingWorkStealingScheduler {
 	public void shutdown() {
 		counter.set(threads.length);
 		while ( counter.get() > 0 ) {
-			for ( WorkerThread thread : threads ){
+			for ( WorkStealingThread thread : threads ){
 				thread.shutdown();
 				LockSupport.unpark(thread);
 			}
@@ -104,11 +104,11 @@ public final class BlockingWorkStealingScheduler {
 		return wsa;
 	}
 	
-	public final void registerThread(WorkerThread thread) {
+	public final void registerThread(WorkStealingThread thread) {
 		eventManager.signalNewThread(thread);
 	}
 
-	public final void unregisterThread(WorkerThread thread) {
+	public final void unregisterThread(WorkStealingThread thread) {
 		counter.decrementAndGet();
 	}
 
@@ -119,8 +119,8 @@ public final class BlockingWorkStealingScheduler {
 		}
 		if ( 0 < maxQueueLength) {
 			Thread thread = Thread.currentThread();
-			if ( thread instanceof WorkerThread) {
-				WorkerThread wthread = (WorkerThread)thread;
+			if ( thread instanceof WorkStealingThread) {
+				WorkStealingThread wthread = (WorkStealingThread)thread;
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 				if ( taskQueue.size() < maxQueueLength ) {
 					taskQueue.push(task);
@@ -134,9 +134,9 @@ public final class BlockingWorkStealingScheduler {
 			}
 		} else {
 			Thread thread = Thread.currentThread();
-			if ( thread instanceof WorkerThread ) {
+			if ( thread instanceof WorkStealingThread ) {
 				// worker thread 
-				WorkerThread wthread = (WorkerThread)thread;
+				WorkStealingThread wthread = (WorkStealingThread)thread;
 				if ( oneTaskPerLevel ) {
 					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
@@ -158,21 +158,21 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 
-	public final void signalWork(WorkerThread thread) {
+	public final void signalWork(WorkStealingThread thread) {
 		// TODO: need to fix that to wake up thread waiting for objects to complete
 		LockSupport.unpark(thread);
-		WorkerThread next = wsa.singalWorkInLocalQueue(thread);
+		WorkStealingThread next = wsa.singalWorkInLocalQueue(thread);
 		LockSupport.unpark(next);
 	}
 	
 	public final void signalWork() {
-		WorkerThread threadParked = wsa.singalWorkInSubmissionQueue();
+		WorkStealingThread threadParked = wsa.singalWorkInSubmissionQueue();
 		if ( threadParked != null ) {
 			LockSupport.unpark(threadParked);
 		}
 	}
 	
-	public final void parkThread(WorkerThread thread) {
+	public final void parkThread(WorkStealingThread thread) {
 		eventManager.signalThreadSuspend(thread);
 		wsa.threadGoingToPark(thread);
 		if ( 0 < unparkInterval ) {
@@ -182,7 +182,7 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 	
-	public final ImplicitTask scanQueues(WorkerThread thread) {
+	public final ImplicitTask scanQueues(WorkStealingThread thread) {
 		return wsa.stealWork(thread);
 	}
 

@@ -6,19 +6,18 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
-public final class WorkerThread extends Thread {
+public final class WorkStealingThread extends AeminiumThread {
 	protected final ImplicitWorkStealingRuntime rt;
 	public final int index;
-	public volatile int taskCount;
 	protected volatile boolean shutdown = false;
 	protected final int pollingCount = Configuration.getProperty(getClass(), "pollingCount", 5);
 	protected WorkStealingQueue<ImplicitTask> taskQueue;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
-	public WorkerThread(ImplicitWorkStealingRuntime rt, int index) {
+	public WorkStealingThread(ImplicitWorkStealingRuntime rt, int index) {
 		this.rt           = rt;
 		this.index        = index;
-		setName("WorkerThread-"+IdGenerator.incrementAndGet());
+		setName("WorkerStealingThread-"+IdGenerator.incrementAndGet());
 	}
 	
 	public final WorkStealingQueue<ImplicitTask> getTaskQueue() {

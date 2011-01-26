@@ -2,7 +2,7 @@ package aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing
 
 import java.util.Queue;
 
-import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkerThread;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public interface WorkStealingAlgorithm {
@@ -12,7 +12,7 @@ public interface WorkStealingAlgorithm {
 	 * 
 	 * @param threads Array of available worker threads threads.
 	 */
-	public void init(WorkerThread[] threads, Queue<ImplicitTask> submissionQueue);
+	public void init(WorkStealingThread[] threads, Queue<ImplicitTask> submissionQueue);
 	
 	/**
 	 * Shutsdown the work stealing algorithm.
@@ -29,7 +29,7 @@ public interface WorkStealingAlgorithm {
 	 * 
 	 * @return The thread that should be woken up or null.
 	 */
-	public WorkerThread singalWorkInSubmissionQueue();
+	public WorkStealingThread singalWorkInSubmissionQueue();
 	
 	/**
 	 * This method is called when a new item has been added into the local 
@@ -43,14 +43,14 @@ public interface WorkStealingAlgorithm {
 	 *                local queue.
 	 * @return The thread that should be woken up.
 	 */
-	public WorkerThread singalWorkInLocalQueue(WorkerThread current);
+	public WorkStealingThread singalWorkInLocalQueue(WorkStealingThread current);
 
 	/**
 	 * This method is called before a worker thread is parked/pasued.
 	 * 
 	 * @param current The thread that is going to be parked.
 	 */
-	public void threadGoingToPark(WorkerThread current);
+	public void threadGoingToPark(WorkStealingThread current);
 
 	/**
 	 * This method is called when a thread runs out of local work. 
@@ -60,5 +60,5 @@ public interface WorkStealingAlgorithm {
 	 * @param current The current worker thread that looks for work.
 	 * @return Either task with work or null
 	 */
-	public ImplicitTask stealWork(WorkerThread current);
+	public ImplicitTask stealWork(WorkStealingThread current);
 }

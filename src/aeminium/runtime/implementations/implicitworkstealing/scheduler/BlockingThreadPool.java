@@ -34,6 +34,7 @@ public final class BlockingThreadPool {
 			for( int i = 0; i < finishedCount; i++ ) {
 				submitTask(FINISHED);
 			}
+			
 			while ( currentThreads > 0 ) {
 				try {
 					taskQueue.wait();
@@ -43,8 +44,8 @@ public final class BlockingThreadPool {
 		}
 		
 		// cleanup
-		taskQueue = null;
-		rt        = null;
+		taskQueue    = null;
+		rt           = null;
 		eventManager = null;
 	}
 	
@@ -90,28 +91,33 @@ public final class BlockingThreadPool {
 			} else {
 				if ( currentThreads < maxThreads ) {
 					// create new thread
-					Thread thread = new Thread() {
-						protected boolean finished = false;
-						@Override
-						public void run() {
-							setName("BlockingThead-" + currentThreads);
-							eventManager.signalNewThread(Thread.currentThread());
-							while ( !finished ) {
-								ImplicitBlockingTask task = getWork();
-								if ( task != FINISHED ) {
-									task.invoke(rt);
-									task = null;
-								} else {
-									finished = true;
-								}
-							}
-							singalThreadFinished();
-						}						
-					};
-					thread.start();
+					new BlockingThread().start();
 					currentThreads++;
 				}
 			}
+		}
+	}
+	
+	protected final class BlockingThread extends AeminiumThread {
+		protected boolean finished = false;
+		
+		public BlockingThread() {
+			setName("BlockingThead-" + currentThreads);
+		}
+		
+		@Override
+		public void run() {			
+			eventManager.signalNewThread(Thread.currentThread());
+			while ( !finished ) {
+				ImplicitBlockingTask task = getWork();
+				if ( task != FINISHED ) {
+					task.invoke(rt);
+					task = null;
+				} else {
+					finished = true;
+				}
+			}
+			singalThreadFinished();
 		}
 	}
 }

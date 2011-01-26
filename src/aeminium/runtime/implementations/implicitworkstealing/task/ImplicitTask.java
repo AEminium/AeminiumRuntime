@@ -11,7 +11,7 @@ import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
-import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkerThread;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 
 
 public abstract class ImplicitTask implements Task {
@@ -63,8 +63,8 @@ public abstract class ImplicitTask implements Task {
 			return result;
 		} else {
 			Thread thread = Thread.currentThread();
-			if ( thread instanceof WorkerThread ) {
-				((WorkerThread)thread).progressToCompletion(this);
+			if ( thread instanceof WorkStealingThread ) {
+				((WorkStealingThread)thread).progressToCompletion(this);
 			} else {
 				synchronized (this) {
 					while ( !isCompleted() ) {
