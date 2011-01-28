@@ -9,5 +9,5 @@ public interface Body {
 	 * 
 	 * @param current Reference to the associated task object.
 	 */
-    public void execute(Runtime rt, Task current) throws Exception;
+    public void execute(final Runtime rt, final Task current) throws Exception;
 }

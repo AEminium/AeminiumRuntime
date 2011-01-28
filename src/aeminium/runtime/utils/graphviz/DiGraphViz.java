@@ -46,7 +46,7 @@ public class DiGraphViz extends GraphViz {
 							  LineStyle lineStyle,
 							  Color color,
 							  String label) {
-		connections.append(String.format("    %12d -> %12d [style=\"%s\", color=\"%s\", label=\"%s\"]"+EOL, from, to, lineStyle.name().toLowerCase(), color.name().toLowerCase(), label));
+		connections.append(String.format("    %12d -> %12d [style=\"%s\", color=\"%s\", fontcolor=\"%s\", label=\"%s\"]"+EOL, from, to, lineStyle.name().toLowerCase(), color.name().toLowerCase(), color.name().toLowerCase(), label));
 	}
 	
 	public boolean dump(File file) {

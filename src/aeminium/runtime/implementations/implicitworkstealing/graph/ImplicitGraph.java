@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import aeminium.runtime.Runtime;
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
@@ -113,7 +112,8 @@ public class ImplicitGraph {
 				} else {
 					taskCounters.get().taskCount--;
 				}
-				throw new RuntimeError("Cannot schedule task twice: " + this);
+				rt.getErrorManager().singalTaskDuplicatedSchedule(itask);
+				return;
 			}
 
 			// setup parent connection
@@ -149,7 +149,8 @@ public class ImplicitGraph {
 		}
 
 		if ( checkForCycles ) {
-			itask.checkForCycles();
+			itask.checkForCycles(rt.getErrorManager());
+			return;
 		}
 	}
 

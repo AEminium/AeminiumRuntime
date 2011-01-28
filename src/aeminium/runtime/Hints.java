@@ -32,7 +32,7 @@ public final class Hints {
 	 * @param hints
 	 * @return
 	 */
-	public static String toString(short hints) {
+	public static final String toString(short hints) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 		if ( (hints & LOOPS) == LOOPS )         sb.append("LOOPS|");

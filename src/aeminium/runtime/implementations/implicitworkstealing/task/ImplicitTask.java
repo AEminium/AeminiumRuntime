@@ -6,11 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import aeminium.runtime.Body;
-import aeminium.runtime.CyclicDependencyError;
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
+import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 
 
@@ -43,6 +42,7 @@ public abstract class ImplicitTask implements Task {
 		try {
 			body.execute(rt, this);
 		} catch (Throwable e) {
+			rt.getErrorManager().signalTaskException(this, e);
 			setResult(e);
 		} finally {
 			taskFinished(rt);
@@ -52,7 +52,7 @@ public abstract class ImplicitTask implements Task {
 	@Override
 	public final void setResult(Object result) {
 		if ( result == null ) {
-			throw new RuntimeError("Cannot set result to 'null'.");
+			//throw new RuntimeError("Cannot set result to 'null'.");
 		}
 		this.result = result;
 	}
@@ -177,30 +177,30 @@ public abstract class ImplicitTask implements Task {
 		return state == ImplicitTaskState.COMPLETED;
 	}
 	
-	public void checkForCycles() {
+	public void checkForCycles(final ErrorManager em) {
 		synchronized (this) {
-			checkForCycles(this, dependents);
+			checkForCycles(this, dependents, em);
 		}
 	}
 	
-	protected void checkForCycles(ImplicitTask task, Collection<ImplicitTask> deps) {
+	protected void checkForCycles(final ImplicitTask task, final Collection<ImplicitTask> deps, final ErrorManager em) {
 		if ( deps == null ) {
 			return;
 		}
 		for ( ImplicitTask t : deps ) {
-			checkPath(task, t);
+			checkPath(task, t, em);
 		}
 	}
 	
-	protected void checkPath(ImplicitTask task, ImplicitTask dep) {
+	protected void checkPath(final ImplicitTask task, ImplicitTask dep, final ErrorManager em) {
 		if ( task == dep ) {
-			throw new CyclicDependencyError("Found Cycle for task: " + task);
+			em.singalDependencyCycle(task);
 		} else {
 			Collection<ImplicitTask> nextDependents;
 			synchronized (dep) {
 				 nextDependents = Collections.unmodifiableList((List<? extends ImplicitTask>) dep.dependents);
 			}
-			checkForCycles(task, nextDependents);
+			checkForCycles(task, nextDependents, em);
 		}
 	}
 	

@@ -2,8 +2,6 @@ package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-import aeminium.runtime.RuntimeError;
-
 
 /**
  * Work stealing queue that has only one thread adding elements to it
@@ -24,7 +22,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 	
 	public ConcurrentWorkStealingQueue(int power) {
 		if ( power < 2 || power >= MAX_QUEUE_POWER ) {
-			throw new RuntimeError("Invalid initial size: 2 <= power < MAX_QUEUE_SIZE.");
+			throw new Error("Invalid initial size: 2 <= power < MAX_QUEUE_SIZE.");
 		}
 		this.base        = 0;
 		this.sp          = 0;
@@ -96,7 +94,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 	protected final void growQueue() {
 		int newLength = length << 1;
 		if ( newLength >= (1<<MAX_QUEUE_POWER) ) {
-			throw new RuntimeError("Cannot grow queue because maximum size has been reached.");
+			throw new Error("Cannot grow queue because maximum size has been reached.");
 		}
 		@SuppressWarnings("unchecked")
 		AtomicReferenceArray<E> newBuffer = new AtomicReferenceArray<E>((E[])new Object[newLength]);

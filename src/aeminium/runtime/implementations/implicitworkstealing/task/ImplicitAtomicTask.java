@@ -15,7 +15,6 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 	protected ImplicitAtomicTask atomicParent = null;
 	protected Set<DataGroup> requiredGroups;
 
-	
 	public ImplicitAtomicTask(Body body, FifoDataGroup datagroup,	short hints) {
 		super(body, hints);
 		this.datagroup = datagroup;
@@ -51,6 +50,7 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		}
 	}
 	
+
 	public  ImplicitAtomicTask getAtomicParent() {
 		ImplicitAtomicTask result = atomicParent;
 		if ( result == null ) {

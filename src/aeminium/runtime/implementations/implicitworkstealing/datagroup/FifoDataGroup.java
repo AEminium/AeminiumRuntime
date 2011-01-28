@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.DataGroup;
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
+import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.utils.graphviz.DiGraphViz;
@@ -30,10 +30,10 @@ public final class FifoDataGroup implements DataGroup {
 		synchronized (this) {
 			if ( locked ) {
 				waitQueue.add(task);
-				if ( checkForDeadlocks ) {
+				if ( checkForDeadlocks ) {					
 					ImplicitAtomicTask atomicParent = ((ImplicitAtomicTask)task).getAtomicParent();
 					atomicParent.addDataGroupDependecy(this);
-					checkForDeadlock(atomicParent);
+					checkForDeadlock(atomicParent, rt.getErrorManager());
 				}
 				return false;
 			} else {
@@ -67,20 +67,32 @@ public final class FifoDataGroup implements DataGroup {
 		}
 	}
 
-	public void checkForDeadlock(ImplicitAtomicTask atomicParent) {
-		for ( DataGroup dg : atomicParent.getDataGroupDependencies() ) {
-			checkForDeadlock(atomicParent, (ImplicitAtomicTask)((FifoDataGroup)dg).owner);
-		}
-	}
-	
-	public void checkForDeadlock(ImplicitAtomicTask atomicParent, ImplicitAtomicTask current) {
-		if ( atomicParent == current ) {
-			throw new RuntimeError("DeadLock");
-		} else {			
-			for ( DataGroup dg : current.getDataGroupDependencies() ) {
-				checkForDeadlock(atomicParent, ((ImplicitAtomicTask)((FifoDataGroup)dg).owner).getAtomicParent());
+	public final boolean checkForDeadlock(final ImplicitAtomicTask atomicParent, 
+					                      final ErrorManager em) {
+		for ( DataGroup dg : atomicParent.getDataGroupDependencies() ) {			
+			if ( checkForDeadlock(atomicParent, (ImplicitAtomicTask)((FifoDataGroup)dg).owner, em) ) {
+				return true;
 			}
 		}
+		return false;
+	}
+	
+	public final boolean checkForDeadlock(final ImplicitAtomicTask atomicParent, 
+			                              final ImplicitAtomicTask current, 
+			                              final ErrorManager em) {
+		boolean result = false;
+		if ( atomicParent == current ) {
+			em.signalLockingDeadlock();
+			result = true;
+		} else {			
+			for ( DataGroup dg : current.getDataGroupDependencies() ) {
+				if ( checkForDeadlock(atomicParent, ((ImplicitAtomicTask)((FifoDataGroup)dg).owner).getAtomicParent(), em) ) {
+					result = true;
+					break;
+				}
+			}
+		}
+		return result;
 	}
 		
 	public final String toString() {

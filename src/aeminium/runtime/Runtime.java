@@ -18,12 +18,12 @@ public interface Runtime {
     public final static Task NO_PARENT = new Task() {
 		@Override
 		public void setResult(Object value) {
-			throw new RuntimeError("Cannot set result on NO_PARENT");
+			throw new Error("Cannot set result on NO_PARENT");
 		}
 
 		@Override
 		public Object getResult() {
-			throw new RuntimeError("Cannot get result from NO_PARENT");
+			throw new Error("Cannot get result from NO_PARENT");
 		}
 		
 		@Override
@@ -33,22 +33,26 @@ public interface Runtime {
 	};
 	
     /* initialize runtime */
-    public void init() throws RuntimeError;
+    public void init() ;
     /* returns the current task object */
-    public void shutdown() throws RuntimeError;
+    public void shutdown() ;
     /* add a task along with it's parent and dependencies */
-    public void schedule(Task task, Task parent, Collection<Task> deps) throws RuntimeError;
+    public void schedule(Task task, Task parent, Collection<Task> deps) ;
 
 
     /* create a new data group object */
-    public DataGroup createDataGroup() throws RuntimeError;
+    public DataGroup createDataGroup() ;
     /* create a new Blocking task */
-    public BlockingTask createBlockingTask(Body b, short hints) throws RuntimeError;
+    public BlockingTask createBlockingTask(Body b, short hints) ;
     /* create a new NonBlocking task */
-    public NonBlockingTask createNonBlockingTask(Body b, short hints) throws RuntimeError;
+    public NonBlockingTask createNonBlockingTask(Body b, short hints) ;
     /* create a new Atomic task */
-    public AtomicTask createAtomicTask(Body b, DataGroup g, short hints) throws RuntimeError;
+    public AtomicTask createAtomicTask(Body b, DataGroup g, short hints) ;
 
     /* return executor service abstraction for this runtime object */
     public ExecutorService getExecutorService();
+    
+    /* add/remove error handlers */
+    public void addErrorHandler(ErrorHandler eh);
+    public void removeErrorHandler(ErrorHandler eh);
 }

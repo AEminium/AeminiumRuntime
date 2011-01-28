@@ -1,21 +1,57 @@
 package aeminium.runtime.tests;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import junit.framework.Assert;
+
 import org.junit.Test;
-
-
 
 import aeminium.runtime.Body;
 import aeminium.runtime.DataGroup;
+import aeminium.runtime.ErrorHandler;
 import aeminium.runtime.Runtime;
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 
 public class AtomicTaskDeadLock  extends BaseTest {
-	@Test(expected=RuntimeError.class, timeout=2000)
-	public void SUPPOSED_TO_FAIL___createAtomicTaskDeadLock() {
+	
+	@Test(timeout=2000)
+	public void createAtomicTaskDeadLock() {
+		final AtomicBoolean deadlock = new AtomicBoolean(false);
 		Runtime rt = getRuntime();
 		rt.init();
 
+		rt.addErrorHandler(new ErrorHandler() {
+
+			@Override
+			public void handleTaskException(Task task, Throwable t) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void handleTaskDuplicatedSchedule(Task task) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void handleLockingDeadlock() {
+				deadlock.set(true);
+			}
+			
+			@Override
+			public void handleInternalError(Error err) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void handleDependencyCycle(Task task) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		DataGroup dg1 = rt.createDataGroup();
 		DataGroup dg2 = rt.createDataGroup();
 		
@@ -24,7 +60,14 @@ public class AtomicTaskDeadLock  extends BaseTest {
 		Task t2 = createAtomicTask(rt, dg2, dg1);
 		rt.schedule(t2, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
-		rt.shutdown();
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e1) {}
+		
+		if ( !deadlock.get() ) {
+			Assert.fail("Could not find deadlock");
+			rt.shutdown();
+		}
 	}
 	
 	private Task createAtomicTask(final Runtime rt, final DataGroup dg1, final DataGroup dg2) {

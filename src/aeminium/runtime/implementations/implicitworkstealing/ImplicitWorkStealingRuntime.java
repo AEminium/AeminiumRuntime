@@ -18,12 +18,14 @@ import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
 import aeminium.runtime.DataGroup;
+import aeminium.runtime.ErrorHandler;
 import aeminium.runtime.NonBlockingTask;
 import aeminium.runtime.Runtime;
-import aeminium.runtime.RuntimeError;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.FifoDataGroup;
+import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
+import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerAdapter;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;
@@ -43,6 +45,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ExecutorService executorService;
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
+	protected ErrorManager errorManager;
 	protected State state = State.UNINITIALIZED;  
 	protected final boolean enableGraphViz = Configuration.getProperty(getClass(), "enableGraphViz", false);
 	protected final String graphVizName    = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
@@ -58,12 +61,13 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		graph        = new ImplicitGraph(this);
 		scheduler    = new BlockingWorkStealingScheduler(this);
 		eventManager = new EventManager();
+		errorManager = new ErrorManagerAdapter();
 	}
 	
 	@Override
-	public final void init() throws RuntimeError {
+	public final void init()  {
 		if ( state != State.UNINITIALIZED ) {
-			throw new RuntimeError("Cannot initialize runtime multiple times.");
+			throw new Error("Cannot initialize runtime multiple times.");
 		}
 		eventManager.init();
 		graph.init(eventManager);
@@ -75,7 +79,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	}
 	
 	@Override
-	public final void shutdown() throws RuntimeError {
+	public final void shutdown()  {
 		if ( state != State.UNINITIALIZED ) {
 			graph.waitToEmpty();
 			scheduler.shutdown();
@@ -92,30 +96,30 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	
 	@Override
 	public final AtomicTask createAtomicTask(Body body, DataGroup datagroup, short hints)
-			throws RuntimeError {
+			 {
 		return new ImplicitAtomicTask(body, (FifoDataGroup)datagroup, hints);
 	}
 
 	@Override
 	public final BlockingTask createBlockingTask(Body body, short hints)
-			throws RuntimeError {
+			 {
 		return new ImplicitBlockingTask(body, hints);
 	}
 	
 	@Override
 	public final NonBlockingTask createNonBlockingTask(Body body, short hints)
-			throws RuntimeError {
+			 {
 		return new ImplicitNonBlockingTask(body, hints);
 	}
 
 	@Override
-	public final DataGroup createDataGroup() throws RuntimeError {
+	public final DataGroup createDataGroup()  {
 		return new FifoDataGroup();
 	}
 
 	@Override
 	public final void schedule(Task task, Task parent, Collection<Task> deps)
-			throws RuntimeError {
+			 {
 		if ( enableGraphViz ) {
 			ImplicitTask itask = (ImplicitTask)task;
 			digraphviz.addNode(itask.hashCode(), itask.body.toString());
@@ -142,6 +146,21 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	
 	public DiGraphViz getGraphViz() {
 		return this.digraphviz;
+	}
+	
+
+	@Override
+	public final void addErrorHandler(final ErrorHandler eh) {
+		errorManager.addErrorHandler(eh);		
+	}
+
+	@Override
+	public final void removeErrorHandler(final ErrorHandler eh) {
+		errorManager.removeErrorHandler(eh);
+	}
+	
+	public final ErrorManager getErrorManager() {
+		return errorManager;
 	}
 	
 	protected final static class ImplicitWorkStealingExecutorService implements ExecutorService {
@@ -312,7 +331,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			
 			@Override
 			public void run() {
-				throw new RuntimeError("Cannot execute the run method.");				
+				throw new Error("Cannot execute the run method.");				
 			}
 
 			@Override
@@ -373,4 +392,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			
 		}
 	}
+
+
+
 }
