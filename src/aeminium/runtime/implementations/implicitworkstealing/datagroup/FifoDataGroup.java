@@ -14,7 +14,7 @@ import aeminium.runtime.utils.graphviz.DiGraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz.Color;
 import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
 
-public final class FifoDataGroup implements DataGroup {	
+public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup {	
 	protected static final boolean checkForDeadlocks        = Configuration.getProperty(FifoDataGroup.class, "checkForDeadlocks", false);
 	protected static final boolean graphVizEnabled          = Configuration.getProperty(ImplicitWorkStealingRuntime.class, "enableGraphViz", false);
 	protected static final boolean graphVizShowLockingOrder = Configuration.getProperty(FifoDataGroup.class, "graphVizShowLockingOrder", false);
@@ -48,7 +48,7 @@ public final class FifoDataGroup implements DataGroup {
 		}
 	}
 
-	public final void unlock(ImplicitWorkStealingRuntime rt) {
+	public final void unlock(ImplicitWorkStealingRuntime rt, ImplicitTask task) {
 		ImplicitTask head = null;
 		synchronized (this) {
 			locked = false;
@@ -94,7 +94,8 @@ public final class FifoDataGroup implements DataGroup {
 		}
 		return result;
 	}
-		
+	
+	@Override
 	public final String toString() {
 		if ( locked == false ) {
 			return "DataGroup["+id+"|UNLOCKED]";

@@ -52,7 +52,7 @@
     <target name="tests">
         <junit fork="yes" dir="src/aeminium/runtime/tests" printsummary="yes">
             <classpath refid="rt.classpath"/>
-            <formatter type="plain"/>
+            <formatter type="brief"/>
             <batchtest>
                 <fileset dir="src/">
                     <include name="aeminium/runtime/tests/*.java"/>
@@ -65,6 +65,7 @@
     <target name="jar">
       <jar destfile="AeminiumRT.jar">
        <fileset dir="bin/aeminium"/>
+       <fileset dir="src/aeminium"/>
        <zipfileset includes="**/*.class" src="lib/jsr166y.jar"/>
        <zipfileset includes="**/*.class" src="lib/junit-4.8.2.jar"/>
        <manifest>
@@ -76,10 +77,34 @@
        </manifest>
       </jar>
     </target>
+
+    <target name="jar-release">
+      <jar destfile="AeminiumRT.jar">
+       <fileset dir="bin/aeminium">
+         <exclude name="**/runtime/tools/benchmark/forkjoin/**"/>
+         <exclude name="**/runtime/examples/fjtests/**"/>
+       </fileset>
+       <fileset dir="src/aeminium">
+         <exclude name="**/runtime/tools/benchmark/forkjoin/**"/>
+         <exclude name="**/runtime/examples/fjtests/**"/>
+       </fileset>
+       <manifest>
+         <!-- Who is building this jar? -->
+         <attribute name="Built-By" value="${user.name}"/>
+         <!-- Information about the program itself -->
+         <attribute name="Implementation-Vendor" value="Aeminium Project"/>
+         <attribute name="Implementation-Title" value="Aeminium Runtime"/>
+       </manifest>
+      </jar>
+    </target>
     
     <target name="clean">
-        <delete verbose="yes" dir="bin/aeminium">
-        </delete>
-        <delete verbose="yes" file="AeminiumRT.jar"/>
+      <delete verbose="yes" dir="bin/aeminium"/>
+      <delete verbose="yes">
+        <fileset dir=".">
+          <include name="AeminiumRT.jar"/>
+          <include name="TEST*"/>
+        </fileset>
+      </delete>
     </target>
 </project>

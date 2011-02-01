@@ -8,14 +8,14 @@ import aeminium.runtime.AtomicTask;
 import aeminium.runtime.Body;
 import aeminium.runtime.DataGroup;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
-import aeminium.runtime.implementations.implicitworkstealing.datagroup.FifoDataGroup;
+import aeminium.runtime.implementations.implicitworkstealing.datagroup.ImplicitWorkStealingRuntimeDataGroup;
 
 public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask {
-	protected FifoDataGroup datagroup;
+	protected ImplicitWorkStealingRuntimeDataGroup datagroup;
 	protected ImplicitAtomicTask atomicParent = null;
 	protected Set<DataGroup> requiredGroups;
 
-	public ImplicitAtomicTask(Body body, FifoDataGroup datagroup,	short hints) {
+	public ImplicitAtomicTask(Body body, ImplicitWorkStealingRuntimeDataGroup datagroup,	short hints) {
 		super(body, hints);
 		this.datagroup = datagroup;
 	}
@@ -50,7 +50,6 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		}
 	}
 	
-
 	public  ImplicitAtomicTask getAtomicParent() {
 		ImplicitAtomicTask result = atomicParent;
 		if ( result == null ) {
@@ -79,8 +78,8 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 
 	@Override 
 	public final void taskCompleted(ImplicitWorkStealingRuntime rt) {
+		datagroup.unlock(rt, this);
 		super.taskCompleted(rt);
-		datagroup.unlock(rt);
 	}
 
 	public final DataGroup getDataGroup() {
