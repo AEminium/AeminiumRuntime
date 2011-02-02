@@ -24,9 +24,9 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.FifoDataGroup;
-import aeminium.runtime.implementations.implicitworkstealing.datagroup.HierarchicalDataGroup;
+import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.ImplicitWorkStealingRuntimeDataGroup;
-import aeminium.runtime.implementations.implicitworkstealing.datagroup.HierarchicalDataGroup.ImplicitWorkStealingRuntimeDataGroupFactory;
+import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup.ImplicitWorkStealingRuntimeDataGroupFactory;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerAdapter;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
@@ -51,11 +51,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ErrorManager errorManager;
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
-	protected final boolean hierarchicalDataGroups = Configuration.getProperty(getClass(), "hierarchicalDataGroups", false);
-	protected final boolean enableGraphViz         = Configuration.getProperty(getClass(), "enableGraphViz", false);
-	protected final String graphVizName            = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
-	protected final int ranksep                    = Configuration.getProperty(getClass(), "ranksep", 1);
-	protected final RankDir rankdir                = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
+	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
+	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
+	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
+	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
+	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
 	
 	public enum State {
 		UNINITIALIZED,
@@ -86,12 +86,12 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 				return new FifoDataGroup();
 			}
 		};
-		if ( hierarchicalDataGroups ) {
+		if ( nestedAtomicTasks ) {
 			final ImplicitWorkStealingRuntimeDataGroupFactory innerFactory = dataGroupFactory;
 			dataGroupFactory = new ImplicitWorkStealingRuntimeDataGroupFactory() {
 				@Override
 				public ImplicitWorkStealingRuntimeDataGroup create() {
-					return new HierarchicalDataGroup(innerFactory);
+					return new NestedAtomicTasksDataGroup(innerFactory);
 				}
 			};
 		}

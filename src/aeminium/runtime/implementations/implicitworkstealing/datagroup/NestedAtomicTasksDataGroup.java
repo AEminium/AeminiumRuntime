@@ -8,13 +8,13 @@ import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealin
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
-public final class HierarchicalDataGroup implements ImplicitWorkStealingRuntimeDataGroup {
+public final class NestedAtomicTasksDataGroup implements ImplicitWorkStealingRuntimeDataGroup {
 	protected ArrayList<ImplicitWorkStealingRuntimeDataGroup> dataGroups = new ArrayList<ImplicitWorkStealingRuntimeDataGroup>();
 	protected final ImplicitWorkStealingRuntimeDataGroupFactory factory;
 	protected static AtomicInteger idGen = new AtomicInteger();
 	protected int id = idGen.incrementAndGet();
 	
-	public HierarchicalDataGroup(ImplicitWorkStealingRuntimeDataGroupFactory factory) {
+	public NestedAtomicTasksDataGroup(ImplicitWorkStealingRuntimeDataGroupFactory factory) {
 		this.factory = factory;
 	}
 	
