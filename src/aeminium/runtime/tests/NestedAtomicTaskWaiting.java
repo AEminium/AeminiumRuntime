@@ -6,6 +6,8 @@ import aeminium.runtime.Body;
 import aeminium.runtime.DataGroup;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
+import aeminium.runtime.implementations.Configuration;
+import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 
 public class NestedAtomicTaskWaiting extends BaseTest {
 	
@@ -13,19 +15,21 @@ public class NestedAtomicTaskWaiting extends BaseTest {
 	public void runAtomicTaskWaitingTest() {
 		Runtime rt = getRuntime();
 		rt.init();
-		
-		DataGroup dg = rt.createDataGroup();
-		Task t1 = createAtomicTask(rt, dg, "TASK-1", 3);
-		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
-		Task t2 = createAtomicTask(rt, dg, "TASK-2", 5);
-		rt.schedule(t2, Runtime.NO_PARENT, Runtime.NO_DEPS);
-		Task t3 = createAtomicTask(rt, dg, "TASK-3", 2);
-		rt.schedule(t3, Runtime.NO_PARENT, Runtime.NO_DEPS);
-		Task t4 = createAtomicTask(rt, dg, "TASK-4", 4);
-		rt.schedule(t4, Runtime.NO_PARENT, Runtime.NO_DEPS);
-		Task t5 = createAtomicTask(rt, dg, "TASK-5", 2);
-		rt.schedule(t5, Runtime.NO_PARENT, Runtime.NO_DEPS);
-		
+
+		if ( Configuration.getProperty(ImplicitWorkStealingRuntime.class, "nestedAtomicTasks", false) ) {
+			System.out.println("nested");
+			DataGroup dg = rt.createDataGroup();
+			Task t1 = createAtomicTask(rt, dg, "TASK-1", 3);
+			rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
+			Task t2 = createAtomicTask(rt, dg, "TASK-2", 5);
+			rt.schedule(t2, Runtime.NO_PARENT, Runtime.NO_DEPS);
+			Task t3 = createAtomicTask(rt, dg, "TASK-3", 2);
+			rt.schedule(t3, Runtime.NO_PARENT, Runtime.NO_DEPS);
+			Task t4 = createAtomicTask(rt, dg, "TASK-4", 4);
+			rt.schedule(t4, Runtime.NO_PARENT, Runtime.NO_DEPS);
+			Task t5 = createAtomicTask(rt, dg, "TASK-5", 2);
+			rt.schedule(t5, Runtime.NO_PARENT, Runtime.NO_DEPS);
+		}
 		rt.shutdown();
 	}
 	
