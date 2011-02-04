@@ -9,10 +9,10 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomic
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public final class NestedAtomicTasksDataGroup implements ImplicitWorkStealingRuntimeDataGroup {
-	protected ArrayList<ImplicitWorkStealingRuntimeDataGroup> dataGroups = new ArrayList<ImplicitWorkStealingRuntimeDataGroup>();
+	protected final ArrayList<ImplicitWorkStealingRuntimeDataGroup> dataGroups = new ArrayList<ImplicitWorkStealingRuntimeDataGroup>();
 	protected final ImplicitWorkStealingRuntimeDataGroupFactory factory;
-	protected static AtomicInteger idGen = new AtomicInteger();
-	protected int id = idGen.incrementAndGet();
+	protected static final AtomicInteger idGen = new AtomicInteger();
+	protected final int id = idGen.incrementAndGet();
 	
 	public NestedAtomicTasksDataGroup(ImplicitWorkStealingRuntimeDataGroupFactory factory) {
 		this.factory = factory;

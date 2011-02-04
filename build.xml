@@ -62,10 +62,10 @@
         </junit>
     </target>
 
-    <target name="jar">
+    <target name="jar-debug">
       <jar destfile="AeminiumRT.jar">
-       <fileset dir="bin/aeminium"/>
-       <fileset dir="src/aeminium"/>
+       <fileset dir="bin/"/>
+       <fileset dir="src/"/>
        <zipfileset includes="**/*.class" src="lib/jsr166y.jar"/>
        <zipfileset includes="**/*.class" src="lib/junit-4.8.2.jar"/>
        <manifest>
@@ -80,7 +80,7 @@
 
     <target name="jar-release">
       <jar destfile="AeminiumRT.jar">
-       <fileset dir="bin/aeminium">
+       <fileset dir="bin/">
          <exclude name="**/runtime/tools/benchmark/forkjoin/**"/>
          <exclude name="**/runtime/examples/fjtests/**"/>
        </fileset>
