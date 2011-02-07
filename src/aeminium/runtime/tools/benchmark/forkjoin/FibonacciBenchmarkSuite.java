@@ -13,7 +13,7 @@ public class FibonacciBenchmarkSuite {
 	Benchmark[] tests;
 	
 	protected int PARAMETER = 46;
-	protected int THRESHOLD = 22;
+	protected int THRESHOLD = 13;
 	
 	public FibonacciBenchmarkSuite() {
 		tests = new Benchmark[3];
@@ -84,7 +84,6 @@ public class FibonacciBenchmarkSuite {
 		};
 		
 	}
-	
 	
 	public static void main(String[] args) {
 		FibonacciBenchmarkSuite suite = new FibonacciBenchmarkSuite();
