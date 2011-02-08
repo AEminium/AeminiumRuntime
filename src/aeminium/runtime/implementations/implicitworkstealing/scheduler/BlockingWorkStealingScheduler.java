@@ -124,7 +124,9 @@ public final class BlockingWorkStealingScheduler {
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 				if ( taskQueue.size() < maxQueueLength ) {
 					taskQueue.push(task);
-					signalWork();
+					if ( taskQueue.size() <= 1 ) {
+						signalWork();
+					}
 				} else {
 					task.invoke(rt);
 				}
@@ -144,11 +146,15 @@ public final class BlockingWorkStealingScheduler {
 						task.invoke(rt);
 					} else {
 						taskQueue.push(task);
-						signalWork(wthread);
+						if ( taskQueue.size() <= 1 ) {
+							signalWork(wthread);
+						}
 					}
 				} else {
 					wthread.getTaskQueue().push(task);
-					signalWork(wthread);
+					if ( wthread.getTaskQueue().size() <= 1 ) {
+						signalWork(wthread);
+					}
 				}
 			} else {
 				// external thread
