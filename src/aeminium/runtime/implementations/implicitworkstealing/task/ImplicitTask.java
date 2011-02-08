@@ -84,11 +84,6 @@ public abstract class ImplicitTask implements Task {
 	public final void attachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child) {
 		synchronized (this) {
 			childCount += 1;
-			if ( childCount == 0 ) {
-				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
-					taskCompleted(rt);
-				}
-			}
 			if ( debug ) {
 				if ( children == null ) {
 					children = new ArrayList<ImplicitTask>(10);
@@ -122,7 +117,7 @@ public abstract class ImplicitTask implements Task {
 		}
 	}
 	
-	public final void decDepencenyCount(ImplicitWorkStealingRuntime rt) {
+	public final void decDependencyCount(ImplicitWorkStealingRuntime rt) {
 		boolean schedule = false;
 		synchronized (this) {
 			depCount -= 1;
@@ -157,7 +152,7 @@ public abstract class ImplicitTask implements Task {
 
 		if ( dependents != null ) {
 			for ( ImplicitTask t : dependents) {
-				t.decDepencenyCount(rt);
+				t.decDependencyCount(rt);
 			}
 			this.dependents = null;
 		}
