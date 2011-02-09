@@ -189,7 +189,7 @@ public abstract class ImplicitTask implements Task {
 	
 	protected void checkPath(final ImplicitTask task, ImplicitTask dep, final ErrorManager em) {
 		if ( task == dep ) {
-			em.singalDependencyCycle(task);
+			em.signalDependencyCycle(task);
 		} else {
 			Collection<ImplicitTask> nextDependents;
 			synchronized (dep) {

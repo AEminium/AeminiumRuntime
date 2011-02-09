@@ -112,7 +112,7 @@ public class ImplicitGraph {
 				} else {
 					taskCounters.get().taskCount--;
 				}
-				rt.getErrorManager().singalTaskDuplicatedSchedule(itask);
+				rt.getErrorManager().signalTaskDuplicatedSchedule(itask);
 				return;
 			}
 

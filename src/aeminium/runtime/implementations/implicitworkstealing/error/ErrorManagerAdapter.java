@@ -35,7 +35,7 @@ public final class ErrorManagerAdapter implements ErrorManager {
 	}
 
 	@Override
-	public void singalDependencyCycle(final Task task) {
+	public void signalDependencyCycle(final Task task) {
 		synchronized (handlers) {
 			for (ErrorHandler eh : handlers) {
 				eh.handleDependencyCycle(task);
@@ -44,7 +44,7 @@ public final class ErrorManagerAdapter implements ErrorManager {
 	}
 	
 	@Override
-	public void singalTaskDuplicatedSchedule(final Task task) {
+	public void signalTaskDuplicatedSchedule(final Task task) {
 		synchronized (handlers) {
 			for (ErrorHandler eh : handlers) {
 				eh.handleTaskDuplicatedSchedule(task);
@@ -53,7 +53,7 @@ public final class ErrorManagerAdapter implements ErrorManager {
 	}
 
 	@Override
-	public void singalInternalError(final Error err) {
+	public void signalInternalError(final Error err) {
 		synchronized (handlers) {
 			for (ErrorHandler eh : handlers) {
 				eh.handleInternalError(err);

@@ -10,8 +10,8 @@ public interface ErrorManager {
 	
 	/* singal errors */
 	public void signalTaskException(final Task task, final Throwable  e);
-	public void singalDependencyCycle(final Task task);
-	public void singalTaskDuplicatedSchedule(final Task task);
-	public void singalInternalError(final Error err);
+	public void signalDependencyCycle(final Task task);
+	public void signalTaskDuplicatedSchedule(final Task task);
+	public void signalInternalError(final Error err);
 	public void signalLockingDeadlock();
 }
