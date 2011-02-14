@@ -39,6 +39,8 @@ public interface Runtime {
     /* add a task along with it's parent and dependencies */
     public void schedule(Task task, Task parent, Collection<Task> deps) ;
 
+    /* check whether runtime has enough tasks to processes */
+    public boolean parallelize();
 
     /* create a new data group object */
     public DataGroup createDataGroup() ;

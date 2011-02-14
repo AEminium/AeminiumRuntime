@@ -32,6 +32,7 @@ import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerA
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;
+import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
@@ -52,6 +53,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
+	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
 	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
 	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
@@ -155,6 +157,19 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		graph.addTask((ImplicitTask)task, parent, deps);
 	}
 
+	@Override
+	public final boolean parallelize() {
+		Thread thread = Thread.currentThread();
+		if ( thread instanceof WorkStealingThread ) {
+			if ( ((WorkStealingThread)thread).getTaskQueue().size() > parallelizeThreshold ) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		return true;
+	}
+	
 	public final ExecutorService getExecutorService() {
 		synchronized (this) {
 			if ( executorService == null ) {
