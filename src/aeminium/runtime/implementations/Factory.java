@@ -37,7 +37,25 @@ public class Factory {
 	public final static Runtime getRuntime() {
 		//return getRuntime(Configuration.getImplementation());
 		if ( rt == null ) {
-			rt = new ImplicitWorkStealingRuntime();
+			synchronized (Factory.class) {
+				if ( Configuration.getImplementation().equals("default")) {
+					rt = new ImplicitWorkStealingRuntime();
+				} else {
+					// try to load runtime from specified class 
+					ClassLoader cl = Factory.class.getClassLoader();
+					try {
+						Class<?> klazz = cl.loadClass(Configuration.getImplementation());
+						Object obj = klazz.newInstance();
+						rt = (Runtime)obj;
+					} catch (ClassNotFoundException e) {
+						throw new Error("Cannot load runtime class : " + Configuration.getImplementation(),e);
+					} catch (InstantiationException e) {
+						throw new Error("Cannot instantiate class : " + Configuration.getImplementation(),e);
+					} catch (IllegalAccessException e) {
+						throw new Error("Cannot access class : " + Configuration.getImplementation(),e);
+					}
+				}
+			}
 		}
 		return rt;
 	}	
