@@ -27,7 +27,7 @@ import aeminium.runtime.implementations.Factory;
 public class AeminiumFibonacci {
 
 	public static class FibBody implements Body {
-		public volatile int value;
+		public int value;
 		private int threshold;
 		
 		public FibBody(int n, int threshold) {
