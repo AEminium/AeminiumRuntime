@@ -26,7 +26,7 @@ import aeminium.runtime.implementations.Factory;
 
 
 class FibBody implements Body {
-	public int value;
+	public volatile int value;
 	
 	FibBody(int n) {
 		value = n;
