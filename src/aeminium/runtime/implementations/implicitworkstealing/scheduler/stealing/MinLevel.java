@@ -67,7 +67,7 @@ public class MinLevel implements WorkStealingAlgorithm {
 		}
 		
 		WorkStealingThread smallest = threads[(current.index+threads.length-1)%threads.length];
-		int smallestCount     = smallest.getLocalQueueSize();
+		int smallestCount     =  100000; //smallest.getLocalQueueSize();
 		for ( int i = 1;  i < threads.length ; i++ ) {
 			WorkStealingThread next = threads[(current.index+threads.length-i)%threads.length];
 			ImplicitTask task = next.peekStealingTask();
