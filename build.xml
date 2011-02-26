@@ -19,7 +19,7 @@
     </target>
 
     <target name="Fibonacci-Aeminium">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
+        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.FibonacciBenchmarkExecutor">
             <arg value="run"/>
             <arg value="AeminiumFibonacciBenchmark"/>
             <classpath refid="rt.classpath"/>
@@ -27,7 +27,7 @@
     </target>
 
     <target name="Fibonacci-ForkJoin">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
+        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.FibonacciBenchmarkExecutor">
             <arg value="run"/>
             <arg value="ForkJoinFibonacciBenchmark"/>
             <classpath refid="rt.classpath"/>
@@ -35,7 +35,7 @@
     </target>
 
     <target name="Fibonacci-Sequential">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.fibonacci.FibonacciBenchmarkExecutor">
+        <java fork="yes" classname="aeminium/runtime/tools/benchmark/forkjoin/FibonacciBenchmarkSuite">
             <arg value="run"/>
             <arg value="SequentialFibonacciBenchmark"/>
             <classpath refid="rt.classpath"/>

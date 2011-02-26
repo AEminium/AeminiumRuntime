@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry excluding="aeminium/runtime/prioritizer/|aeminium/runtime/prioritizer/lowestlevelfirst/|aeminium/runtime/scheduler/|aeminium/runtime/scheduler/forkjoin/|aeminium/runtime/scheduler/linear/|aeminium/runtime/scheduler/singlethreadpool/cached/|aeminium/runtime/scheduler/singlethreadpool/fixed/|aeminium/runtime/scheduler/workstealing/blocking/|aeminium/runtime/scheduler/workstealing/polling/|aeminium/runtime/task/|aeminium/runtime/task/implicit/|aeminium/runtime/datagroup/|aeminium/runtime/graph/|aeminium/runtime/implementations/generic/" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jsr166y.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
