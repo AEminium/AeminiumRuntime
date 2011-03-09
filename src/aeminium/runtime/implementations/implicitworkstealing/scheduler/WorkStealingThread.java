@@ -29,7 +29,8 @@ public final class WorkStealingThread extends AeminiumThread {
 	protected final ImplicitWorkStealingRuntime rt;
 	public final int index;
 	protected volatile boolean shutdown = false;
-	protected final int pollingCount = Configuration.getProperty(getClass(), "pollingCount", 5);
+	protected final int pollingCount   = Configuration.getProperty(getClass(), "pollingCount", 5);
+	public int remainingRecursionDepth = Configuration.getProperty(getClass(), "maxRecursionDepth", 512);;
 	protected WorkStealingQueue<ImplicitTask> taskQueue;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	

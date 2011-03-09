@@ -141,13 +141,15 @@ public final class BlockingWorkStealingScheduler {
 			if ( thread instanceof WorkStealingThread) {
 				WorkStealingThread wthread = (WorkStealingThread)thread;
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
-				if ( taskQueue.size() < maxQueueLength ) {
+				if ( taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0 ) {
 					taskQueue.push(task);
 					if ( taskQueue.size() <= 1 ) {
 						signalWork();
 					}
 				} else {
+					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
+					wthread.remainingRecursionDepth++;
 				}
 			} else {
 				submissionQueue.add(task);
@@ -161,8 +163,10 @@ public final class BlockingWorkStealingScheduler {
 				if ( oneTaskPerLevel ) {
 					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
-					if ( head != null && head.level == task.level ) {
+					if ( head != null && head.level == task.level && wthread.remainingRecursionDepth > 0 ) {
+						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
+						wthread.remainingRecursionDepth++;
 					} else {
 						taskQueue.push(task);
 						if ( taskQueue.size() <= 1 ) {
