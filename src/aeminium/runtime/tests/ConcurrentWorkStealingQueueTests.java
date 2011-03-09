@@ -82,4 +82,76 @@ public class ConcurrentWorkStealingQueueTests {
 		wsq.push("7");
 		assertEquals( 5, wsq.size());
 	}
+
+	@Test(timeout=3000)
+	public void stessTest() {
+		final int N = 10000000;
+		final WorkStealingQueue<Integer> wsq = new ConcurrentWorkStealingQueue<Integer>(13);
+		
+		Thread producer = new Thread(new Runnable() {	
+			@Override
+			public void run() {
+				int counter = 0;
+				for (int i = 0; i < N ; i++ ) {
+					wsq.push(i);
+					if ( i % 12 == 0 ) {
+						Integer value = wsq.pop();
+						if (value != null ) {
+							counter++;
+						}
+					}
+				}
+				wsq.push(Integer.MAX_VALUE);
+				wsq.push(Integer.MAX_VALUE);
+				System.out.println("Producer consumed " + counter);
+			}
+		});
+		
+		Thread consumer1 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				int counter = 0;
+				while (true) {
+					Integer value = wsq.tryStealing();
+					if ( value != null ) {
+						if ( value == Integer.MAX_VALUE ) {
+							break;
+						}
+						counter++;
+					}
+				}
+				System.out.println("Consumer1 consumed " + counter);
+			}
+		});
+
+		Thread consumer2 = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				int counter = 0;
+				while ( true ) {
+					Integer value = wsq.tryStealing();
+					if ( value != null ) {
+						if ( value == Integer.MAX_VALUE ) {
+							break;
+						}
+						counter++;
+					}
+				}
+				System.out.println("Consumer2 consumed " + counter);
+			}
+		});
+
+		
+		consumer1.start();
+		consumer2.start();
+		producer.start();
+		
+		try {
+			consumer1.join();
+			consumer2.join();
+			producer.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 }
