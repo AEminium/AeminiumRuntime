@@ -116,6 +116,35 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 				}
 			};
 		}
+		errorManager.addErrorHandler(new ErrorHandler() {
+			private final String PREFIX = "[AEMINIUM] ";
+			
+			@Override
+			public void handleTaskException(Task task, Throwable t) {
+				System.err.println(PREFIX + "Task " + task + " threw exception: " + t);
+			}
+			
+			@Override
+			public void handleTaskDuplicatedSchedule(Task task) {
+				System.err.println(PREFIX + "Duplicated task : " + task);
+			}
+			
+			@Override
+			public void handleLockingDeadlock() {
+				System.err.println(PREFIX + "Locking Deadlock.");
+			}
+			
+			@Override
+			public void handleInternalError(Error error) {
+				System.err.println(PREFIX + "INTERNAL ERROR : " + error);
+			}
+			
+			@Override
+			public void handleDependencyCycle(Task task) {
+				// TODO Auto-generated method stub
+				System.err.println(PREFIX + "Task " + task + " causes a dependency cycle.");
+			}
+		});
 		state = State.INITIALIZED;
 	}
 	
