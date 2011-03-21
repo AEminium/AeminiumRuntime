@@ -165,6 +165,10 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		}
 	}
 	
+	public final void waitToEmpty() {
+		graph.waitToEmpty();
+	}
+	
 	@Override
 	public final AtomicTask createAtomicTask(Body body, DataGroup datagroup, short hints) {
 		return new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
@@ -474,7 +478,5 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			
 		}
 	}
-
-
 
 }

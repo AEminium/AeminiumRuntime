@@ -53,8 +53,13 @@ public interface Runtime {
 	
     /* initialize runtime */
     public void init() ;
-    /* returns the current task object */
-    public void shutdown() ;
+    /* 
+     * wait until all task graph is empty and 
+     * frees all resources of the runtime 
+     */
+    public void shutdown();
+    /* wait until all tasks have been processed */
+    public void waitToEmpty();
     /* add a task along with it's parent and dependencies */
     public void schedule(Task task, Task parent, Collection<Task> deps) ;
 
