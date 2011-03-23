@@ -32,9 +32,9 @@ import aeminium.runtime.implementations.implicitworkstealing.datagroup.ImplicitW
 public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask {
 	protected ImplicitWorkStealingRuntimeDataGroup datagroup;
 	protected ImplicitAtomicTask atomicParent = null;
-	protected Set<DataGroup> requiredGroups;
+	protected volatile Set<DataGroup> requiredGroups;
 
-	public ImplicitAtomicTask(Body body, ImplicitWorkStealingRuntimeDataGroup datagroup,	short hints) {
+	public ImplicitAtomicTask(Body body, ImplicitWorkStealingRuntimeDataGroup datagroup, short hints) {
 		super(body, hints);
 		this.datagroup = datagroup;
 	}
