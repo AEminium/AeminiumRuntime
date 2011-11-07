@@ -33,6 +33,8 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import profiler.AeminiumProfiler;
+
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -68,9 +70,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ExecutorService executorService;
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
+	protected AeminiumProfiler profiler;
 	protected ErrorManager errorManager;
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
+	protected final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", false);
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
 	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
@@ -88,6 +92,10 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		scheduler    = new BlockingWorkStealingScheduler(this);
 		eventManager = new EventManager();
 		errorManager = new ErrorManagerAdapter();
+		
+		if (enableProfiler) {
+			profiler = new AeminiumProfiler(scheduler, graph);
+		}
 	}
 	
 	@Override
@@ -98,6 +106,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		eventManager.init();
 		graph.init(eventManager);
 		scheduler.init(eventManager);
+		
+		if (enableProfiler) {
+			profiler.start();
+		}
+		
 		if ( enableGraphViz ) {
 			digraphviz = new DiGraphViz(graphVizName, ranksep, rankdir);
 		}
@@ -151,6 +164,13 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	@Override
 	public final void shutdown()  {
 		if ( state != State.UNINITIALIZED ) {
+			
+			System.out.println("WAALALALALALALA");
+			
+			if (enableProfiler) {
+				profiler.stopExecution();
+			}
+			
 			graph.waitToEmpty();
 			scheduler.shutdown();
 			eventManager.shutdown();
