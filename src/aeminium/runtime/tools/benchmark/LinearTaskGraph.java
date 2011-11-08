@@ -60,7 +60,8 @@ public class LinearTaskGraph implements Benchmark {
 		long end = System.nanoTime();
 		
 		String result = String.format("Run %10d tasks in %12d ns ==> %10d ns per task | %6d tasks/second.", count, (end-start), ((end-start)/count),  (1000000000/((end-start)/count)));
-		reporter.reportLn(result);
+		String profilerResult = String.format("\nThe profiler has collected %10d samples.", rt.getProfiler().getDataList().size());
+		reporter.reportLn(result + profilerResult);
 
 	}
 	

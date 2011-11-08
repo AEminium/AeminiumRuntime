@@ -10,25 +10,26 @@ public class AeminiumProfiler extends Thread implements Profiler {
 	
 	private final long SLEEP_PRECISION = 1;
 	private final long SPIN_YIELD_PRECISION = 1;
-	private final long SLEEPING_TIME = 1000;
+	private final long SLEEPING_TIME = 1;
 	
 	private BlockingWorkStealingScheduler scheduler;
 	private ImplicitGraph graph;
 	private LinkedList<DataCollection> dataList;
 	
-	private boolean isToContinue = true;
+	private volatile boolean isToContinue = true;
 	
 	public AeminiumProfiler(BlockingWorkStealingScheduler scheduler, ImplicitGraph graph) {
 		
 		this.scheduler = scheduler;
 		this.graph = graph;
 		this.dataList = new LinkedList<DataCollection>();
+		
+		this.start();
 	}
 	
 	public void run() {
 
 		while (isToContinue) {
-			
 			DataCollection data = new DataCollection();
 			
 			/* We first collect the data concerning the graph. */
@@ -57,17 +58,18 @@ public class AeminiumProfiler extends Thread implements Profiler {
 	            timeLeft = end - System.nanoTime();
 	
 	        } while (timeLeft > 0 && isToContinue);
-	        
-	        System.out.println("OUT OUT OUT");
 	    }
-		
-		System.out.println("We have collected: " + dataList.size());
 	}
 	
 	@Override
-	public synchronized void stopExecution()
-	{
-		System.out.println("HERE");
+	public void stopExecution() {
+		
+		System.out.println("Profiler has been ordered to stop...");
 		this.isToContinue = false;
+	}
+	
+	@Override
+	public LinkedList<DataCollection> getDataList() {
+		return dataList;
 	}
 }

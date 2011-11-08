@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+import profiler.AeminiumProfiler;
+
 public interface Runtime {
     /* global constants used for the */
     public final static Collection<Task> NO_DEPS = new ArrayList<Task>() {
@@ -81,4 +83,7 @@ public interface Runtime {
     /* add/remove error handlers */
     public void addErrorHandler(ErrorHandler eh);
     public void removeErrorHandler(ErrorHandler eh);
+    
+    /* return the profiler for this runtime object */
+    public AeminiumProfiler getProfiler();
 }

@@ -58,6 +58,7 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomic
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
+import aeminium.runtime.tools.benchmark.StringBuilderReporter;
 import aeminium.runtime.utils.graphviz.DiGraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz.Color;
@@ -108,7 +109,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		scheduler.init(eventManager);
 		
 		if (enableProfiler) {
-			profiler.start();
+			//profiler.start();
 		}
 		
 		if ( enableGraphViz ) {
@@ -164,13 +165,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	@Override
 	public final void shutdown()  {
 		if ( state != State.UNINITIALIZED ) {
-			
-			System.out.println("WAALALALALALALA");
-			
-			if (enableProfiler) {
-				profiler.stopExecution();
-			}
-			
 			graph.waitToEmpty();
 			scheduler.shutdown();
 			eventManager.shutdown();
@@ -182,6 +176,10 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			executorService = null;
 			dataGroupFactory = null;
 			state = State.UNINITIALIZED;
+			
+			if (enableProfiler) {
+				profiler.stopExecution();
+			}
 		}
 	}
 	
@@ -253,6 +251,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	
 	public DiGraphViz getGraphViz() {
 		return this.digraphviz;
+	}
+	
+	@Override
+	public AeminiumProfiler getProfiler() {
+		return this.profiler;
 	}
 
 	@Override
