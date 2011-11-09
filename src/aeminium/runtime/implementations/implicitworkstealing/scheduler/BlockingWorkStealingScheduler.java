@@ -229,6 +229,9 @@ public final class BlockingWorkStealingScheduler {
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	public synchronized void collectData(DataCollection data) {
 		
+		if (threads == null)
+			return;
+		
 		for (int i = 0; i < threads.length; i++)
 		{
 			threads[i].getLocalQueueSize();

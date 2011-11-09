@@ -61,6 +61,11 @@ public class AeminiumProfiler extends AeminiumThread implements Profiler {
 	
 	        } while (timeLeft > 0 && shutdown);
 	    }
+		
+		/*for (int i = 0; i < dataList.size(); i++)
+		{
+			System.out.println(dataList.get(i).taskInNonBlockingQueue[0]);
+		}*/
 	}
 	
 	@Override
