@@ -32,6 +32,7 @@ import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEvent
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.AeminiumThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
+import aeminium.runtime.profiler.DataCollection;
 
 
 public class ImplicitGraph {
@@ -206,6 +207,14 @@ public class ImplicitGraph {
 				}
 			}
 		}
+	}
+	
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 *                                          PROFILER                                               *      
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	public synchronized void collectData(DataCollection data) {
+		
+		return;
 	}
 
 }

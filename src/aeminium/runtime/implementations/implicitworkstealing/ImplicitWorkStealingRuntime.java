@@ -33,8 +33,7 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import profiler.AeminiumProfiler;
-
+import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -58,7 +57,6 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomic
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
-import aeminium.runtime.tools.benchmark.StringBuilderReporter;
 import aeminium.runtime.utils.graphviz.DiGraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz.Color;
@@ -93,10 +91,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		scheduler    = new BlockingWorkStealingScheduler(this);
 		eventManager = new EventManager();
 		errorManager = new ErrorManagerAdapter();
-		
-		if (enableProfiler) {
-			profiler = new AeminiumProfiler(scheduler, graph);
-		}
 	}
 	
 	@Override
@@ -109,7 +103,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		scheduler.init(eventManager);
 		
 		if (enableProfiler) {
-			//profiler.start();
+			profiler = new AeminiumProfiler(scheduler, graph);
 		}
 		
 		if ( enableGraphViz ) {
@@ -178,7 +172,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			state = State.UNINITIALIZED;
 			
 			if (enableProfiler) {
-				profiler.stopExecution();
+				profiler.shutdown();
 			}
 		}
 	}

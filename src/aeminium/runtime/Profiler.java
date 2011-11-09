@@ -2,10 +2,10 @@ package aeminium.runtime;
 
 import java.util.LinkedList;
 
-import profiler.DataCollection;
+import aeminium.runtime.profiler.DataCollection;
 
 public interface Profiler {
 	
-	public void stopExecution();
+	public void shutdown();
 	public LinkedList<DataCollection> getDataList();
 }

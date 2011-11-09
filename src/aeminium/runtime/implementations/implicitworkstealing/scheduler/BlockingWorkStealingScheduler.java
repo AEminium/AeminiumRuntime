@@ -30,6 +30,7 @@ import aeminium.runtime.implementations.implicitworkstealing.events.EventManager
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.WorkStealingAlgorithm;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
+import aeminium.runtime.profiler.DataCollection;
 
 public final class BlockingWorkStealingScheduler {
 	protected final ImplicitWorkStealingRuntime rt;
@@ -221,5 +222,23 @@ public final class BlockingWorkStealingScheduler {
 			task.taskFinished(rt);
 		}
 		return result;
+	}
+	
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 *                                          PROFILER                                               *      
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	public synchronized void collectData(DataCollection data) {
+		
+		for (int i = 0; i < threads.length; i++)
+		{
+			threads[i].getLocalQueueSize();
+			data.taskInNonBlockingQueue[i]++;
+		}
+		
+		return;
+	}
+	
+	public int getMaxParallelism() {
+		return maxParallelism;
 	}
 }

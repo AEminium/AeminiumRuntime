@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import profiler.AeminiumProfiler;
+import aeminium.runtime.profiler.AeminiumProfiler;
 
 public interface Runtime {
     /* global constants used for the */
