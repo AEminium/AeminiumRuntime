@@ -44,6 +44,9 @@ public class ImplicitGraph {
 	protected final boolean debug;
 	protected boolean polling = false;
 	
+	/* Profiler information. */
+	
+	
 	private static final class TaskCounter {
 		protected final Thread thread;
 		public volatile int taskCount = 0;

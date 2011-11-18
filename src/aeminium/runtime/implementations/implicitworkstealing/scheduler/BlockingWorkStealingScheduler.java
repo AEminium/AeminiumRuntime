@@ -234,7 +234,8 @@ public final class BlockingWorkStealingScheduler {
 		
 		for (int i = 0; i < threads.length; i++)
 		{
-			threads[i].getLocalQueueSize();
+			data.taskInNonBlockingQueue[i] = threads[i].getLocalQueueSize();
+			data.tasksHandled[i] = threads[i].getNoTasksHandledAndReset();
 			data.taskInNonBlockingQueue[i]++;
 		}
 		

@@ -34,10 +34,15 @@ public final class WorkStealingThread extends AeminiumThread {
 	protected WorkStealingQueue<ImplicitTask> taskQueue;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
+	/* Profiler information. */
+	volatile int noTasksHandled;
+	
 	public WorkStealingThread(ImplicitWorkStealingRuntime rt, int index) {
 		this.rt           = rt;
 		this.index        = index;
 		setName("WorkerStealingThread-"+IdGenerator.incrementAndGet());
+		
+		noTasksHandled = 0;
 	}
 	
 	public final WorkStealingQueue<ImplicitTask> getTaskQueue() {
@@ -59,11 +64,13 @@ public final class WorkStealingThread extends AeminiumThread {
 			task = taskQueue.pop();
 			if ( task != null ) {
 				task.invoke(rt);
+				noTasksHandled++;
 			} else {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
 				if ( task != null ) {
 					task.invoke(rt);
+					noTasksHandled++;
 				} else {
 					if ( pollCounter == 0) {
 						rt.scheduler.parkThread(this);
@@ -101,6 +108,12 @@ public final class WorkStealingThread extends AeminiumThread {
 			return queue.size();
 		}
 		return 0;
+	}
+	
+	public final int getNoTasksHandledAndReset() {
+		int temp = noTasksHandled;
+		noTasksHandled = 0;
+		return temp;
 	}
 	
 	public final void progressToCompletion(ImplicitTask toComplete) {

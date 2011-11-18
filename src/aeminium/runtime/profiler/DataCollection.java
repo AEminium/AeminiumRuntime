@@ -7,10 +7,12 @@ public class DataCollection {
 	public int noOccupiedQueues;
 	public int [] taskInNonBlockingQueue;
 	public int [] taskInBlockingQueue;
+	public int [] tasksHandled;
 	
 	public DataCollection (int maxParallelism) {
 		
 		taskInNonBlockingQueue = new int[maxParallelism];
+		tasksHandled = new int[maxParallelism];
 		taskInBlockingQueue = new int[NO_BLOCKING_QUEUES];
 		
 	}
