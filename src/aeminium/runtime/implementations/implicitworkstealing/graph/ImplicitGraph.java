@@ -30,9 +30,14 @@ import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealin
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventListener;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.AeminiumThread;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
+import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
+import aeminium.runtime.profiler.TaskInfo;
 
 
 public class ImplicitGraph {
@@ -45,6 +50,16 @@ public class ImplicitGraph {
 	protected boolean polling = false;
 	
 	/* Profiler information. */
+	protected AeminiumProfiler profiler;
+	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
+	
+	volatile int noAtomicTasksCompleted = 0;
+	volatile int noBlockingTasksCompleted = 0;
+	volatile int noNonBlockingTasksCompleted = 0;
+	
+	volatile int noWaitingForDependenciesTasks = 0;
+	volatile int noRunningTasks = 0;
+	volatile int noCompletedTasks = 0;
 	
 	
 	private static final class TaskCounter {
@@ -149,6 +164,14 @@ public class ImplicitGraph {
 
 			// setup dependencies
 			itask.state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
+			
+			if (enableProfiler) {
+				TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
+				
+				info.waitingForDependencies = System.nanoTime();
+				this.noWaitingForDependenciesTasks++;
+			}
+			
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
 				for ( Task t : deps) {
@@ -159,10 +182,26 @@ public class ImplicitGraph {
 				if ( itask.depCount == 0 ) {
 					itask.state = ImplicitTaskState.RUNNING;
 					schedule = true;
+					
+					if (enableProfiler) {
+						TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
+						info.running = System.nanoTime();
+						
+						this.noWaitingForDependenciesTasks--;
+						this.noRunningTasks++;
+					}
 				}
 			} else {
 				itask.state = ImplicitTaskState.RUNNING;
 				schedule = true;
+				
+				if (enableProfiler) {
+					TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
+					info.running = System.nanoTime();
+					
+					this.noWaitingForDependenciesTasks--;
+					this.noRunningTasks++;
+				}
 			}			
 		}
 		
@@ -183,6 +222,21 @@ public class ImplicitGraph {
 			((AeminiumThread)thread).taskCount--;
 		} else {
 			taskCounters.get().taskCount--;
+		}
+		
+		if (enableProfiler) {
+			TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+			info.completed = System.nanoTime();
+			
+			if (task instanceof ImplicitAtomicTask)
+				noAtomicTasksCompleted++;
+			else if (task instanceof ImplicitBlockingTask)
+				noBlockingTasksCompleted++;
+			else if (task instanceof ImplicitNonBlockingTask)
+				noNonBlockingTasksCompleted++;
+			
+			this.noRunningTasks--;
+			this.noCompletedTasks++;
 		}
 	}
 	
@@ -217,7 +271,19 @@ public class ImplicitGraph {
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	public synchronized void collectData(DataCollection data) {
 		
+		data.noTasksCompleted[DataCollection.ATOMIC_TASK] = this.noAtomicTasksCompleted;
+		data.noTasksCompleted[DataCollection.BLOCKING_TASK] = this.noBlockingTasksCompleted;
+		data.noTasksCompleted[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksCompleted;
+		
+		data.noWaitingForDependenciesTasks = this.noWaitingForDependenciesTasks;
+		data.noRunningTasks = this.noRunningTasks;
+		data.noCompletedTasks = this.noCompletedTasks;
+		
 		return;
+	}
+	
+	public void setProfiler (AeminiumProfiler profiler) {
+		this.profiler = profiler;
 	}
 
 }

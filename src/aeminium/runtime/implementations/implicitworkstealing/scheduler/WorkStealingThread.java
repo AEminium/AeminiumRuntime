@@ -23,7 +23,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
+import aeminium.runtime.profiler.AeminiumProfiler;
+import aeminium.runtime.profiler.DataCollection;
+import aeminium.runtime.profiler.TaskInfo;
 
 public final class WorkStealingThread extends AeminiumThread {
 	protected final ImplicitWorkStealingRuntime rt;
@@ -35,14 +41,21 @@ public final class WorkStealingThread extends AeminiumThread {
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
 	/* Profiler information. */
-	volatile int noTasksHandled;
+	volatile int noAtomicTasksHandled;
+	volatile int noBlockingTasksHandled;
+	volatile int noNonBlockingTasksHandled;
+	
+	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
+	protected AeminiumProfiler profiler;
 	
 	public WorkStealingThread(ImplicitWorkStealingRuntime rt, int index) {
 		this.rt           = rt;
 		this.index        = index;
 		setName("WorkerStealingThread-"+IdGenerator.incrementAndGet());
 		
-		noTasksHandled = 0;
+		this.noAtomicTasksHandled = 0;
+		this.noBlockingTasksHandled = 0;
+		this.noNonBlockingTasksHandled = 0;
 	}
 	
 	public final WorkStealingQueue<ImplicitTask> getTaskQueue() {
@@ -63,14 +76,52 @@ public final class WorkStealingThread extends AeminiumThread {
 			ImplicitTask task = null;
 			task = taskQueue.pop();
 			if ( task != null ) {
+				
+				if (enableProfiler) {
+					TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+					info.exitedQueue = System.nanoTime();
+					info.startedExecution = System.nanoTime();
+				}
+				
 				task.invoke(rt);
-				noTasksHandled++;
+				
+				if (enableProfiler) {
+					TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+					info.endedExecution = System.nanoTime();
+					
+					if (task instanceof ImplicitAtomicTask)
+						noAtomicTasksHandled++;
+					else if (task instanceof ImplicitBlockingTask)
+						noBlockingTasksHandled++;
+					else if (task instanceof ImplicitNonBlockingTask)
+						noNonBlockingTasksHandled++;						
+				}
+				
+				
 			} else {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
 				if ( task != null ) {
+					if (enableProfiler) {
+						TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+						info.exitedQueue = System.nanoTime();
+						info.startedExecution = System.nanoTime();
+					}
+					
 					task.invoke(rt);
-					noTasksHandled++;
+					
+					if (enableProfiler) {
+						TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+						info.endedExecution = System.nanoTime();
+						
+						if (task instanceof ImplicitAtomicTask)
+							noAtomicTasksHandled++;
+						else if (task instanceof ImplicitBlockingTask)
+							noBlockingTasksHandled++;
+						else if (task instanceof ImplicitNonBlockingTask)
+							noNonBlockingTasksHandled++;
+					}
+					
 				} else {
 					if ( pollCounter == 0) {
 						rt.scheduler.parkThread(this);
@@ -82,6 +133,7 @@ public final class WorkStealingThread extends AeminiumThread {
 				}
 			}
 		}
+		
 		rt.scheduler.unregisterThread(this);
 		taskQueue = null;
 	}
@@ -110,12 +162,6 @@ public final class WorkStealingThread extends AeminiumThread {
 		return 0;
 	}
 	
-	public final int getNoTasksHandledAndReset() {
-		int temp = noTasksHandled;
-		noTasksHandled = 0;
-		return temp;
-	}
-	
 	public final void progressToCompletion(ImplicitTask toComplete) {
 		int pollCounter = pollingCount;
 		while ( !toComplete.isCompleted() ) {
@@ -139,6 +185,21 @@ public final class WorkStealingThread extends AeminiumThread {
 				}
 			}
 		}
+	}
+	
+	public final void getNoTasksHandledAndReset(int taskHandled[]) {
+		
+		taskHandled[DataCollection.ATOMIC_TASK] = this.noAtomicTasksHandled;
+		taskHandled[DataCollection.BLOCKING_TASK] = this.noBlockingTasksHandled;
+		taskHandled[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksHandled;
+		
+		this.noAtomicTasksHandled = 0;
+		this.noBlockingTasksHandled = 0;
+		this.noNonBlockingTasksHandled = 0;
+	}
+	
+	public void setProfiler(AeminiumProfiler profiler) {
+		this.profiler = profiler;
 	}
 	
 	public final String toString() {

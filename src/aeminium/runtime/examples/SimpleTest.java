@@ -19,7 +19,8 @@
 
 package aeminium.runtime.examples;
 
-import aeminium.runtime.tools.benchmark.LinearTaskGraph;
+import aeminium.runtime.tools.benchmark.FibonacciBenchmark;
+//import aeminium.runtime.tools.benchmark.LinearTaskGraph;
 import aeminium.runtime.tools.benchmark.StringBuilderReporter;
 
 public class SimpleTest {
@@ -29,8 +30,11 @@ public class SimpleTest {
 		//FibonacciBenchmark fib = new FibonacciBenchmark();
 		//fib.runTest(new StringBuilderReporter(), 1000);
 		
-		LinearTaskGraph taskGraph = new LinearTaskGraph();
-		taskGraph.run(new StringBuilderReporter());
+		//LinearTaskGraph taskGraph = new LinearTaskGraph();
+		//taskGraph.run(new StringBuilderReporter());
+		
+		FibonacciBenchmark fibonacci = new FibonacciBenchmark();
+		fibonacci.runTest(new StringBuilderReporter(), 20);
 		
 	}
 }

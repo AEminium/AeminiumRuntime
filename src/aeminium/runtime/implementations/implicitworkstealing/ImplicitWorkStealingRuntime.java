@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import aeminium.runtime.profiler.AeminiumProfiler;
+import aeminium.runtime.profiler.TaskInfo;
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -73,7 +74,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ErrorManager errorManager;
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
-	protected final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", false);
+	protected final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
 	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
@@ -98,12 +99,16 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		if ( state != State.UNINITIALIZED ) {
 			throw new Error("Cannot initialize runtime multiple times.");
 		}
+		
 		eventManager.init();
 		graph.init(eventManager);
 		scheduler.init(eventManager);
 		
 		if (enableProfiler) {
 			profiler = new AeminiumProfiler(scheduler, graph);
+			
+			this.graph.setProfiler(profiler);
+			this.scheduler.setProfiler(profiler);
 		}
 		
 		if ( enableGraphViz ) {
@@ -183,18 +188,45 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	
 	@Override
 	public final AtomicTask createAtomicTask(Body body, DataGroup datagroup, short hints) {
+		
+		if (enableProfiler) {
+			
+			ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
+			profiler.setTaskInfo(task);
+			
+			return task;
+		}
+		
 		return new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
 	}
 
 	@Override
 	public final BlockingTask createBlockingTask(Body body, short hints)
 			 {
+		
+		if (enableProfiler) {
+			
+			ImplicitBlockingTask task = new ImplicitBlockingTask(body, hints);
+			profiler.setTaskInfo(task);
+			
+			return task;
+		}
+		
 		return new ImplicitBlockingTask(body, hints);
 	}
 	
 	@Override
 	public final NonBlockingTask createNonBlockingTask(Body body, short hints)
 			 {
+		
+		if (enableProfiler) {
+			
+			ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints);
+			profiler.setTaskInfo(task);
+			
+			return task;
+		}
+		
 		return new ImplicitNonBlockingTask(body, hints);
 	}
 
@@ -218,6 +250,12 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 				}
  			}
 		}
+		
+		if (enableProfiler) {
+			TaskInfo info = profiler.getTaskInfo(task.hashCode());
+			info.addedToGraph = System.nanoTime();
+		}
+		
 		graph.addTask((ImplicitTask)task, parent, deps);
 	}
 
