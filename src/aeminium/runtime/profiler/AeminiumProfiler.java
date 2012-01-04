@@ -41,10 +41,10 @@ public class AeminiumProfiler extends AeminiumThread implements Profiler {
 		String directoryName = (((new Date()).toString()).replace(" ", "_")
 								.replaceFirst(":", "h")).replaceFirst(":", "m");
 		
-		//this.directoryPath = "C:/Users/Alcides/Desktop/Ivo/SavedData/" + directoryName + 
-		//						"_" + System.nanoTime() + "/";
-		this.directoryPath = "E:/Ivo/FCTUC/AEminium/SavedData/" + directoryName + 
+		this.directoryPath = "C:/Users/Alcides/Desktop/Ivo/SavedData/" + directoryName + 
 								"_" + System.nanoTime() + "/";
+		//this.directoryPath = "E:/Ivo/FCTUC/AEminium/SavedData/" + directoryName + 
+		//						"_" + System.nanoTime() + "/";
 	
 		createDirectory();
 		
@@ -186,8 +186,7 @@ class CsvFileWriter extends Thread {
 				 *   -> Number of tasks handled by this thread. 
 				 */
 				for (int i = 0; i < element.taskInNonBlockingQueue.length; i++) {
-					contents += element.taskInNonBlockingQueue[i]
-					            + "," + element.tasksHandled[i][0] +
+					contents += element.tasksHandled[i][0] +
 					              "," + element.tasksHandled[i][1] +
 					              "," + element.tasksHandled[i][2] + ",";
 				}
