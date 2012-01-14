@@ -27,14 +27,21 @@ public class SimpleTest {
 
 	public static void main(String[] args) {
 		
-		//FibonacciBenchmark fib = new FibonacciBenchmark();
-		//fib.runTest(new StringBuilderReporter(), 1000);
-		
 		//LinearTaskGraph taskGraph = new LinearTaskGraph();
 		//taskGraph.run(new StringBuilderReporter());
 		
+		int value;
+		
+		if (args.length < 1) 
+		{
+			value = 20;
+		} else
+		{
+			value = Integer.parseInt(args[0]);
+		}
+		
 		FibonacciBenchmark fibonacci = new FibonacciBenchmark();
-		fibonacci.runTest(new StringBuilderReporter(), 20);
+		fibonacci.runTest(new StringBuilderReporter(), value);
 		
 	}
 }

@@ -37,7 +37,6 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
-import aeminium.runtime.profiler.TaskInfo;
 
 
 public class ImplicitGraph {
@@ -165,10 +164,11 @@ public class ImplicitGraph {
 			// setup dependencies
 			itask.state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
 			
+			//TODO: REMOVE THIS
 			if (enableProfiler) {
-				TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
+				//TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
 				
-				info.waitingForDependencies = System.nanoTime();
+				//info.waitingForDependencies = System.nanoTime();
 				this.noWaitingForDependenciesTasks++;
 			}
 			
@@ -183,9 +183,10 @@ public class ImplicitGraph {
 					itask.state = ImplicitTaskState.RUNNING;
 					schedule = true;
 					
+					//TODO: REMOVE THIS
 					if (enableProfiler) {
-						TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
-						info.running = System.nanoTime();
+						//TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
+						//info.running = System.nanoTime();
 						
 						this.noWaitingForDependenciesTasks--;
 						this.noRunningTasks++;
@@ -195,9 +196,10 @@ public class ImplicitGraph {
 				itask.state = ImplicitTaskState.RUNNING;
 				schedule = true;
 				
+				//TODO: REMOVE THIS
 				if (enableProfiler) {
-					TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
-					info.running = System.nanoTime();
+					//TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
+					//info.running = System.nanoTime();
 					
 					this.noWaitingForDependenciesTasks--;
 					this.noRunningTasks++;
@@ -224,16 +226,17 @@ public class ImplicitGraph {
 			taskCounters.get().taskCount--;
 		}
 		
+		//TODO: REMOVE THIS
 		if (enableProfiler) {
-			TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-			info.completed = System.nanoTime();
+			//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+			//info.completed = System.nanoTime();
 			
 			if (task instanceof ImplicitAtomicTask)
-				noAtomicTasksCompleted++;
+				this.noAtomicTasksCompleted++;
 			else if (task instanceof ImplicitBlockingTask)
-				noBlockingTasksCompleted++;
+				this.noBlockingTasksCompleted++;
 			else if (task instanceof ImplicitNonBlockingTask)
-				noNonBlockingTasksCompleted++;
+				this.noNonBlockingTasksCompleted++;
 			
 			this.noRunningTasks--;
 			this.noCompletedTasks++;

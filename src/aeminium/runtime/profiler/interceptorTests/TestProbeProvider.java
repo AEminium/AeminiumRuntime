@@ -9,7 +9,7 @@ import com.jprofiler.api.agent.probe.ProbeProvider;
 // The interceptor class and all referenced classes have to be in the boot classpath
 // so they can be accessed by the profiling agent. 
 public class TestProbeProvider implements ProbeProvider {
-
+	
     public Probe[] getProbes() {
         return new Probe[] {
             new MethodProbe()

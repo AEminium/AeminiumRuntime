@@ -29,7 +29,6 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlo
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
-import aeminium.runtime.profiler.TaskInfo;
 
 public final class WorkStealingThread extends AeminiumThread {
 	protected final ImplicitWorkStealingRuntime rt;
@@ -41,9 +40,9 @@ public final class WorkStealingThread extends AeminiumThread {
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
 	/* Profiler information. */
-	volatile int noAtomicTasksHandled;
-	volatile int noBlockingTasksHandled;
-	volatile int noNonBlockingTasksHandled;
+	private AtomicInteger noAtomicTasksHandled = new AtomicInteger(0);
+	private AtomicInteger noBlockingTasksHandled = new AtomicInteger(0);
+	private AtomicInteger noNonBlockingTasksHandled = new AtomicInteger(0);
 	
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected AeminiumProfiler profiler;
@@ -52,10 +51,6 @@ public final class WorkStealingThread extends AeminiumThread {
 		this.rt           = rt;
 		this.index        = index;
 		setName("WorkerStealingThread-"+IdGenerator.incrementAndGet());
-		
-		this.noAtomicTasksHandled = 0;
-		this.noBlockingTasksHandled = 0;
-		this.noNonBlockingTasksHandled = 0;
 	}
 	
 	public final WorkStealingQueue<ImplicitTask> getTaskQueue() {
@@ -75,26 +70,32 @@ public final class WorkStealingThread extends AeminiumThread {
 		while (!shutdown) {
 			ImplicitTask task = null;
 			task = taskQueue.pop();
+			
 			if ( task != null ) {
 				
+				//TODO: REMOVE THIS
 				if (enableProfiler) {
-					TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					info.exitedQueue = System.nanoTime();
-					info.startedExecution = System.nanoTime();
+					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+					//info.exitedQueue = System.nanoTime();
+					//info.startedExecution = System.nanoTime();
 				}
+				
+				System.out.println("AT LEAST ENTERED");
 				
 				task.invoke(rt);
 				
+				
+				//TODO: REMOVE THIS
 				if (enableProfiler) {
-					TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					info.endedExecution = System.nanoTime();
+					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+					//info.endedExecution = System.nanoTime();
 					
 					if (task instanceof ImplicitAtomicTask)
-						noAtomicTasksHandled++;
+						noAtomicTasksHandled.getAndIncrement();
 					else if (task instanceof ImplicitBlockingTask)
-						noBlockingTasksHandled++;
+						noBlockingTasksHandled.getAndIncrement();
 					else if (task instanceof ImplicitNonBlockingTask)
-						noNonBlockingTasksHandled++;						
+						noNonBlockingTasksHandled.getAndIncrement();						
 				}
 				
 				
@@ -102,24 +103,27 @@ public final class WorkStealingThread extends AeminiumThread {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
 				if ( task != null ) {
+					
+					//TODO: REMOVE THIS
 					if (enableProfiler) {
-						TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-						info.exitedQueue = System.nanoTime();
-						info.startedExecution = System.nanoTime();
+						//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+						//info.exitedQueue = System.nanoTime();
+						//info.startedExecution = System.nanoTime();
 					}
 					
 					task.invoke(rt);
 					
+					//REMOVE THIS
 					if (enableProfiler) {
-						TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-						info.endedExecution = System.nanoTime();
+						//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+						//info.endedExecution = System.nanoTime();
 						
 						if (task instanceof ImplicitAtomicTask)
-							noAtomicTasksHandled++;
+							noAtomicTasksHandled.getAndIncrement();
 						else if (task instanceof ImplicitBlockingTask)
-							noBlockingTasksHandled++;
+							noBlockingTasksHandled.getAndIncrement();
 						else if (task instanceof ImplicitNonBlockingTask)
-							noNonBlockingTasksHandled++;
+							noNonBlockingTasksHandled.getAndIncrement();
 					}
 					
 				} else {
@@ -187,15 +191,13 @@ public final class WorkStealingThread extends AeminiumThread {
 		}
 	}
 	
-	public final void getNoTasksHandledAndReset(int taskHandled[]) {
+	/* Added for profiler. */
+	public final void getNoTasksHandled(int taskHandled[]) {
 		
-		taskHandled[DataCollection.ATOMIC_TASK] = this.noAtomicTasksHandled;
-		taskHandled[DataCollection.BLOCKING_TASK] = this.noBlockingTasksHandled;
-		taskHandled[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksHandled;
-		
-		this.noAtomicTasksHandled = 0;
-		this.noBlockingTasksHandled = 0;
-		this.noNonBlockingTasksHandled = 0;
+		taskHandled[DataCollection.ATOMIC_TASK] = this.noAtomicTasksHandled.get();
+		taskHandled[DataCollection.BLOCKING_TASK] = this.noBlockingTasksHandled.get();
+		taskHandled[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksHandled.get();
+
 	}
 	
 	public void setProfiler(AeminiumProfiler profiler) {
@@ -204,5 +206,17 @@ public final class WorkStealingThread extends AeminiumThread {
 	
 	public final String toString() {
 		return getName();
+	}
+	
+	public void incrementNoBlockingTasksHandled() {
+		this.noBlockingTasksHandled.getAndIncrement();
+	}
+	
+	public void incrementNoNonBlockingTasksHandled() {
+		this.noNonBlockingTasksHandled.getAndIncrement();
+	}
+	
+	public void incrementNoAtomicTasksHandled() {
+		this.noAtomicTasksHandled.getAndIncrement();
 	}
 }

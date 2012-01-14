@@ -28,11 +28,12 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.WorkStealingAlgorithm;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
-import aeminium.runtime.profiler.TaskInfo;
 
 public final class BlockingWorkStealingScheduler {
 	protected final ImplicitWorkStealingRuntime rt;
@@ -149,9 +150,10 @@ public final class BlockingWorkStealingScheduler {
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 				if ( taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0 ) {
 					
+					//TODO: REMOVE THIS
 					if (enableProfiler) {
-						TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-						info.enteredQueue = System.nanoTime();
+						//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+						//info.enteredQueue = System.nanoTime();
 					}
 					
 					taskQueue.push(task);
@@ -162,11 +164,21 @@ public final class BlockingWorkStealingScheduler {
 					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
 					wthread.remainingRecursionDepth++;
+					
+					if (enableProfiler) {
+						if (task instanceof ImplicitAtomicTask)
+							wthread.incrementNoAtomicTasksHandled();
+						else if (task instanceof ImplicitBlockingTask)
+							wthread.incrementNoBlockingTasksHandled();
+						else if (task instanceof ImplicitNonBlockingTask)
+							wthread.incrementNoNonBlockingTasksHandled();
+					}
 				}
 			} else {
+				//TODO: REMOVE THIS
 				if (enableProfiler) {
-					TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					info.enteredQueue = System.nanoTime();
+					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+					//info.enteredQueue = System.nanoTime();
 				}
 				
 				submissionQueue.add(task);
@@ -184,11 +196,22 @@ public final class BlockingWorkStealingScheduler {
 						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
 						wthread.remainingRecursionDepth++;
-					} else {
 						
 						if (enableProfiler) {
-							TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-							info.enteredQueue = System.nanoTime();
+							if (task instanceof ImplicitAtomicTask)
+								wthread.incrementNoAtomicTasksHandled();
+							else if (task instanceof ImplicitBlockingTask)
+								wthread.incrementNoBlockingTasksHandled();
+							else if (task instanceof ImplicitNonBlockingTask)
+								wthread.incrementNoNonBlockingTasksHandled();
+						}
+						
+					} else {
+						
+						//TODO: REMOVE THIS
+						if (enableProfiler) {
+							//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+							//info.enteredQueue = System.nanoTime();
 						}
 						
 						taskQueue.push(task);
@@ -204,9 +227,10 @@ public final class BlockingWorkStealingScheduler {
 				}
 			} else {
 				// external thread
+				//TODO: REMOVE THIS
 				if (enableProfiler) {
-					TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					info.enteredQueue = System.nanoTime();
+					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
+					//info.enteredQueue = System.nanoTime();
 				}
 				
 				submissionQueue.add(task);
@@ -262,8 +286,9 @@ public final class BlockingWorkStealingScheduler {
 		for (int i = 0; i < threads.length; i++)
 		{
 			data.taskInNonBlockingQueue[i] = threads[i].getLocalQueueSize();
-			threads[i].getNoTasksHandledAndReset(data.tasksHandled[i]);
-			data.taskInNonBlockingQueue[i]++;
+			threads[i].getNoTasksHandled(data.tasksHandled[i]);
+			//TODO: Why this? Aren't we collecting data for blocking queue?
+			//data.taskInNonBlockingQueue[i]++;
 		}
 		
 		return;

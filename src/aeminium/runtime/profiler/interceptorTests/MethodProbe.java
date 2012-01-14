@@ -3,16 +3,19 @@ package aeminium.runtime.profiler.interceptorTests;
 import com.jprofiler.api.agent.probe.*;
 
 @SuppressWarnings("rawtypes")
-public class MethodProbe implements InterceptorProbe {
+public class MethodProbe implements InterceptorProbe, TelemetryProbe {
+	
+	public static int number = 1;
 	
 	public void interceptionEnter(InterceptorContext context, Object object, Class declaringClass, String declaringClassName, String methodName, String methodSignature, Object[] parameters) {
         
 		System.out.println("INTERCEPTION ENTERED!!");
 		
-		System.out.println("Has " + (String) parameters[0]);
+		System.out.println("Has " + methodName);
 		
 		// the "loadFactor" parameter is the content of the payload
-        PayloadInfo payloadInfo = context.createPayloadInfo(parameters[0].getClass().getName());
+        PayloadInfo payloadInfo = context.createPayloadInfo(parameters[0].getClass().getName());   
+        
         // save payload for use in interceptionExit
         context.push(payloadInfo);
     }
@@ -27,7 +30,8 @@ public class MethodProbe implements InterceptorProbe {
         if (context.isPayloadStackEmpty()) {
             // perform the time measurement relative to the creation of the payload info and
             // attach the payload to the current call stack, so it is displayed in the call tree and the hot spot list
-            context.addPayloadInfo(payloadInfo.calculateTime());
+            payloadInfo.setDescription("Exited payload");
+        	context.addPayloadInfo(payloadInfo.calculateTime());
         }
     }
 
@@ -37,7 +41,9 @@ public class MethodProbe implements InterceptorProbe {
     }
 
     public ProbeMetaData getMetaData() {
-        return ProbeMetaData.create("AWT event types").payload(true);
+        return ProbeMetaData.create("Method Testing").events(true).payload(true).recordOnStartup(true)
+        		.addAdditionalData("Another Column", DataType.INT)
+        		.telemetry(true).addCustomTelemetry("Number", Unit.PLAIN, 1f);
     }
 
     public InterceptionMethod[] getInterceptionMethods() {
@@ -57,4 +63,12 @@ public class MethodProbe implements InterceptorProbe {
     	
     	return methods2Intercept;
     }
+
+	@Override
+	public void fillTelemetryData(ProbeContext context, int[] arg1) {
+		
+		arg1[0] = number++;
+		// TODO Auto-generated method stub
+		
+	}
 }

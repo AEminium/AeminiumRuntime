@@ -52,6 +52,9 @@ public abstract class ImplicitTask implements Task {
 	public short level;
 	public Thread waiter;    // we could same this and just mention that there is someone waiting
 
+	/* Added for profiler. */
+	public int id;
+	
 	public ImplicitTask(Body body, short hints) {
 		this.body = body;
 		this.hints = hints;

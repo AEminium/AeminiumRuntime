@@ -32,9 +32,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.profiler.AeminiumProfiler;
-import aeminium.runtime.profiler.TaskInfo;
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -81,6 +81,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
+	
+	/* Added for profiler. */
+	private AtomicInteger idCounter = new AtomicInteger(0);
 	
 	public enum State {
 		UNINITIALIZED,
@@ -175,10 +178,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			executorService = null;
 			dataGroupFactory = null;
 			state = State.UNINITIALIZED;
-			
-			if (enableProfiler) {
-				profiler.shutdown();
-			}
 		}
 	}
 	
@@ -189,45 +188,30 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	@Override
 	public final AtomicTask createAtomicTask(Body body, DataGroup datagroup, short hints) {
 		
-		if (enableProfiler) {
-			
-			ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
-			profiler.setTaskInfo(task);
-			
-			return task;
-		}
+		ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
+		task.id = idCounter.getAndIncrement();
 		
-		return new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
+		return task;
 	}
 
 	@Override
 	public final BlockingTask createBlockingTask(Body body, short hints)
 			 {
+
+		ImplicitBlockingTask task = new ImplicitBlockingTask(body, hints);
+		task.id = idCounter.getAndIncrement();
 		
-		if (enableProfiler) {
-			
-			ImplicitBlockingTask task = new ImplicitBlockingTask(body, hints);
-			profiler.setTaskInfo(task);
-			
-			return task;
-		}
-		
-		return new ImplicitBlockingTask(body, hints);
+		return task;
 	}
 	
 	@Override
 	public final NonBlockingTask createNonBlockingTask(Body body, short hints)
 			 {
 		
-		if (enableProfiler) {
-			
-			ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints);
-			profiler.setTaskInfo(task);
-			
-			return task;
-		}
+		ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints);
+		task.id = idCounter.getAndIncrement();
 		
-		return new ImplicitNonBlockingTask(body, hints);
+		return task;
 	}
 
 	@Override
@@ -251,9 +235,10 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
  			}
 		}
 		
+		//TODO: REMOVE THIS
 		if (enableProfiler) {
-			TaskInfo info = profiler.getTaskInfo(task.hashCode());
-			info.addedToGraph = System.nanoTime();
+			//TaskInfo info = profiler.getTaskInfo(task.hashCode());
+			//info.addedToGraph = System.nanoTime();
 		}
 		
 		graph.addTask((ImplicitTask)task, parent, deps);
