@@ -34,7 +34,7 @@ public final class BlockingThreadPool {
 	private int currentThreads;
 	private int sleepingThreads;
 	protected static int maxThreads               = Configuration.getProperty(BlockingThreadPool.class, "maxThreads", Runtime.getRuntime().availableProcessors()*2);
-	protected final ImplicitBlockingTask FINISHED = new ImplicitBlockingTask(null, (short)0) {
+	protected final ImplicitBlockingTask FINISHED = new ImplicitBlockingTask(null, (short)0, this.rt.enableProfiler) {
 		@Override
 		public String toString() {
 			return "FINISHED";

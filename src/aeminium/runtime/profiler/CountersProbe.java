@@ -13,10 +13,12 @@ public class CountersProbe implements TelemetryProbe {
 	private final static int BLOCKING_TASK = 2;
 	private final static int NO_TASKS_COMPLETED = 3;
 	
-	private final static int NO_WAITING_FOR_DEPENDENCIES_TASKS = 4;
-	private final static int NO_RUNNING_TASKS = 5;
+	private final static int NO_UNSCHEDULED_TASKS = 4;
+	private final static int NO_WAITING_FOR_DEPENDENCIES_TASKS = 5;
+	private final static int NO_WAITING_FOR_CHILDREN_TASKS = 6;
+	private final static int NO_RUNNING_TASKS = 7;
 	
-	private final static int QUEUE_INFO = 6;
+	private final static int QUEUE_INFO = 8;
 	
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 	
@@ -36,7 +38,9 @@ public class CountersProbe implements TelemetryProbe {
     	metaData.addCustomTelemetry("Non Blocking Tasks Completed", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("Blocking Tasks Completed", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("Tasks Completed", Unit.PLAIN, 1f);
+    	metaData.addCustomTelemetry("No of Unscheduled Tasks", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No of Tasks Waiting for Dependencies", Unit.PLAIN, 1f);
+    	metaData.addCustomTelemetry("No of Tasks Waiting for Children", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No Running Tasks", Unit.PLAIN, 1f);
     	
     	/* Then, creates a set of information for each thread capable of handling tasks
@@ -69,8 +73,11 @@ public class CountersProbe implements TelemetryProbe {
 			customTelemetries[NON_BLOCKING_TASK] = data.noTasksCompleted[NON_BLOCKING_TASK];
 			customTelemetries[BLOCKING_TASK] = data.noTasksCompleted[BLOCKING_TASK];
 			customTelemetries[NO_TASKS_COMPLETED] = data.noCompletedTasks;
+			customTelemetries[NO_UNSCHEDULED_TASKS] = data.noUnscheduledTasks;
 			customTelemetries[NO_WAITING_FOR_DEPENDENCIES_TASKS] = data.noWaitingForDependenciesTasks;
+			customTelemetries[NO_WAITING_FOR_CHILDREN_TASKS] = data.noWaitingForChildrenTasks;
 			customTelemetries[NO_RUNNING_TASKS] = data.noRunningTasks;
+			
 		}
 		
 		/* Information related to the scheduler. */

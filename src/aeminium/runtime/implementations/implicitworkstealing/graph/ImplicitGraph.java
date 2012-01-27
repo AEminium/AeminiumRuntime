@@ -22,6 +22,7 @@ package aeminium.runtime.implementations.implicitworkstealing.graph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
@@ -52,13 +53,19 @@ public class ImplicitGraph {
 	protected AeminiumProfiler profiler;
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
 	
-	volatile int noAtomicTasksCompleted = 0;
-	volatile int noBlockingTasksCompleted = 0;
-	volatile int noNonBlockingTasksCompleted = 0;
+	private AtomicInteger noAtomicTasksCompleted = new AtomicInteger(0);
+	private AtomicInteger noBlockingTasksCompleted = new AtomicInteger(0);
+	private AtomicInteger noNonBlockingTasksCompleted = new AtomicInteger(0);
 	
-	volatile int noWaitingForDependenciesTasks = 0;
-	volatile int noRunningTasks = 0;
-	volatile int noCompletedTasks = 0;
+	public AtomicInteger noUnscheduledTasks = new AtomicInteger(0);
+	public AtomicInteger noRunningTasks = new AtomicInteger(0);
+	public AtomicInteger noWaitingForDependenciesTasks = new AtomicInteger(0);
+	public AtomicInteger noWaitingForChildrenTasks = new AtomicInteger(0);
+	public AtomicInteger noCompletedTasks = new AtomicInteger(0);
+	
+	/* TODO: REMOVE THIS LATER, JUST FOR DEBUGGING. */
+	public java.io.File taskStateFile;
+	
 	
 	
 	private static final class TaskCounter {
@@ -88,6 +95,19 @@ public class ImplicitGraph {
 		debug          = Configuration.getProperty(getClass(), "debug", false);
 		checkForCycles = Configuration.getProperty(getClass(), "checkForCycles", false);
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
+		
+		/* TODO: REMOVE THIS TOO. */
+	    this.taskStateFile = new java.io.File("taskStates.txt");
+	    
+		try {
+			java.io.Writer output = null;
+		    String text = "";
+		    output = new java.io.BufferedWriter(new java.io.FileWriter(this.taskStateFile));
+		    output.write(text);
+		    output.close();
+		} catch (Exception e){
+			// Silently discards it. :P
+		}
 	}
 	
 	public final void init(EventManager eventManager) {
@@ -143,7 +163,7 @@ public class ImplicitGraph {
 		boolean schedule = false;
 		synchronized (itask) {			
 			// check for double scheduling
-			if ( itask.state != ImplicitTaskState.UNSCHEDULED) {
+			if ( itask.getState() != ImplicitTaskState.UNSCHEDULED) {
 				if ( thread instanceof AeminiumThread ) {
 					((AeminiumThread)thread).taskCount--;
 				} else {
@@ -152,6 +172,9 @@ public class ImplicitGraph {
 				rt.getErrorManager().signalTaskDuplicatedSchedule(itask);
 				return;
 			}
+			
+			if (enableProfiler)
+				this.noUnscheduledTasks.incrementAndGet();
 
 			// setup parent connection
 			if ( parent != Runtime.NO_PARENT ) {
@@ -162,15 +185,11 @@ public class ImplicitGraph {
 			}
 
 			// setup dependencies
-			itask.state = ImplicitTaskState.WAITING_FOR_DEPENDENCIES;
+			if (enableProfiler)
+				itask.setState(ImplicitTaskState.WAITING_FOR_DEPENDENCIES, this);
+			else
+				itask.setState(ImplicitTaskState.WAITING_FOR_DEPENDENCIES);
 			
-			//TODO: REMOVE THIS
-			if (enableProfiler) {
-				//TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
-				
-				//info.waitingForDependencies = System.nanoTime();
-				this.noWaitingForDependenciesTasks++;
-			}
 			
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
@@ -180,32 +199,34 @@ public class ImplicitGraph {
 				}
 				itask.depCount += count;
 				if ( itask.depCount == 0 ) {
-					itask.state = ImplicitTaskState.RUNNING;
+					if (enableProfiler)
+						itask.setState(ImplicitTaskState.RUNNING, this);
+					else
+						itask.setState(ImplicitTaskState.RUNNING);
 					schedule = true;
-					
-					//TODO: REMOVE THIS
-					if (enableProfiler) {
-						//TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
-						//info.running = System.nanoTime();
-						
-						this.noWaitingForDependenciesTasks--;
-						this.noRunningTasks++;
-					}
 				}
 			} else {
-				itask.state = ImplicitTaskState.RUNNING;
+				if (enableProfiler)
+					itask.setState(ImplicitTaskState.RUNNING, this);
+				else
+					itask.setState(ImplicitTaskState.RUNNING);
 				schedule = true;
-				
-				//TODO: REMOVE THIS
-				if (enableProfiler) {
-					//TaskInfo info = this.profiler.getTaskInfo(itask.hashCode());
-					//info.running = System.nanoTime();
-					
-					this.noWaitingForDependenciesTasks--;
-					this.noRunningTasks++;
-				}
 			}			
 		}
+		
+		//PROFILER
+		/*if ( thread instanceof AeminiumThread ) {
+			System.out.println("1. HAVE "+ ((AeminiumThread)thread).taskCount + 
+					" AND " + this.noWaitingForDependenciesTasks + 
+					" AND " + this.noRunningTasks);
+
+		} else {
+			
+			System.out.println("2. HAVE " + taskCounters.get().taskCount
+					+ " AND " + this.noWaitingForDependenciesTasks +
+					" AND " + this.noRunningTasks);
+			
+		}*/
 		
 		// schedule task if it's marked as running
 		if (schedule) {
@@ -225,21 +246,15 @@ public class ImplicitGraph {
 		} else {
 			taskCounters.get().taskCount--;
 		}
-		
-		//TODO: REMOVE THIS
+
 		if (enableProfiler) {
-			//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-			//info.completed = System.nanoTime();
-			
+
 			if (task instanceof ImplicitAtomicTask)
-				this.noAtomicTasksCompleted++;
+				this.noAtomicTasksCompleted.getAndIncrement();
 			else if (task instanceof ImplicitBlockingTask)
-				this.noBlockingTasksCompleted++;
+				this.noBlockingTasksCompleted.getAndIncrement();
 			else if (task instanceof ImplicitNonBlockingTask)
-				this.noNonBlockingTasksCompleted++;
-			
-			this.noRunningTasks--;
-			this.noCompletedTasks++;
+				this.noNonBlockingTasksCompleted.getAndIncrement();
 		}
 	}
 	
@@ -274,13 +289,15 @@ public class ImplicitGraph {
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	public synchronized void collectData(DataCollection data) {
 		
-		data.noTasksCompleted[DataCollection.ATOMIC_TASK] = this.noAtomicTasksCompleted;
-		data.noTasksCompleted[DataCollection.BLOCKING_TASK] = this.noBlockingTasksCompleted;
-		data.noTasksCompleted[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksCompleted;
+		data.noTasksCompleted[DataCollection.ATOMIC_TASK] = this.noAtomicTasksCompleted.get();
+		data.noTasksCompleted[DataCollection.BLOCKING_TASK] = this.noBlockingTasksCompleted.get();
+		data.noTasksCompleted[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksCompleted.get();
 		
-		data.noWaitingForDependenciesTasks = this.noWaitingForDependenciesTasks;
-		data.noRunningTasks = this.noRunningTasks;
-		data.noCompletedTasks = this.noCompletedTasks;
+		data.noUnscheduledTasks = this.noUnscheduledTasks.get();
+		data.noWaitingForDependenciesTasks = this.noWaitingForDependenciesTasks.get();
+		data.noWaitingForChildrenTasks = this.noWaitingForChildrenTasks.get();
+		data.noRunningTasks = this.noRunningTasks.get();
+		data.noCompletedTasks = this.noCompletedTasks.get();
 		
 		return;
 	}

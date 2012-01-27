@@ -74,7 +74,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ErrorManager errorManager;
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
-	protected final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", true);
+	public final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
 	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
@@ -188,7 +188,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	@Override
 	public final AtomicTask createAtomicTask(Body body, DataGroup datagroup, short hints) {
 		
-		ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
+		ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints, this.enableProfiler);
 		task.id = idCounter.getAndIncrement();
 		
 		return task;
@@ -198,7 +198,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final BlockingTask createBlockingTask(Body body, short hints)
 			 {
 
-		ImplicitBlockingTask task = new ImplicitBlockingTask(body, hints);
+		ImplicitBlockingTask task = new ImplicitBlockingTask(body, hints, this.enableProfiler);
 		task.id = idCounter.getAndIncrement();
 		
 		return task;
@@ -208,7 +208,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final NonBlockingTask createNonBlockingTask(Body body, short hints)
 			 {
 		
-		ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints);
+		ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints, this.enableProfiler);
 		task.id = idCounter.getAndIncrement();
 		
 		return task;

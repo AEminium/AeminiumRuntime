@@ -16,6 +16,8 @@ public class DataCollection {
 	 */
 	public int noTasksCompleted[];
 	
+	public int noUnscheduledTasks;
+	public int noWaitingForChildrenTasks;
 	public int noWaitingForDependenciesTasks;
 	public int noRunningTasks;
 	public int noCompletedTasks;

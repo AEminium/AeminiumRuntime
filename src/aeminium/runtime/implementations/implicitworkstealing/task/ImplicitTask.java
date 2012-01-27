@@ -29,6 +29,7 @@ import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
+import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 
 
@@ -41,13 +42,14 @@ public abstract class ImplicitTask implements Task {
 	};
 	protected volatile Object result = UNSET;  // could merge result with body  
 	public Body body;
-	public ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
+	private ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
 	public byte depCount;
 	public byte childCount;
 	public List<ImplicitTask> dependents;  
 	public List<ImplicitTask> children;     // children are only used for debugging purposes => could be removed
 	public ImplicitTask parent;
 	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
+	public final boolean enableProfiler;
 	public final short hints;
 	public short level;
 	public Thread waiter;    // we could same this and just mention that there is someone waiting
@@ -55,9 +57,10 @@ public abstract class ImplicitTask implements Task {
 	/* Added for profiler. */
 	public int id;
 	
-	public ImplicitTask(Body body, short hints) {
+	public ImplicitTask(Body body, short hints, boolean enableProfiler) {
 		this.body = body;
 		this.hints = hints;
+		this.enableProfiler = enableProfiler;
 	}
 		
 	public void invoke(ImplicitWorkStealingRuntime rt) {
@@ -144,7 +147,12 @@ public abstract class ImplicitTask implements Task {
 		synchronized (this) {
 			depCount -= 1;
 			if ( depCount == 0 ) {
-				state = ImplicitTaskState.RUNNING;
+				if (enableProfiler) {
+					this.setState(ImplicitTaskState.RUNNING, rt.graph);
+				} else {
+					this.setState(ImplicitTaskState.RUNNING);
+				}
+				
 				schedule = true;
 			}
 		}
@@ -155,7 +163,12 @@ public abstract class ImplicitTask implements Task {
 	
 	public final void taskFinished(ImplicitWorkStealingRuntime rt) {
 		synchronized (this) {
-			state = ImplicitTaskState.WAITING_FOR_CHILDREN;
+
+			if (enableProfiler) {
+				this.setState(ImplicitTaskState.WAITING_FOR_CHILDREN, rt.graph);
+			} else {
+				this.setState(ImplicitTaskState.WAITING_FOR_CHILDREN);
+			}
 
 			if ( childCount == 0 ) {
 				taskCompleted(rt);
@@ -165,7 +178,12 @@ public abstract class ImplicitTask implements Task {
 	
 	public void taskCompleted(ImplicitWorkStealingRuntime rt) {
 		assert( state == ImplicitTaskState.WAITING_FOR_CHILDREN );
-		state = ImplicitTaskState.COMPLETED;	
+
+		if (enableProfiler) {
+			this.setState(ImplicitTaskState.COMPLETED, rt.graph);
+		} else {
+			this.setState(ImplicitTaskState.COMPLETED);
+		}
 
 		if ( parent != null) {
 			parent.detachChild(rt, this);
@@ -220,6 +238,68 @@ public abstract class ImplicitTask implements Task {
 			checkForCycles(task, nextDependents, em);
 		}
 	}
+	
+	/* This method simply changes the state of the task. */
+	public void setState(ImplicitTaskState newState) {
+		this.state = newState;
+	}
+	
+	/* If we are using the profiler, we need to call these methods, because we need to update
+	 * the value of the graph variables concerning the actual state, namely, for example, the 
+	 * number of running tasks or the number of tasks waiting for dependencies.
+	 */
+	public void setState(ImplicitTaskState newState, ImplicitGraph graph) {
+		
+		/* First, we have to test the previous state, decreasing the corresponding
+		 * number of tasks in the graph for that category.
+		 */
+		if (this.state == ImplicitTaskState.UNSCHEDULED) {
+			graph.noUnscheduledTasks.decrementAndGet();
+			
+		} else if (this.state == ImplicitTaskState.RUNNING) {
+			graph.noRunningTasks.decrementAndGet();
+		} else if (this.state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES) {
+			graph.noWaitingForDependenciesTasks.decrementAndGet();
+		} else if (this.state == ImplicitTaskState.WAITING_FOR_CHILDREN) {
+			graph.noWaitingForChildrenTasks.decrementAndGet();
+		} else if (this.state == ImplicitTaskState.COMPLETED) {
+			graph.noCompletedTasks.decrementAndGet();
+		}
+		
+		/* Update the task state. */
+		this.state = newState;
+		
+		/* Having the new state, we also need to update the graph counters. */
+		if (this.state == ImplicitTaskState.UNSCHEDULED) {
+			graph.noUnscheduledTasks.incrementAndGet();
+		} else if (this.state == ImplicitTaskState.RUNNING) {
+			graph.noRunningTasks.incrementAndGet();
+		} else if (this.state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES) {
+			graph.noWaitingForDependenciesTasks.incrementAndGet();
+		} else if (this.state == ImplicitTaskState.WAITING_FOR_CHILDREN) {
+			graph.noWaitingForChildrenTasks.incrementAndGet();
+		} else if (this.state == ImplicitTaskState.COMPLETED) {
+			graph.noCompletedTasks.incrementAndGet();
+		}
+		
+		//TODO: REMOVE THIS
+		try {
+			synchronized (graph.taskStateFile) {
+				java.io.Writer output = null;
+			    String text = System.nanoTime() + ": task " + this.id + " is in state " + this.state + ".\n";
+			    output = new java.io.BufferedWriter(new java.io.FileWriter(graph.taskStateFile, true));
+			    output.write(text);
+			    output.close();
+			}
+		} catch (Exception e){
+			// Silently discards it. :P
+		}
+	}
+	
+	public ImplicitTaskState getState() {
+		return this.state;
+	}
+	
 	
 	@Override
 	public String toString() {
