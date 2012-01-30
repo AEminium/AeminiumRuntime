@@ -22,6 +22,7 @@ package aeminium.runtime.implementations.implicitworkstealing.task;
 public enum ImplicitTaskState {
 	UNSCHEDULED,
 	WAITING_FOR_DEPENDENCIES,
+	WAITING_IN_QUEUE,
 	RUNNING,
 	WAITING_FOR_CHILDREN,
 	COMPLETED

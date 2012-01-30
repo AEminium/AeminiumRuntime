@@ -61,6 +61,7 @@ public class ImplicitGraph {
 	public AtomicInteger noRunningTasks = new AtomicInteger(0);
 	public AtomicInteger noWaitingForDependenciesTasks = new AtomicInteger(0);
 	public AtomicInteger noWaitingForChildrenTasks = new AtomicInteger(0);
+	public AtomicInteger noTasksWaitingInQueue = new AtomicInteger(0);
 	public AtomicInteger noCompletedTasks = new AtomicInteger(0);
 	
 	/* TODO: REMOVE THIS LATER, JUST FOR DEBUGGING. */
@@ -200,16 +201,16 @@ public class ImplicitGraph {
 				itask.depCount += count;
 				if ( itask.depCount == 0 ) {
 					if (enableProfiler)
-						itask.setState(ImplicitTaskState.RUNNING, this);
+						itask.setState(ImplicitTaskState.WAITING_IN_QUEUE, this);
 					else
-						itask.setState(ImplicitTaskState.RUNNING);
+						itask.setState(ImplicitTaskState.WAITING_IN_QUEUE);
 					schedule = true;
 				}
 			} else {
 				if (enableProfiler)
-					itask.setState(ImplicitTaskState.RUNNING, this);
+					itask.setState(ImplicitTaskState.WAITING_IN_QUEUE, this);
 				else
-					itask.setState(ImplicitTaskState.RUNNING);
+					itask.setState(ImplicitTaskState.WAITING_IN_QUEUE);
 				schedule = true;
 			}			
 		}
@@ -297,6 +298,7 @@ public class ImplicitGraph {
 		data.noWaitingForDependenciesTasks = this.noWaitingForDependenciesTasks.get();
 		data.noWaitingForChildrenTasks = this.noWaitingForChildrenTasks.get();
 		data.noRunningTasks = this.noRunningTasks.get();
+		data.noTasksWaitingInQueue = this.noTasksWaitingInQueue.get();
 		data.noCompletedTasks = this.noCompletedTasks.get();
 		
 		return;

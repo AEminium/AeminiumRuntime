@@ -64,6 +64,12 @@ public abstract class ImplicitTask implements Task {
 	}
 		
 	public void invoke(ImplicitWorkStealingRuntime rt) {
+		
+		if (enableProfiler)
+			this.setState(ImplicitTaskState.RUNNING, rt.graph);
+		else
+			this.setState(ImplicitTaskState.RUNNING);
+		
 		try {
 			body.execute(rt, this);
 		} catch (Throwable e) {
@@ -148,9 +154,9 @@ public abstract class ImplicitTask implements Task {
 			depCount -= 1;
 			if ( depCount == 0 ) {
 				if (enableProfiler) {
-					this.setState(ImplicitTaskState.RUNNING, rt.graph);
+					this.setState(ImplicitTaskState.WAITING_IN_QUEUE, rt.graph);
 				} else {
-					this.setState(ImplicitTaskState.RUNNING);
+					this.setState(ImplicitTaskState.WAITING_IN_QUEUE);
 				}
 				
 				schedule = true;
@@ -255,7 +261,8 @@ public abstract class ImplicitTask implements Task {
 		 */
 		if (this.state == ImplicitTaskState.UNSCHEDULED) {
 			graph.noUnscheduledTasks.decrementAndGet();
-			
+		} else if (this.state == ImplicitTaskState.WAITING_IN_QUEUE) {
+				graph.noTasksWaitingInQueue.decrementAndGet();	
 		} else if (this.state == ImplicitTaskState.RUNNING) {
 			graph.noRunningTasks.decrementAndGet();
 		} else if (this.state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES) {
@@ -272,6 +279,8 @@ public abstract class ImplicitTask implements Task {
 		/* Having the new state, we also need to update the graph counters. */
 		if (this.state == ImplicitTaskState.UNSCHEDULED) {
 			graph.noUnscheduledTasks.incrementAndGet();
+		} else if (this.state == ImplicitTaskState.WAITING_IN_QUEUE) {
+				graph.noTasksWaitingInQueue.incrementAndGet();	
 		} else if (this.state == ImplicitTaskState.RUNNING) {
 			graph.noRunningTasks.incrementAndGet();
 		} else if (this.state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES) {
@@ -283,7 +292,7 @@ public abstract class ImplicitTask implements Task {
 		}
 		
 		//TODO: REMOVE THIS
-		try {
+		/*try {
 			synchronized (graph.taskStateFile) {
 				java.io.Writer output = null;
 			    String text = System.nanoTime() + ": task " + this.id + " is in state " + this.state + ".\n";
@@ -293,7 +302,7 @@ public abstract class ImplicitTask implements Task {
 			}
 		} catch (Exception e){
 			// Silently discards it. :P
-		}
+		}*/
 	}
 	
 	public ImplicitTaskState getState() {

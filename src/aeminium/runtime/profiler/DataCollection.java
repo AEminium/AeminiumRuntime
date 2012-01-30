@@ -3,7 +3,7 @@ package aeminium.runtime.profiler;
 public class DataCollection {
 	
 	private final int NO_BLOCKING_QUEUES = 1;
-	//TODO: Add all the variables that we are looking for.
+
 	/* Scheduler variables. */
 	public int noOccupiedQueues;
 	public int [] taskInNonBlockingQueue;
@@ -19,6 +19,7 @@ public class DataCollection {
 	public int noUnscheduledTasks;
 	public int noWaitingForChildrenTasks;
 	public int noWaitingForDependenciesTasks;
+	public int noTasksWaitingInQueue;
 	public int noRunningTasks;
 	public int noCompletedTasks;
 	

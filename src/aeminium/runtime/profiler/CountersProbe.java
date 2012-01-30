@@ -16,9 +16,10 @@ public class CountersProbe implements TelemetryProbe {
 	private final static int NO_UNSCHEDULED_TASKS = 4;
 	private final static int NO_WAITING_FOR_DEPENDENCIES_TASKS = 5;
 	private final static int NO_WAITING_FOR_CHILDREN_TASKS = 6;
-	private final static int NO_RUNNING_TASKS = 7;
+	private final static int NO_TASKS_WAITING_IN_QUEUE = 7;
+	private final static int NO_RUNNING_TASKS = 8;
 	
-	private final static int QUEUE_INFO = 8;
+	private final static int QUEUE_INFO = 9;
 	
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 	
@@ -41,6 +42,7 @@ public class CountersProbe implements TelemetryProbe {
     	metaData.addCustomTelemetry("No of Unscheduled Tasks", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No of Tasks Waiting for Dependencies", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No of Tasks Waiting for Children", Unit.PLAIN, 1f);
+    	metaData.addCustomTelemetry("No of Tasks Waiting in a Queue", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No Running Tasks", Unit.PLAIN, 1f);
     	
     	/* Then, creates a set of information for each thread capable of handling tasks
@@ -76,6 +78,7 @@ public class CountersProbe implements TelemetryProbe {
 			customTelemetries[NO_UNSCHEDULED_TASKS] = data.noUnscheduledTasks;
 			customTelemetries[NO_WAITING_FOR_DEPENDENCIES_TASKS] = data.noWaitingForDependenciesTasks;
 			customTelemetries[NO_WAITING_FOR_CHILDREN_TASKS] = data.noWaitingForChildrenTasks;
+			customTelemetries[NO_TASKS_WAITING_IN_QUEUE] = data.noTasksWaitingInQueue;
 			customTelemetries[NO_RUNNING_TASKS] = data.noRunningTasks;
 			
 		}

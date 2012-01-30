@@ -72,24 +72,9 @@ public final class WorkStealingThread extends AeminiumThread {
 			task = taskQueue.pop();
 			
 			if ( task != null ) {
-				
-				//TODO: REMOVE THIS
-				if (enableProfiler) {
-					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					//info.exitedQueue = System.nanoTime();
-					//info.startedExecution = System.nanoTime();
-				}
-				
-				System.out.println("AT LEAST ENTERED");
-				
 				task.invoke(rt);
-				
-				
-				//TODO: REMOVE THIS
+
 				if (enableProfiler) {
-					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					//info.endedExecution = System.nanoTime();
-					
 					if (task instanceof ImplicitAtomicTask)
 						noAtomicTasksHandled.getAndIncrement();
 					else if (task instanceof ImplicitBlockingTask)
@@ -103,21 +88,9 @@ public final class WorkStealingThread extends AeminiumThread {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
 				if ( task != null ) {
-					
-					//TODO: REMOVE THIS
-					if (enableProfiler) {
-						//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-						//info.exitedQueue = System.nanoTime();
-						//info.startedExecution = System.nanoTime();
-					}
-					
 					task.invoke(rt);
 					
-					//REMOVE THIS
 					if (enableProfiler) {
-						//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-						//info.endedExecution = System.nanoTime();
-						
 						if (task instanceof ImplicitAtomicTask)
 							noAtomicTasksHandled.getAndIncrement();
 						else if (task instanceof ImplicitBlockingTask)
@@ -173,11 +146,29 @@ public final class WorkStealingThread extends AeminiumThread {
 			task = taskQueue.pop();
 			if ( task != null ) {
 				task.invoke(rt);
+				
+				if (enableProfiler) {
+					if (task instanceof ImplicitAtomicTask)
+						noAtomicTasksHandled.getAndIncrement();
+					else if (task instanceof ImplicitBlockingTask)
+						noBlockingTasksHandled.getAndIncrement();
+					else if (task instanceof ImplicitNonBlockingTask)
+						noNonBlockingTasksHandled.getAndIncrement();
+				}
 			} else {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
 				if ( task != null ) {
 					task.invoke(rt);
+					
+					if (enableProfiler) {
+						if (task instanceof ImplicitAtomicTask)
+							noAtomicTasksHandled.getAndIncrement();
+						else if (task instanceof ImplicitBlockingTask)
+							noBlockingTasksHandled.getAndIncrement();
+						else if (task instanceof ImplicitNonBlockingTask)
+							noNonBlockingTasksHandled.getAndIncrement();
+					}
 				} else {
 					if ( pollCounter == 0) {
 						// reset counter
