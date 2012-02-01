@@ -98,7 +98,7 @@ public class ImplicitGraph {
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
 		
 		/* TODO: REMOVE THIS TOO. */
-	    this.taskStateFile = new java.io.File("taskStates.txt");
+	    this.taskStateFile = new java.io.File("taskStates.log");
 	    
 		try {
 			java.io.Writer output = null;

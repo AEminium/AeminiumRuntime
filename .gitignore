@@ -3,3 +3,4 @@ bin
 build
 *.class
 **/nbproject/private
+*.log
