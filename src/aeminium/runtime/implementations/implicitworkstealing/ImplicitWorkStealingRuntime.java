@@ -269,11 +269,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public DiGraphViz getGraphViz() {
 		return this.digraphviz;
 	}
-	
-	@Override
-	public AeminiumProfiler getProfiler() {
-		return this.profiler;
-	}
 
 	@Override
 	public final void addErrorHandler(final ErrorHandler eh) {

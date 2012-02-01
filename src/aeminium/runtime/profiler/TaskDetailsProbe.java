@@ -23,7 +23,8 @@ public class TaskDetailsProbe implements InterceptorProbe {
 			PayloadInfo payloadInfo = context.createPayloadInfo("invoke method");
 	        
 			this.invokingTime.put(task.id, payloadInfo);
-			
+		//TODO: Naturally, change this. I've just kept the else if so I can
+		//		easily copy/paste for the next functions I need to implement.
 		} else if (methodName.equals("SECOND"))
 		{
 			
@@ -56,10 +57,12 @@ public class TaskDetailsProbe implements InterceptorProbe {
 	    	ImplicitTask task = (ImplicitTask) object;
 			payloadInfo = this.waitingForChildrenTime.get(task.id);
 			
-			//TODO: Sometime we have null.
+			//TODO: Sometime we have null. Check again if this is still
+			//		necessary, as I have cleaned up the collisions in the
+			//		hash table.
 			if (payloadInfo != null) 
 				payloadInfo.setDescription("Waiting for children time");
-			
+		//TODO: Same has above.	
 		} else if (methodName.equals("THIRD"))
 		{
 			
