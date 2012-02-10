@@ -7,40 +7,10 @@
     <path id="rt.classpath">
         <pathelement path="bin/" />
         <pathelement path="lib/jsr166y.jar" />
+        <pathelement path="lib/api.jar" />
+        <pathelement path="lib/apisrc.jar" />
         <pathelement path="lib/junit-4.8.2.jar" />
     </path>
-
-    <target name="RTBench-Fibonacci">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.RTBench">
-            <arg value="run"/>
-            <arg value="FibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
-
-    <target name="Fibonacci-Aeminium">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.FibonacciBenchmarkExecutor">
-            <arg value="run"/>
-            <arg value="AeminiumFibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
-
-    <target name="Fibonacci-ForkJoin">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.FibonacciBenchmarkExecutor">
-            <arg value="run"/>
-            <arg value="ForkJoinFibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
-
-    <target name="Fibonacci-Sequential">
-        <java fork="yes" classname="aeminium/runtime/tools/benchmark/forkjoin/FibonacciBenchmarkSuite">
-            <arg value="run"/>
-            <arg value="SequentialFibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
 
     <target name="build">
         <mkdir dir="bin" />
@@ -63,7 +33,7 @@
     </target>
 
     <target name="jar-debug">
-      <jar destfile="AeminiumRT.jar">
+      <jar destfile="AeminiumRuntime.jar">
        <fileset dir="bin/"/>
        <fileset dir="src/"/>
        <zipfileset includes="**/*.class" src="lib/jsr166y.jar"/>
@@ -79,7 +49,7 @@
     </target>
 
     <target name="jar-release">
-      <jar destfile="AeminiumRT.jar">
+      <jar destfile="AeminiumRuntime.jar">
        <fileset dir="bin/">
          <exclude name="**/runtime/tools/benchmark/forkjoin/**"/>
          <exclude name="**/runtime/examples/fjtests/**"/>
@@ -102,7 +72,7 @@
       <delete verbose="yes" dir="bin/aeminium"/>
       <delete verbose="yes">
         <fileset dir=".">
-          <include name="AeminiumRT.jar"/>
+          <include name="AeminiumRuntime.jar"/>
           <include name="TEST*"/>
         </fileset>
       </delete>
