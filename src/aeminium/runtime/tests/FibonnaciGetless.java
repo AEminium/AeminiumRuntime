@@ -64,10 +64,20 @@ public class FibonnaciGetless
 
 	public static void main(String args[])
 	{
+		int value;
+		
+		if (args.length < 1) 
+		{
+			value = 20;
+		} else
+		{
+			value = Integer.parseInt(args[0]);
+		}
+		
 		Runtime rt = Factory.getRuntime();
 		rt.init();
 		
-		FibBody bodyMain = new FibBody(30);	
+		FibBody bodyMain = new FibBody(value);	
 		Task taskMain = rt.createNonBlockingTask(bodyMain, Runtime.NO_HINTS);
 		rt.schedule(taskMain, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
