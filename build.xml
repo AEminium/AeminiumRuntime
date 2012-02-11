@@ -1,110 +1,82 @@
 <?xml version="1.0"?>
-<project name="AEminium Runtime" default="build">
-    <property name="compiler" value="javac1.6" />
-    <property name="ant.build.javac.target" value="1.6" />
-    <property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6" />
+<project name="AEminium Runtime" default="compile">
+	<property name="compiler" value="javac1.6" />
+	<property name="ant.build.javac.target" value="1.6" />
+	<property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6" />
 
-    <path id="rt.classpath">
-        <pathelement path="bin/" />
-        <pathelement path="lib/jsr166y.jar" />
-        <pathelement path="lib/junit-4.8.2.jar" />
-    </path>
+	<property name="src.dir"	 value="src"/>	
+	<property name="build.dir"	 value="bin"/> 
+	<property name="dist.dir"	value="dist"/>	
+	<property name="lib.dir"   value="lib"/>  
 
-    <target name="RTBench-Fibonacci">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.RTBench">
-            <arg value="run"/>
-            <arg value="FibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
 
-    <target name="Fibonacci-Aeminium">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.FibonacciBenchmarkExecutor">
-            <arg value="run"/>
-            <arg value="AeminiumFibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
+	<path id="rt.classpath">
+		<pathelement path="${build.dir}/" />
+		<pathelement path="${lib.dir}/junit-4.8.2.jar" />
+	</path>
+	
+	<path id="rt.classpath.debug">
+		<pathelement path="${build.dir}/" />
+		<pathelement path="${lib.dir}/junit-4.8.2.jar" />
+	</path>
 
-    <target name="Fibonacci-ForkJoin">
-        <java fork="yes" classname="aeminium.runtime.tools.benchmark.forkjoin.FibonacciBenchmarkExecutor">
-            <arg value="run"/>
-            <arg value="ForkJoinFibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
+	<target name="clean">  
+		<echo message="In clean "/>	 
+		<delete dir="${build.dir}"/>  
+		<delete dir="${dist.dir}"/>	 
+		<delete verbose="yes">
+			<fileset dir=".">
+		  		<include name="TEST*"/>
+			</fileset>
+	  	</delete>
+	</target> 
 
-    <target name="Fibonacci-Sequential">
-        <java fork="yes" classname="aeminium/runtime/tools/benchmark/forkjoin/FibonacciBenchmarkSuite">
-            <arg value="run"/>
-            <arg value="SequentialFibonacciBenchmark"/>
-            <classpath refid="rt.classpath"/>
-        </java>
-    </target>
+	<target name="compile">
+		<mkdir dir="${build.dir}" />
+		<javac srcdir="${src.dir}" destdir="${build.dir}" fork="false">
+			<classpath refid="rt.classpath"/>
+		</javac>
+	</target>
 
-    <target name="build">
-        <mkdir dir="bin" />
-        <javac srcdir="src" destdir="bin" fork="false" compiler="javac1.5">
-            <classpath refid="rt.classpath"/>
-        </javac>
-    </target>
+	<target name="tests">
+		<junit fork="yes" dir="${src.dir}/aeminium/runtime/tests" printsummary="yes">
+			<classpath refid="rt.classpath.debug"/>
+			<formatter type="brief"/>
+			<batchtest>
+				<fileset dir="${src.dir}/">
+					<include name="aeminium/runtime/tests/*.java"/>
+					<exclude name="aeminium/runtime/tests/BaseTest.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
 
-    <target name="tests">
-        <junit fork="yes" dir="src/aeminium/runtime/tests" printsummary="yes">
-            <classpath refid="rt.classpath"/>
-            <formatter type="brief"/>
-            <batchtest>
-                <fileset dir="src/">
-                    <include name="aeminium/runtime/tests/*.java"/>
-                    <exclude name="aeminium/runtime/tests/BaseTest.java"/>
-                </fileset>
-            </batchtest>
-        </junit>
-    </target>
+	<target name="jar-debug">
+	  <jar destfile="${dist.dir}/AeminiumRuntimeDebug.jar">
+	   <fileset dir="${build.dir}/"/>
+	   <fileset dir="${src.dir}/"/>
+	   <zipfileset includes="**/*.class" src="${lib.dir}/junit-4.8.2.jar"/>
+	   <manifest>
+		 <!-- Who is building this jar? -->
+		 <attribute name="Built-By" value="${user.name}"/>
+		 <!-- Information about the program itself -->
+		 <attribute name="Implementation-Vendor" value="Aeminium Project"/>
+		 <attribute name="Implementation-Title" value="Aeminium Runtime"/>
+	   </manifest>
+	  </jar>
+	</target>
 
-    <target name="jar-debug">
-      <jar destfile="AeminiumRT.jar">
-       <fileset dir="bin/"/>
-       <fileset dir="src/"/>
-       <zipfileset includes="**/*.class" src="lib/jsr166y.jar"/>
-       <zipfileset includes="**/*.class" src="lib/junit-4.8.2.jar"/>
-       <manifest>
-         <!-- Who is building this jar? -->
-         <attribute name="Built-By" value="${user.name}"/>
-         <!-- Information about the program itself -->
-         <attribute name="Implementation-Vendor" value="Aeminium Project"/>
-         <attribute name="Implementation-Title" value="Aeminium Runtime"/>
-       </manifest>
-      </jar>
-    </target>
-
-    <target name="jar-release">
-      <jar destfile="AeminiumRT.jar">
-       <fileset dir="bin/">
-         <exclude name="**/runtime/tools/benchmark/forkjoin/**"/>
-         <exclude name="**/runtime/examples/fjtests/**"/>
-       </fileset>
-       <fileset dir="src/aeminium">
-         <exclude name="**/runtime/tools/benchmark/forkjoin/**"/>
-         <exclude name="**/runtime/examples/fjtests/**"/>
-       </fileset>
-       <manifest>
-         <!-- Who is building this jar? -->
-         <attribute name="Built-By" value="${user.name}"/>
-         <!-- Information about the program itself -->
-         <attribute name="Implementation-Vendor" value="Aeminium Project"/>
-         <attribute name="Implementation-Title" value="Aeminium Runtime"/>
-       </manifest>
-      </jar>
-    </target>
-    
-    <target name="clean">
-      <delete verbose="yes" dir="bin/aeminium"/>
-      <delete verbose="yes">
-        <fileset dir=".">
-          <include name="AeminiumRT.jar"/>
-          <include name="TEST*"/>
-        </fileset>
-      </delete>
-    </target>
+	<target name="jar">
+	  <jar destfile="${dist.dir}/AeminiumRuntime.jar">
+	   <fileset dir="${build.dir}/" />
+	   <fileset dir="${src.dir}/aeminium" />
+	   <manifest>
+		 <!-- Who is building this jar? -->
+		 <attribute name="Built-By" value="${user.name}"/>
+		 <!-- Information about the program itself -->
+		 <attribute name="Implementation-Vendor" value="Aeminium Project"/>
+		 <attribute name="Implementation-Title" value="Aeminium Runtime"/>
+	   </manifest>
+	  </jar>
+	</target>
 </project>
