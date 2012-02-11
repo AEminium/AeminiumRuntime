@@ -64,11 +64,6 @@ public class ImplicitGraph {
 	public AtomicInteger noTasksWaitingInQueue = new AtomicInteger(0);
 	public AtomicInteger noCompletedTasks = new AtomicInteger(0);
 	
-	/* TODO: REMOVE THIS LATER, JUST FOR DEBUGGING. */
-	public java.io.File taskStateFile;
-	
-	
-	
 	private static final class TaskCounter {
 		protected final Thread thread;
 		public volatile int taskCount = 0;
@@ -96,19 +91,6 @@ public class ImplicitGraph {
 		debug          = Configuration.getProperty(getClass(), "debug", false);
 		checkForCycles = Configuration.getProperty(getClass(), "checkForCycles", false);
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
-		
-		/* TODO: REMOVE THIS TOO. */
-	    this.taskStateFile = new java.io.File("taskStates.log");
-	    
-		try {
-			java.io.Writer output = null;
-		    String text = "";
-		    output = new java.io.BufferedWriter(new java.io.FileWriter(this.taskStateFile));
-		    output.write(text);
-		    output.close();
-		} catch (Exception e){
-			// Silently discards it. :P
-		}
 	}
 	
 	public final void init(EventManager eventManager) {
@@ -232,7 +214,6 @@ public class ImplicitGraph {
 		}
 
 		if (enableProfiler) {
-
 			if (task instanceof ImplicitAtomicTask)
 				this.noAtomicTasksCompleted.getAndIncrement();
 			else if (task instanceof ImplicitBlockingTask)

@@ -1,10 +1,7 @@
 package aeminium.runtime.profiler;
 
 import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicLong;
-
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
-
 import com.jprofiler.api.agent.probe.*;
 
 @SuppressWarnings("rawtypes")
@@ -15,6 +12,7 @@ public class TaskDetailsProbe implements InterceptorProbe {
 	private Hashtable <Integer, PayloadInfo> runningTime = new Hashtable <Integer, PayloadInfo>();
 	private Hashtable <Integer, PayloadInfo> waitingForChildrenTime = new Hashtable <Integer, PayloadInfo>();
 	
+	//TODO: Remove when completely unnecessary.
 	//private AtomicLong counter = new AtomicLong(0);
 	
 	@Override

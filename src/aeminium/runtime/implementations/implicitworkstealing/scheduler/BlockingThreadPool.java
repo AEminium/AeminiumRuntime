@@ -117,6 +117,10 @@ public final class BlockingThreadPool {
 		}
 	}
 	
+	public int getTaskQueueSize() {
+		return taskQueue.size();
+	}
+	
 	protected final class BlockingThread extends AeminiumThread {
 		protected boolean finished = false;
 		

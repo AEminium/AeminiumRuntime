@@ -235,12 +235,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
  			}
 		}
 		
-		//TODO: REMOVE THIS
-		if (enableProfiler) {
-			//TaskInfo info = profiler.getTaskInfo(task.hashCode());
-			//info.addedToGraph = System.nanoTime();
-		}
-		
 		graph.addTask((ImplicitTask)task, parent, deps);
 	}
 

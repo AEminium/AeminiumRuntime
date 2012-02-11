@@ -1,13 +1,11 @@
 package aeminium.runtime.profiler;
 
 public class DataCollection {
-	
-	private final int NO_BLOCKING_QUEUES = 1;
 
 	/* Scheduler variables. */
 	public int noOccupiedQueues;
 	public int [] taskInNonBlockingQueue;
-	public int [] taskInBlockingQueue;
+	public int taskInBlockingQueue;
 	public int [][] tasksHandled;
 	/* Graph variables. */
 	/* This vector discriminates between the three different types
@@ -33,7 +31,7 @@ public class DataCollection {
 		/* Scheduler variables. */
 		taskInNonBlockingQueue = new int[maxParallelism];
 		tasksHandled = new int[maxParallelism][3];
-		taskInBlockingQueue = new int[NO_BLOCKING_QUEUES];
+		taskInBlockingQueue = 0;
 		/* Graph variables. */
 		noTasksCompleted = new int[3];
 		

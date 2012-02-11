@@ -261,8 +261,7 @@ public final class BlockingWorkStealingScheduler {
 		{
 			data.taskInNonBlockingQueue[i] = threads[i].getLocalQueueSize();
 			threads[i].getNoTasksHandled(data.tasksHandled[i]);
-			//TODO: Why this? Aren't we collecting data for blocking queue?
-			//data.taskInNonBlockingQueue[i]++;
+			data.taskInBlockingQueue = blockingThreadPool.getTaskQueueSize();
 		}
 		
 		return;

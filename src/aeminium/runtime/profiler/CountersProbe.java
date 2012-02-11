@@ -18,8 +18,9 @@ public class CountersProbe implements TelemetryProbe {
 	private final static int NO_WAITING_FOR_CHILDREN_TASKS = 6;
 	private final static int NO_TASKS_WAITING_IN_QUEUE = 7;
 	private final static int NO_RUNNING_TASKS = 8;
+	private final static int NO_TASKS_IN_BLOCKING_QUEUE = 9;
 	
-	private final static int QUEUE_INFO = 9;
+	private final static int QUEUE_INFO = 10;
 	
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 	
@@ -44,6 +45,7 @@ public class CountersProbe implements TelemetryProbe {
     	metaData.addCustomTelemetry("No of Tasks Waiting for Children", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No of Tasks Waiting in a Queue", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No Running Tasks", Unit.PLAIN, 1f);
+    	metaData.addCustomTelemetry("No Tasks in Blocking Queue", Unit.PLAIN, 1f);
     	
     	/* Then, creates a set of information for each thread capable of handling tasks
     	 * (i.e., the set will have the size of maxParallelism, corresponding to the number
@@ -51,8 +53,7 @@ public class CountersProbe implements TelemetryProbe {
     	 */
     	for (int i = 0; i < maxParallelism; i++)
     	{
-    		//TODO: What about blocking queue?
-        	metaData.addCustomTelemetry("Tasks in Non-blocking Queue (" + (i + 1) + ")", Unit.PLAIN, 1f);
+    		metaData.addCustomTelemetry("Tasks in Non-blocking Queue (" + (i + 1) + ")", Unit.PLAIN, 1f);
         	metaData.addCustomTelemetry("No of Atomic Tasks Handled (" + (i + 1) + ")", Unit.PLAIN, 1f);
         	metaData.addCustomTelemetry("No of Blocking Tasks Handled (" + (i + 1) + ")", Unit.PLAIN, 1f);
         	metaData.addCustomTelemetry("No of Non-blocking Tasks Handled (" + (i + 1) + ")", Unit.PLAIN, 1f);
@@ -80,7 +81,7 @@ public class CountersProbe implements TelemetryProbe {
 			customTelemetries[NO_WAITING_FOR_CHILDREN_TASKS] = data.noWaitingForChildrenTasks;
 			customTelemetries[NO_TASKS_WAITING_IN_QUEUE] = data.noTasksWaitingInQueue;
 			customTelemetries[NO_RUNNING_TASKS] = data.noRunningTasks;
-			
+			customTelemetries[NO_TASKS_IN_BLOCKING_QUEUE] = data.taskInBlockingQueue;
 		}
 		
 		/* Information related to the scheduler. */
