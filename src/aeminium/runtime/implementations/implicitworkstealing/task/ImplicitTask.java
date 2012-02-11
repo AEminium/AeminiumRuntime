@@ -79,38 +79,6 @@ public abstract class ImplicitTask implements Task {
 			taskFinished(rt);
 		}
 	}
-
-	@Override
-	public final void setResult(Object result) {
-		if ( result == null ) {
-			//throw new RuntimeError("Cannot set result to 'null'.");
-		}
-		this.result = result;
-	}
-	
-	@Override
-	public final Object getResult() {
-		if ( isCompleted() ) {
-			return result;
-		} else {
-			Thread thread = Thread.currentThread();
-			if ( thread instanceof WorkStealingThread ) {
-				((WorkStealingThread)thread).progressToCompletion(this);
-			} else {
-				synchronized (this) {
-					while ( !isCompleted() ) {
-						waiter = thread;
-						try {
-							this.wait();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-			return result;
-		}
-	}
 	
 	public final void attachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child) {
 		synchronized (this) {
@@ -290,25 +258,43 @@ public abstract class ImplicitTask implements Task {
 		} else if (this.state == ImplicitTaskState.COMPLETED) {
 			graph.noCompletedTasks.incrementAndGet();
 		}
-		
-		//TODO: REMOVE THIS
-		/*try {
-			synchronized (graph.taskStateFile) {
-				java.io.Writer output = null;
-			    String text = System.nanoTime() + ": task " + this.id + " is in state " + this.state + ".\n";
-			    output = new java.io.BufferedWriter(new java.io.FileWriter(graph.taskStateFile, true));
-			    output.write(text);
-			    output.close();
-			}
-		} catch (Exception e){
-			// Silently discards it. :P
-		}*/
 	}
 	
 	public ImplicitTaskState getState() {
 		return this.state;
 	}
 	
+	@Override
+	public final void setResult(Object result) {
+		if ( result == null ) {
+			//throw new RuntimeError("Cannot set result to 'null'.");
+		}
+		this.result = result;
+	}
+	
+	@Override
+	public final Object getResult() {
+		if ( isCompleted() ) {
+			return result;
+		} else {
+			Thread thread = Thread.currentThread();
+			if ( thread instanceof WorkStealingThread ) {
+				((WorkStealingThread)thread).progressToCompletion(this);
+			} else {
+				synchronized (this) {
+					while ( !isCompleted() ) {
+						waiter = thread;
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			return result;
+		}
+	}
 	
 	@Override
 	public String toString() {

@@ -20,6 +20,9 @@ class FibBodySum implements Body
 		throws Exception
 	{
 		this.parent.value = this.parent.body1.value + this.parent.body2.value;
+		
+		this.parent.body1 = null;
+		this.parent.body2 = null;
 	}
 }
 
@@ -40,8 +43,12 @@ class FibBody implements Body
 	public void execute(Runtime rt, Task current)
 		throws Exception
 	{
-		if (this.n < 2)
-			this.value = n;
+		
+		int threashold = 20;
+		
+		if (this.n < threashold) {
+			this.value = fib(n);
+		}
 		else
 		{
 			this.body1 = new FibBody(this.n - 1);
@@ -56,6 +63,14 @@ class FibBody implements Body
 			Task taskSum = rt.createNonBlockingTask(bodySum, Runtime.NO_HINTS);
 			rt.schedule(taskSum, current, Arrays.asList(new Task[] {task1, task2}));
 		}
+	}
+	
+	public int fib(int n)
+	{
+		if (n < 2)
+			return n;
+		
+		return fib(n-1) + fib(n-2);
 	}
 }
 

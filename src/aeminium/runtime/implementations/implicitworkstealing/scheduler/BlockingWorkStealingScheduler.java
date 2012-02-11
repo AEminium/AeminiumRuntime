@@ -148,14 +148,7 @@ public final class BlockingWorkStealingScheduler {
 			if ( thread instanceof WorkStealingThread) {
 				WorkStealingThread wthread = (WorkStealingThread)thread;
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
-				if ( taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0 ) {
-					
-					//TODO: REMOVE THIS
-					if (enableProfiler) {
-						//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-						//info.enteredQueue = System.nanoTime();
-					}
-					
+				if ( taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0 ) {					
 					taskQueue.push(task);
 					if ( taskQueue.size() <= 1 ) {
 						signalWork();
@@ -174,13 +167,7 @@ public final class BlockingWorkStealingScheduler {
 							wthread.incrementNoNonBlockingTasksHandled();
 					}
 				}
-			} else {
-				//TODO: REMOVE THIS
-				if (enableProfiler) {
-					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					//info.enteredQueue = System.nanoTime();
-				}
-				
+			} else {				
 				submissionQueue.add(task);
 				signalWork();
 			}
@@ -192,7 +179,7 @@ public final class BlockingWorkStealingScheduler {
 				if ( oneTaskPerLevel ) {
 					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
-					if ( head != null && head.level == task.level && wthread.remainingRecursionDepth > 0 ) {
+					/*if ( head != null && head.level == task.level && wthread.remainingRecursionDepth > 0 ) {
 						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
 						wthread.remainingRecursionDepth++;
@@ -206,14 +193,7 @@ public final class BlockingWorkStealingScheduler {
 								wthread.incrementNoNonBlockingTasksHandled();
 						}
 						
-					} else {
-						
-						//TODO: REMOVE THIS
-						if (enableProfiler) {
-							//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-							//info.enteredQueue = System.nanoTime();
-						}
-						
+					} else */{						
 						taskQueue.push(task);
 						if ( taskQueue.size() <= 1 ) {
 							signalWork(wthread);
@@ -226,13 +206,7 @@ public final class BlockingWorkStealingScheduler {
 					}
 				}
 			} else {
-				// external thread
-				//TODO: REMOVE THIS
-				if (enableProfiler) {
-					//TaskInfo info = this.profiler.getTaskInfo(task.hashCode());
-					//info.enteredQueue = System.nanoTime();
-				}
-				
+				// external thread				
 				submissionQueue.add(task);
 				signalWork();
 			}

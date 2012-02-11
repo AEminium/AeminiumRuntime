@@ -1,6 +1,7 @@
 package aeminium.runtime.profiler;
 
 import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicLong;
 
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
@@ -9,98 +10,137 @@ import com.jprofiler.api.agent.probe.*;
 @SuppressWarnings("rawtypes")
 public class TaskDetailsProbe implements InterceptorProbe {
 	
-	public static int number = 1;
-	private Hashtable <Integer, PayloadInfo> invokingTime = new Hashtable <Integer, PayloadInfo>();
+	private Hashtable <Integer, PayloadInfo> waitingForDependenciesTime = new Hashtable <Integer, PayloadInfo>();
+	private Hashtable <Integer, PayloadInfo> waitingInQueueTime = new Hashtable <Integer, PayloadInfo>();
+	private Hashtable <Integer, PayloadInfo> runningTime = new Hashtable <Integer, PayloadInfo>();
 	private Hashtable <Integer, PayloadInfo> waitingForChildrenTime = new Hashtable <Integer, PayloadInfo>();
 	
+	//private AtomicLong counter = new AtomicLong(0);
+	
+	@Override
 	public void interceptionEnter(InterceptorContext context, Object object, Class declaringClass, String declaringClassName, String methodName, String methodSignature, Object[] parameters) {
-
-		/* Given the method name, we need to take different actions. */
-		if (methodName.equals("invoke"))
+		
+		ImplicitTask task;
+		PayloadInfo payloadInfo;
+		
+		/* When we schedule a task, it is primarily marked as waiting in queue. */
+		if (methodName.equals("addTask"))
 		{
-			ImplicitTask task = (ImplicitTask) object;
+			task = (ImplicitTask) parameters[0];
 			
-			PayloadInfo payloadInfo = context.createPayloadInfo("invoke method");
-	        
-			this.invokingTime.put(task.id, payloadInfo);
-		//TODO: Naturally, change this. I've just kept the else if so I can
-		//		easily copy/paste for the next functions I need to implement.
-		} else if (methodName.equals("SECOND"))
+			/* Starts recording the waiting in queue time. */
+			payloadInfo = context.createPayloadInfo("Waiting for Dependencies");
+			this.waitingForDependenciesTime.put(task.id, payloadInfo);
+		
+		} else if (methodName.equals("scheduleTask")) 
 		{
+			task = (ImplicitTask) parameters[0];
 			
-		} else if (methodName.equals("THIRD"))
-		{
-			
-		}
-
-    }
-
-    public void interceptionExit(InterceptorContext context, Object object, Class declaringClass, String declaringClassName, String methodName, String methodSignature, Object returnValue) {
-        
-    	PayloadInfo payloadInfo = null;
-
-		/* Given the method name, we need to take different actions. */
-		if (methodName.equals("invoke"))
-		{
-			ImplicitTask task = (ImplicitTask) object;
-			payloadInfo = this.invokingTime.get(task.id);
-			
-			payloadInfo.setDescription("Task processing time");
+			/* Calculates the waiting for dependencies time. */
+			payloadInfo = this.waitingForDependenciesTime.remove(task.id);
 	        context.addPayloadInfo(payloadInfo.calculateTime());
-	        
-	        /* Now, saves the time that it is waiting for children. */
-	        PayloadInfo payloadInfo2 = context.createPayloadInfo("Waiting for children");
-			this.waitingForChildrenTime.put(task.id, payloadInfo2);    
-		
-	    } else if (methodName.equals("taskCompleted"))
-		{
-	    	ImplicitTask task = (ImplicitTask) object;
-			payloadInfo = this.waitingForChildrenTime.get(task.id);
 			
-			//TODO: Sometime we have null. Check again if this is still
-			//		necessary, as I have cleaned up the collisions in the
-			//		hash table.
-			if (payloadInfo != null) 
-				payloadInfo.setDescription("Waiting for children time");
-		//TODO: Same has above.	
-		} else if (methodName.equals("THIRD"))
-		{
+			/* Starts recording the waiting in queue time. */
+			payloadInfo = context.createPayloadInfo("Waiting in Queue");
+			this.waitingInQueueTime.put(task.id, payloadInfo);
 			
-		}
-		
-		if (payloadInfo != null)
+		/* At the beginning of the method invoke, the task is marked as running. */
+		} else if (methodName.equals("invoke")) 
+		{
+			task = (ImplicitTask) object;
+			
+			/* Calculates the waiting in queue time. */
+			payloadInfo = this.waitingInQueueTime.remove(task.id);
 			context.addPayloadInfo(payloadInfo.calculateTime());
+
+	        /* Starts recording the running time. */
+			payloadInfo = context.createPayloadInfo("Running");
+			this.runningTime.put(task.id, payloadInfo);
+			
+			//System.out.println("Counter: " + counter);
+			//counter.getAndIncrement();
+			
+		/* When the method taskFinished is called, the state of the task turns into
+		 * waiting for children.
+		 */
+		} else if (methodName.equals("taskFinished"))
+		{
+			task = (ImplicitTask) object;
+			
+			/* Calculates the running time. */
+			payloadInfo = this.runningTime.remove(task.id);
+			context.addPayloadInfo(payloadInfo.calculateTime());
+	        
+	        /* Starts recording the waiting for children time. */
+			payloadInfo = context.createPayloadInfo("Waiting for Children");
+			this.waitingForChildrenTime.put(task.id, payloadInfo);
+		
+		/* When the method taskCompleted is called, the work for this task is
+		 * completely done, meaning it has no longer any working children.	
+		 */
+		} else if (methodName.equals("taskCompleted"))
+		{
+			task = (ImplicitTask) object;
+			
+			/* Calculates the waiting for children time. */
+			payloadInfo = this.waitingForChildrenTime.remove(task.id);
+			context.addPayloadInfo(payloadInfo.calculateTime());
+		}
+
     }
 
+	@Override
+    public void interceptionExit(InterceptorContext context, Object object, Class declaringClass, String declaringClassName, String methodName, String methodSignature, Object returnValue) {
+    	
+    }
+
+	@Override
     public void interceptionExceptionExit(InterceptorContext context, Object object, Class declaringClass, String declaringClassName, String methodName, String methodSignature, Throwable throwable) {
-        // ignore exceptions
-        context.pop();
+        System.err.println("Exception exit occured: " + throwable.getMessage());
     }
 
+	@Override
     public ProbeMetaData getMetaData() {
         return ProbeMetaData.create("Task Details").events(true)
         		.payload(true).recordOnStartup(true)
         		.description("Measures the time each task take on each processing stage.");
     }
 
+	@Override
     public InterceptionMethod[] getInterceptionMethods() {
 
     	String implicitWorkStealing = "aeminium.runtime.implementations.implicitworkstealing";
     	
-    	InterceptionMethod[] methods2Intercept = new InterceptionMethod[2];
+    	InterceptionMethod[] methods2Intercept = new InterceptionMethod[5];
     	
     	/* IMPLICIT TASKS */
-    	/* Invoke */
+    	// invoke
     	methods2Intercept[0] = new InterceptionMethod(
     			implicitWorkStealing + ".task.ImplicitTask", 
         		"invoke", "(Laeminium/runtime/implementations/implicitworkstealing/ImplicitWorkStealingRuntime;)V");
+    	
+    	// taskFinished
     	methods2Intercept[1] = new InterceptionMethod(
     			implicitWorkStealing + ".task.ImplicitTask", 
+        		"taskFinished", "(Laeminium/runtime/implementations/implicitworkstealing/ImplicitWorkStealingRuntime;)V");
+    	
+    	// taskCompleted
+    	methods2Intercept[2] = new InterceptionMethod(
+    			implicitWorkStealing + ".task.ImplicitTask", 
         		"taskCompleted", "(Laeminium/runtime/implementations/implicitworkstealing/ImplicitWorkStealingRuntime;)V");
+
+    	// scheduleTask
+    	methods2Intercept[3] = new InterceptionMethod(
+    			implicitWorkStealing + ".scheduler.BlockingWorkStealingScheduler", 
+        		"scheduleTask", "(Laeminium/runtime/implementations/implicitworkstealing/task/ImplicitTask;)V");
     	
-    	//methods2Intercept[1] = new InterceptionMethod("aeminium.runtime.profiler.interceptorTests.InterceptorLauncher", 
-        //		"methodTwo", "(Ljava/lang/String;)V");
-    	
+    	// addTask
+    	methods2Intercept[4] = new InterceptionMethod(
+    			implicitWorkStealing + ".graph.ImplicitGraph", 
+        		"addTask", "(Laeminium/runtime/implementations/implicitworkstealing/task/ImplicitTask;"
+        			+ "Laeminium/runtime/Task;"
+        			+ "Ljava/util/Collection;)V");
+
     	return methods2Intercept;
     }
 

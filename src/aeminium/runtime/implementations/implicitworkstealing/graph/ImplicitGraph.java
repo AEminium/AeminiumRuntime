@@ -200,37 +200,20 @@ public class ImplicitGraph {
 				}
 				itask.depCount += count;
 				if ( itask.depCount == 0 ) {
-					if (enableProfiler)
-						itask.setState(ImplicitTaskState.WAITING_IN_QUEUE, this);
-					else
-						itask.setState(ImplicitTaskState.WAITING_IN_QUEUE);
 					schedule = true;
 				}
 			} else {
-				if (enableProfiler)
-					itask.setState(ImplicitTaskState.WAITING_IN_QUEUE, this);
-				else
-					itask.setState(ImplicitTaskState.WAITING_IN_QUEUE);
 				schedule = true;
 			}			
 		}
 		
-		//PROFILER
-		/*if ( thread instanceof AeminiumThread ) {
-			System.out.println("1. HAVE "+ ((AeminiumThread)thread).taskCount + 
-					" AND " + this.noWaitingForDependenciesTasks + 
-					" AND " + this.noRunningTasks);
-
-		} else {
-			
-			System.out.println("2. HAVE " + taskCounters.get().taskCount
-					+ " AND " + this.noWaitingForDependenciesTasks +
-					" AND " + this.noRunningTasks);
-			
-		}*/
-		
-		// schedule task if it's marked as running
+		// schedule task if it's marked as waiting in queue
 		if (schedule) {
+			if (enableProfiler)
+				itask.setState(ImplicitTaskState.WAITING_IN_QUEUE, this);
+			else
+				itask.setState(ImplicitTaskState.WAITING_IN_QUEUE);
+			
 			rt.scheduler.scheduleTask(itask);
 		}
 
