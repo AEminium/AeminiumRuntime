@@ -21,8 +21,6 @@ public class DataCollection {
 	public int noRunningTasks;
 	public int noCompletedTasks;
 	
-	public long samplingTime;
-	
 	public final static int ATOMIC_TASK = 0;
 	public final static int NON_BLOCKING_TASK = 1;
 	public final static int BLOCKING_TASK = 2;

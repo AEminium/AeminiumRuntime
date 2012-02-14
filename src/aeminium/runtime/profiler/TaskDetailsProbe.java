@@ -1,6 +1,8 @@
 package aeminium.runtime.profiler;
 
 import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicLong;
+
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import com.jprofiler.api.agent.probe.*;
 
@@ -13,7 +15,7 @@ public class TaskDetailsProbe implements InterceptorProbe {
 	private Hashtable <Integer, PayloadInfo> waitingForChildrenTime = new Hashtable <Integer, PayloadInfo>();
 	
 	//TODO: Remove when completely unnecessary.
-	//private AtomicLong counter = new AtomicLong(0);
+	private AtomicLong counter = new AtomicLong(0);
 	
 	@Override
 	public void interceptionEnter(InterceptorContext context, Object object, Class declaringClass, String declaringClassName, String methodName, String methodSignature, Object[] parameters) {
@@ -29,6 +31,9 @@ public class TaskDetailsProbe implements InterceptorProbe {
 			/* Starts recording the waiting in queue time. */
 			payloadInfo = context.createPayloadInfo("Waiting for Dependencies");
 			this.waitingForDependenciesTime.put(task.id, payloadInfo);
+			
+			System.out.println("Counter: " + counter);
+			counter.incrementAndGet();
 		
 		} else if (methodName.equals("scheduleTask")) 
 		{

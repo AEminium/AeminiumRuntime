@@ -261,7 +261,9 @@ public final class BlockingWorkStealingScheduler {
 		{
 			data.taskInNonBlockingQueue[i] = threads[i].getLocalQueueSize();
 			threads[i].getNoTasksHandled(data.tasksHandled[i]);
-			data.taskInBlockingQueue = blockingThreadPool.getTaskQueueSize();
+			
+			if (blockingThreadPool != null)
+				data.taskInBlockingQueue = blockingThreadPool.getTaskQueueSize();
 		}
 		
 		return;
