@@ -19,10 +19,10 @@ public class AeminiumProbeProvider implements ProbeProvider {
     	 * telemetries, so we can have data related to how many tasks we have at
     	 * the moment and so on.
     	 */
-    	Probe[] probes = new Probe[1];
+    	Probe[] probes = new Probe[2];
     	
     	probes[0] = new CountersProbe();
-    	//probes[1] = new TaskDetailsProbe();
+    	probes[1] = new TaskDetailsProbe();
     	
     	
         return probes;
