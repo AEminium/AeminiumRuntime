@@ -69,7 +69,7 @@
 	<target name="jar">
 	  <jar destfile="${dist.dir}/AeminiumRuntime.jar">
 	   <fileset dir="${build.dir}/" />
-	   <fileset dir="${src.dir}/aeminium" />
+	   <fileset dir="${src.dir}" />
 	   <manifest>
 		 <!-- Who is building this jar? -->
 		 <attribute name="Built-By" value="${user.name}"/>
