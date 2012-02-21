@@ -1,7 +1,6 @@
 package aeminium.runtime.profiler;
 
-import java.util.Hashtable;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ConcurrentHashMap;
 
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import com.jprofiler.api.agent.probe.*;
@@ -9,13 +8,10 @@ import com.jprofiler.api.agent.probe.*;
 @SuppressWarnings("rawtypes")
 public class TaskDetailsProbe implements InterceptorProbe {
 	
-	private Hashtable <Integer, PayloadInfo> waitingForDependenciesTime = new Hashtable <Integer, PayloadInfo>();
-	private Hashtable <Integer, PayloadInfo> waitingInQueueTime = new Hashtable <Integer, PayloadInfo>();
-	private Hashtable <Integer, PayloadInfo> runningTime = new Hashtable <Integer, PayloadInfo>();
-	private Hashtable <Integer, PayloadInfo> waitingForChildrenTime = new Hashtable <Integer, PayloadInfo>();
-	
-	//TODO: Remove when completely unnecessary.
-	private AtomicLong counter = new AtomicLong(0);
+	private ConcurrentHashMap <Integer, PayloadInfo> waitingForDependenciesTime = new ConcurrentHashMap <Integer, PayloadInfo>();
+	private ConcurrentHashMap <Integer, PayloadInfo> waitingInQueueTime = new ConcurrentHashMap <Integer, PayloadInfo>();
+	private ConcurrentHashMap <Integer, PayloadInfo> runningTime = new ConcurrentHashMap <Integer, PayloadInfo>();
+	private ConcurrentHashMap <Integer, PayloadInfo> waitingForChildrenTime = new ConcurrentHashMap <Integer, PayloadInfo>();
 	
 	@Override
 	public void interceptionEnter(InterceptorContext context, Object object, Class declaringClass, String declaringClassName, String methodName, String methodSignature, Object[] parameters) {
@@ -31,9 +27,6 @@ public class TaskDetailsProbe implements InterceptorProbe {
 			/* Starts recording the waiting in queue time. */
 			payloadInfo = context.createPayloadInfo("Waiting for Dependencies");
 			this.waitingForDependenciesTime.put(task.id, payloadInfo);
-			
-			//System.out.println("Counter: " + counter);
-			//counter.incrementAndGet();
 		
 		} else if (methodName.equals("scheduleTask")) 
 		{
