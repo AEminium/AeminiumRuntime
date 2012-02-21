@@ -32,8 +32,8 @@ public class TaskDetailsProbe implements InterceptorProbe {
 			payloadInfo = context.createPayloadInfo("Waiting for Dependencies");
 			this.waitingForDependenciesTime.put(task.id, payloadInfo);
 			
-			System.out.println("Counter: " + counter);
-			counter.incrementAndGet();
+			//System.out.println("Counter: " + counter);
+			//counter.incrementAndGet();
 		
 		} else if (methodName.equals("scheduleTask")) 
 		{
