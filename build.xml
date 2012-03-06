@@ -38,7 +38,7 @@
 		</javac>
 	</target>
 
-	<target name="tests">
+	<target name="tests" depends="compile">
 		<junit fork="yes" dir="${src.dir}/aeminium/runtime/tests" printsummary="yes">
 			<classpath refid="rt.classpath.debug"/>
 			<formatter type="brief"/>
@@ -51,7 +51,7 @@
 		</junit>
 	</target>
 
-	<target name="jar-debug">
+	<target name="jar-debug" depends="compile">
 	  <jar destfile="${dist.dir}/AeminiumRuntimeDebug.jar">
 	   <fileset dir="${build.dir}/"/>
 	   <fileset dir="${src.dir}/"/>
@@ -66,7 +66,7 @@
 	  </jar>
 	</target>
 
-	<target name="jar">
+	<target name="jar" depends="compile">
 	  <jar destfile="${dist.dir}/AeminiumRuntime.jar">
 	   <fileset dir="${build.dir}/" />
 	   <fileset dir="${src.dir}" />
