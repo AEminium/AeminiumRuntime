@@ -2,6 +2,9 @@ package aeminium.runtime.tests;
 
 import java.util.Arrays;
 
+import aeminium.runtime.tests.FibBody;
+import aeminium.runtime.tests.FibBodySum;
+
 import aeminium.runtime.*;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.implementations.Factory;
