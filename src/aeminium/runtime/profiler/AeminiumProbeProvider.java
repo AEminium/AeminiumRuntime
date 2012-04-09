@@ -2,6 +2,8 @@ package aeminium.runtime.profiler;
 
 import com.jprofiler.api.agent.probe.Probe;
 import com.jprofiler.api.agent.probe.ProbeProvider;
+import com.jprofiler.api.agent.Controller;
+import com.jprofiler.api.agent.HeapDumpOptions;
 
 /* The probe provider class is specified with as a VM parameter as
  * -Djprofiler.probeProvider=aeminium.runtime.profiler.AeminiumProbeProvider
@@ -12,7 +14,6 @@ import com.jprofiler.api.agent.probe.ProbeProvider;
 public class AeminiumProbeProvider implements ProbeProvider {
 	
     public Probe[] getProbes() {
-    	
     	/* We will have two probes. One that monitors the execution of methods,
     	 * (e.g. time related to a specific task, like how long was it in a queue,
     	 * how long did it take to complete,...) and another that monitors the

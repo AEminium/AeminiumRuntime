@@ -1,4 +1,4 @@
-package tests.PI;
+package aeminium.runtime.profilerTests.PI;
 
 import java.io.File;
 import java.io.IOException;
