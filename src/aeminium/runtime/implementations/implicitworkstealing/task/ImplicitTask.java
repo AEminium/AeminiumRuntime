@@ -45,7 +45,7 @@ public abstract class ImplicitTask implements Task {
 	private ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
 	public byte depCount;
 	public byte childCount;
-	public List<ImplicitTask> dependents;  
+	public List<ImplicitTask> dependents = new ArrayList<ImplicitTask>();  
 	public List<ImplicitTask> children;     // children are only used for debugging purposes => could be removed
 	public ImplicitTask parent;
 	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
@@ -109,13 +109,10 @@ public abstract class ImplicitTask implements Task {
 	}
 
 	public final int addDependent(ImplicitTask task) {
-		synchronized (this) {
-			if ( state == ImplicitTaskState.COMPLETED ) {
-				return 0;
-			}
-			if ( dependents == null ) {
-				dependents = new ArrayList<ImplicitTask>();
-			}
+	  if ( state == ImplicitTaskState.COMPLETED ) {
+		  return 0;
+	  }
+	  synchronized (dependents) {
 			dependents.add(task);
 			return 1;
 		}
@@ -169,7 +166,7 @@ public abstract class ImplicitTask implements Task {
 			this.parent = null;
 		}
 
-		if ( dependents != null ) {
+    synchronized (dependents) {
 			for ( ImplicitTask t : dependents) {
 				t.decDependencyCount(rt);
 			}

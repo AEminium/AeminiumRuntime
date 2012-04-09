@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
-<project name="AEminium Runtime" default="build">
-    <property name="compiler" value="javac1.6" />
-    <property name="ant.build.javac.target" value="1.6" />
-    <property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6" />
+<project name="AEminium Runtime" default="compile">
+	<property name="compiler" value="javac1.6" />
+	<property name="ant.build.javac.target" value="1.6" />
+	<property name="org.apache.tools.ant.taskdefs.compilers.CompilerAdapter" value="javac1.6" />
 
+<<<<<<< HEAD
     <path id="rt.classpath">
         <pathelement path="bin/" />
         <pathelement path="lib/jsr166y.jar" />
@@ -18,20 +19,71 @@
             <classpath refid="rt.classpath"/>
         </javac>
     </target>
+=======
+	<property name="src.dir"	 value="src"/>	
+	<property name="build.dir"	 value="bin"/> 
+	<property name="dist.dir"	value="dist"/>	
+	<property name="lib.dir"   value="lib"/>  
 
-    <target name="tests">
-        <junit fork="yes" dir="src/aeminium/runtime/tests" printsummary="yes">
-            <classpath refid="rt.classpath"/>
-            <formatter type="brief"/>
-            <batchtest>
-                <fileset dir="src/">
-                    <include name="aeminium/runtime/tests/*.java"/>
-                    <exclude name="aeminium/runtime/tests/BaseTest.java"/>
-                </fileset>
-            </batchtest>
-        </junit>
-    </target>
 
+	<path id="rt.classpath">
+		<pathelement path="${build.dir}/" />
+		<pathelement path="${lib.dir}/junit-4.8.2.jar" />
+	</path>
+	
+	<path id="rt.classpath.debug">
+		<pathelement path="${build.dir}/" />
+		<pathelement path="${lib.dir}/junit-4.8.2.jar" />
+	</path>
+
+	<target name="clean">  
+		<echo message="In clean "/>	 
+		<delete dir="${build.dir}"/>  
+		<delete dir="${dist.dir}"/>	 
+		<delete verbose="yes">
+			<fileset dir=".">
+		  		<include name="TEST*"/>
+			</fileset>
+	  	</delete>
+	</target> 
+
+	<target name="compile">
+		<mkdir dir="${build.dir}" />
+		<javac srcdir="${src.dir}" destdir="${build.dir}" fork="false">
+			<classpath refid="rt.classpath"/>
+		</javac>
+	</target>
+
+	<target name="tests" depends="compile">
+		<junit fork="yes" dir="${src.dir}/aeminium/runtime/tests" printsummary="yes">
+			<classpath refid="rt.classpath.debug"/>
+			<formatter type="brief"/>
+			<batchtest>
+				<fileset dir="${src.dir}/">
+					<include name="aeminium/runtime/tests/*.java"/>
+					<exclude name="aeminium/runtime/tests/BaseTest.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+>>>>>>> 78b573b0f3d2151fef8e61e1c52589e75a0e8738
+
+	<target name="jar-debug" depends="compile">
+	  <jar destfile="${dist.dir}/AeminiumRuntimeDebug.jar">
+	   <fileset dir="${build.dir}/"/>
+	   <fileset dir="${src.dir}/"/>
+	   <zipfileset includes="**/*.class" src="${lib.dir}/junit-4.8.2.jar"/>
+	   <manifest>
+		 <!-- Who is building this jar? -->
+		 <attribute name="Built-By" value="${user.name}"/>
+		 <!-- Information about the program itself -->
+		 <attribute name="Implementation-Vendor" value="Aeminium Project"/>
+		 <attribute name="Implementation-Title" value="Aeminium Runtime"/>
+	   </manifest>
+	  </jar>
+	</target>
+
+<<<<<<< HEAD
     <target name="jar-debug">
       <jar destfile="AeminiumRuntime.jar">
        <fileset dir="bin/"/>
@@ -77,4 +129,19 @@
         </fileset>
       </delete>
     </target>
+=======
+	<target name="jar" depends="compile">
+	  <jar destfile="${dist.dir}/AeminiumRuntime.jar">
+	   <fileset dir="${build.dir}/" />
+	   <fileset dir="${src.dir}" />
+	   <manifest>
+		 <!-- Who is building this jar? -->
+		 <attribute name="Built-By" value="${user.name}"/>
+		 <!-- Information about the program itself -->
+		 <attribute name="Implementation-Vendor" value="Aeminium Project"/>
+		 <attribute name="Implementation-Title" value="Aeminium Runtime"/>
+	   </manifest>
+	  </jar>
+	</target>
+>>>>>>> 78b573b0f3d2151fef8e61e1c52589e75a0e8738
 </project>
