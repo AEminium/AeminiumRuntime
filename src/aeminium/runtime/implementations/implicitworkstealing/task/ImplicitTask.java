@@ -129,7 +129,7 @@ public abstract class ImplicitTask implements Task {
 	}
 
 	public final int addDependent(ImplicitTask task) {
-	  if ( state == ImplicitTaskState.COMPLETED ) {
+	  if ( state == ImplicitTaskState.COMPLETED || dependents == null ) {
 		  return 0;
 	  }
 	  synchronized (dependents) {
