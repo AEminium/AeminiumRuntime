@@ -95,6 +95,7 @@ public final class BlockingThreadPool {
 			}
 		}
 	}
+
 	/* Is called after a task finishes its work. */
 	protected void signalThreadFinished() {
 		synchronized (taskQueue) {
