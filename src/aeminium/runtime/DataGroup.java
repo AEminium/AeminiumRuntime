@@ -19,5 +19,5 @@
 
 package aeminium.runtime;
 
-/* opaque interface for data groups */
+/* Opaque interface for Data Groups */
 public interface DataGroup {}

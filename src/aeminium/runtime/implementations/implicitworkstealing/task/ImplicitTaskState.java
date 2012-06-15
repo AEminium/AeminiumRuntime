@@ -20,9 +20,9 @@
 package aeminium.runtime.implementations.implicitworkstealing.task;
 
 public enum ImplicitTaskState {
-	UNSCHEDULED,
-	WAITING_FOR_DEPENDENCIES,
-	RUNNING,
-	WAITING_FOR_CHILDREN,
-	COMPLETED
+	UNSCHEDULED, /* Task created by the Runtime, but not scheduled for execution. */
+	WAITING_FOR_DEPENDENCIES, /* Task cannot be executed because it depends on uncompleted tasks. */
+	RUNNING, /* Task is executing. */
+	WAITING_FOR_CHILDREN, /* Task has finished its body, but some children tasks are still not complete. */
+	COMPLETED /* Task has been completed. */
 }

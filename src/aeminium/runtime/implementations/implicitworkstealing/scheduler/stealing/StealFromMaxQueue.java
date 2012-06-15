@@ -25,6 +25,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
+
+/*
+ * Task Stealing Algorithm that steals a task from the largest queue.
+ */
 public class StealFromMaxQueue implements WorkStealingAlgorithm {
 	private ConcurrentLinkedQueue<WorkStealingThread> parkedThreads;
 	private WorkStealingThread[] threads;

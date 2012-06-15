@@ -27,6 +27,9 @@ import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealin
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 
+/* Threadpool for executing Blocking Tasks.
+ * Has a traditional threadpool behavior. 
+ */
 public final class BlockingThreadPool {
 	protected ImplicitWorkStealingRuntime rt;
 	protected EventManager eventManager;
@@ -67,7 +70,7 @@ public final class BlockingThreadPool {
 		rt           = null;
 		eventManager = null;
 	}
-	
+	/* Retrieves a new task to execute from the queue. */
 	protected ImplicitBlockingTask getWork() {
 		synchronized (taskQueue) {
 			if ( taskQueue.isEmpty() ) {
@@ -92,7 +95,7 @@ public final class BlockingThreadPool {
 			}
 		}
 	}
-	
+	/* Is called after a task finishes its work. */
 	protected void signalThreadFinished() {
 		synchronized (taskQueue) {
 			currentThreads--;
@@ -102,6 +105,8 @@ public final class BlockingThreadPool {
 		}
 	}
 	
+	
+	/* Adds a new task to the queue. */
 	public final void submitTask(ImplicitBlockingTask task) {
 		synchronized (taskQueue) {
 			taskQueue.add(task);

@@ -31,7 +31,7 @@ import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealin
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 
-
+/* Task super class that holds all common behaviors */
 public abstract class ImplicitTask implements Task {
 	protected static final Object UNSET = new Object() {
 		@Override
@@ -56,7 +56,8 @@ public abstract class ImplicitTask implements Task {
 		this.body = body;
 		this.hints = hints;
 	}
-		
+	
+	/* Executes task on the Runtime, and handles errors. */
 	public void invoke(ImplicitWorkStealingRuntime rt) {
 		try {
 			body.execute(rt, this);
@@ -100,6 +101,7 @@ public abstract class ImplicitTask implements Task {
 		}
 	}
 	
+	/* Sets another task as a child of the current one. */
 	public final void attachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child) {
 		synchronized (this) {
 			childCount += 1;
@@ -112,6 +114,7 @@ public abstract class ImplicitTask implements Task {
 		}
 	}
 	
+	/* Removes another task as a children of this one. */
 	public final void detachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child) {
 		boolean shouldComplete = false;
 		
@@ -128,6 +131,7 @@ public abstract class ImplicitTask implements Task {
 			taskCompleted(rt);
 	}
 
+	/* Adds another task as a dependent of the current task. */
 	public final int addDependent(ImplicitTask task) {
 	  if ( state == ImplicitTaskState.COMPLETED || dependents == null ) {
 		  return 0;
@@ -138,6 +142,10 @@ public abstract class ImplicitTask implements Task {
 		}
 	}
 	
+	/* 
+	 * Decreases an internal counter of how many dependencies the current task has.
+	 * When the counter reaches 0, the task is scheduled.
+	 *   */
 	public final void decDependencyCount(ImplicitWorkStealingRuntime rt) {
 		boolean schedule = false;
 		synchronized (this) {
@@ -152,6 +160,9 @@ public abstract class ImplicitTask implements Task {
 		}
 	}
 	
+	/*
+	 * Method called after a task finishes executing the body.
+	 */
 	public final void taskFinished(ImplicitWorkStealingRuntime rt) {
 		synchronized (this) {
 			state = ImplicitTaskState.WAITING_FOR_CHILDREN;
@@ -162,6 +173,7 @@ public abstract class ImplicitTask implements Task {
 		}
 	}
 	
+	/* Method called after a task completes (both current task and children have finished) */
 	public void taskCompleted(ImplicitWorkStealingRuntime rt) {
 		assert( state == ImplicitTaskState.WAITING_FOR_CHILDREN );
 		state = ImplicitTaskState.COMPLETED;	
@@ -171,6 +183,7 @@ public abstract class ImplicitTask implements Task {
 			this.parent = null;
 		}
 
+		synchronized (dependents) {
 			for ( ImplicitTask t : dependents) {
 				t.decDependencyCount(rt);
 			}
@@ -192,6 +205,7 @@ public abstract class ImplicitTask implements Task {
 		return state == ImplicitTaskState.COMPLETED;
 	}
 	
+	/* Verifies if there are any cyclic dependencies in the Graph. */
 	public void checkForCycles(final ErrorManager em) {
 		synchronized (this) {
 			checkForCycles(this, dependents, em);

@@ -23,8 +23,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+
+/*
+ * Aeminium Runtime
+ * 
+ * Provides an interface to create new tasks and submit them for execution.
+ * Aeminium Programs should call init() when starting and should
+ * call shutdown() at the end.
+ */
 public interface Runtime {
-    /* global constants used for the */
+    /* Global constants for default values */
     public final static Collection<Task> NO_DEPS = new ArrayList<Task>() {
 		private static final long serialVersionUID = 1852797887380877437L;
 
@@ -51,34 +59,38 @@ public interface Runtime {
 		}
 	};
 	
-    /* initialize runtime */
+    /* Initializes runtime. Should be called upon program start. */
     public void init() ;
     /* 
-     * wait until all task graph is empty and 
-     * frees all resources of the runtime 
+     * Waits until all tasks are executed and frees
+     * all allocated resources. 
+     * Should be called at the end of the program. 
      */
     public void shutdown();
-    /* wait until all tasks have been processed */
+    /* Waits until all tasks have been processed */
     public void waitToEmpty();
-    /* add a task along with it's parent and dependencies */
+    /* 
+     * Submits a task for execution, providing the parent task as well
+     * as its dependencies.
+     *  */
     public void schedule(Task task, Task parent, Collection<Task> deps) ;
 
-    /* check whether runtime has enough tasks to processes */
+    /* Checks whether runtime has enough tasks to process. */
     public boolean parallelize();
 
-    /* create a new data group object */
+    /* Creates a new data group object */
     public DataGroup createDataGroup() ;
-    /* create a new Blocking task */
+    /* Creates a new Blocking task */
     public BlockingTask createBlockingTask(Body b, short hints) ;
-    /* create a new NonBlocking task */
+    /* Creates a new NonBlocking task */
     public NonBlockingTask createNonBlockingTask(Body b, short hints) ;
-    /* create a new Atomic task */
+    /* Creates a new Atomic task */
     public AtomicTask createAtomicTask(Body b, DataGroup g, short hints) ;
 
-    /* return executor service abstraction for this runtime object */
+    /* Return executor service abstraction for this runtime object */
     public ExecutorService getExecutorService();
     
-    /* add/remove error handlers */
+    /* Add/Remove error handlers */
     public void addErrorHandler(ErrorHandler eh);
     public void removeErrorHandler(ErrorHandler eh);
 }

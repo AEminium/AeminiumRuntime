@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
+/*
+ * Task Stealing Algorithm that steals from those who have stolen before.
+ */
 public class Revenge implements WorkStealingAlgorithm {
 	private ConcurrentLinkedQueue<WorkStealingThread> parkedThreads;
 	private WorkStealingThread[] threads;

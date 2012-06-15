@@ -24,7 +24,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
-
+/*
+ * Task Stealing Algorithm that steals the first task going backwards on the
+ * list of threads from the current task.
+ */
 public final class SequentialReverseScan implements WorkStealingAlgorithm {
 	private ConcurrentLinkedQueue<WorkStealingThread> parkedThreads;
 	private WorkStealingThread[] threads;
