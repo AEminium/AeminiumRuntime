@@ -103,10 +103,11 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 
+	
 	protected WorkStealingAlgorithm loadWorkStealingAlgorithm(String name) {
 		WorkStealingAlgorithm wsa = null;
 		
-		Class<?> wsaClass = null;;
+		Class<?> wsaClass = null;
 		try {
 			wsaClass = getClass().getClassLoader().loadClass("aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing."+name);
 		} catch (ClassNotFoundException e) {
@@ -190,12 +191,12 @@ public final class BlockingWorkStealingScheduler {
 	public final void signalWork(WorkStealingThread thread) {
 		// TODO: need to fix that to wake up thread waiting for objects to complete
 		LockSupport.unpark(thread);
-		WorkStealingThread next = wsa.singalWorkInLocalQueue(thread);
+		WorkStealingThread next = wsa.signalWorkInLocalQueue(thread);
 		LockSupport.unpark(next);
 	}
 	
 	public final void signalWork() {
-		WorkStealingThread threadParked = wsa.singalWorkInSubmissionQueue();
+		WorkStealingThread threadParked = wsa.signalWorkInSubmissionQueue();
 		if ( threadParked != null ) {
 			LockSupport.unpark(threadParked);
 		}
@@ -204,7 +205,7 @@ public final class BlockingWorkStealingScheduler {
 	public final void parkThread(WorkStealingThread thread) {
 		eventManager.signalThreadSuspend(thread);
 		wsa.threadGoingToPark(thread);
-		if ( 0 < unparkInterval ) {
+		if (unparkInterval > 0) {
 			LockSupport.parkNanos(thread, unparkInterval);
 		} else {
 			LockSupport.park(thread);

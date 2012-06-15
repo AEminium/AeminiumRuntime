@@ -93,7 +93,7 @@ public final class BlockingThreadPool {
 		}
 	}
 	
-	protected void singalThreadFinished() {
+	protected void signalThreadFinished() {
 		synchronized (taskQueue) {
 			currentThreads--;
 			if ( currentThreads == 0 ) {
@@ -136,7 +136,7 @@ public final class BlockingThreadPool {
 					finished = true;
 				}
 			}
-			singalThreadFinished();
+			signalThreadFinished();
 		}
 	}
 }

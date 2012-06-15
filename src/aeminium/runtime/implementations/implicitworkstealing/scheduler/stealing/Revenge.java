@@ -28,14 +28,14 @@ public class Revenge implements WorkStealingAlgorithm {
 	}
 
 	@Override
-	public final WorkStealingThread singalWorkInLocalQueue(WorkStealingThread current) {
+	public final WorkStealingThread signalWorkInLocalQueue(WorkStealingThread current) {
 		WorkStealingThread thread = threads[(current.index+1)%threads.length];
 		parkedThreads.remove(thread);		
 		return thread;
 	}
 
 	@Override
-	public final WorkStealingThread singalWorkInSubmissionQueue() {
+	public final WorkStealingThread signalWorkInSubmissionQueue() {
 		WorkStealingThread thread = parkedThreads.poll();
 		return thread;
 	}

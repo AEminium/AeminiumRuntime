@@ -171,7 +171,6 @@ public abstract class ImplicitTask implements Task {
 			this.parent = null;
 		}
 
-    synchronized (dependents) {
 			for ( ImplicitTask t : dependents) {
 				t.decDependencyCount(rt);
 			}
