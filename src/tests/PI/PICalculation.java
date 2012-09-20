@@ -16,7 +16,7 @@ public class PICalculation
 	public static void main(String args[])
 	{
 		
-		boolean offlineProfiling = true;
+		boolean offlineProfiling = false;
 		
 		if (offlineProfiling)
 		{
@@ -43,7 +43,7 @@ public class PICalculation
 		Runtime rt = Factory.getRuntime();
 		rt.init();
 		
-		int noMasterTasks = Configuration.getProcessorCount();
+		int noMasterTasks = Configuration.getProcessorCount() / 2;
 		
 		MasterBody[] masterArray = new MasterBody[noMasterTasks];
 		
