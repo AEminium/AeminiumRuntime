@@ -2,8 +2,6 @@ package aeminium.runtime.profiler;
 
 import com.jprofiler.api.agent.probe.Probe;
 import com.jprofiler.api.agent.probe.ProbeProvider;
-import com.jprofiler.api.agent.Controller;
-import com.jprofiler.api.agent.HeapDumpOptions;
 
 /* The probe provider class is specified with as a VM parameter as
  * -Djprofiler.probeProvider=aeminium.runtime.profiler.AeminiumProbeProvider

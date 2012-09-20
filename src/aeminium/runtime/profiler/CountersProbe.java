@@ -22,6 +22,8 @@ public class CountersProbe implements TelemetryProbe {
 	
 	private final static int QUEUE_INFO = 10;
 	
+	private DataCollection data;
+	
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 	
 	private int maxParallelism = 1;
@@ -29,7 +31,7 @@ public class CountersProbe implements TelemetryProbe {
     public ProbeMetaData getMetaData() {
     	
     	/* First, we get the number of processors available. */
-    	maxParallelism = Configuration.getProcessorCount();
+    	maxParallelism = Configuration.getProcessorCount()*2;
     	
     	ProbeMetaData metaData = ProbeMetaData.create("Counters").recordOnStartup(true)
     								.telemetry(true)
@@ -59,14 +61,15 @@ public class CountersProbe implements TelemetryProbe {
         	metaData.addCustomTelemetry("No of Non-blocking Tasks Handled (" + (i + 1) + ")", Unit.PLAIN, 1f);
         }
     	
+    	/* Initializes the data collection object. */
+    	data = new DataCollection(maxParallelism); 
+    	
         return metaData;
     }
 
 	@Override
 	public void fillTelemetryData(ProbeContext context, int[] customTelemetries) 
-	{
-		DataCollection data = new DataCollection(maxParallelism);
-		
+	{	
 		/* Get the data from the graph. */
 		if (AeminiumProfiler.graph != null)
 		{
