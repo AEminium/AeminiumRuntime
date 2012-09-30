@@ -2,16 +2,16 @@ package aeminium.runtime.profiler.profilerTests.PI;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import com.jprofiler.api.agent.Controller;
 
 import aeminium.runtime.*;
 import aeminium.runtime.Runtime;
-import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.Factory;
 
-
-public class PICalculation
+public class PICorrected
 {	
 	public static void main(String args[])
 	{
@@ -56,34 +56,68 @@ public class PICalculation
 		Runtime rt = Factory.getRuntime();
 		rt.init();
 		
-		int noMasterTasks = Configuration.getProcessorCount();
+		long NO_TASKS = Long.parseLong(args[3]);
+		long DARTS = Long.parseLong(args[2]);
+		LinkedList<WorkerBody> workersBodies = new LinkedList<WorkerBody>();
 		
-		MasterBody[] masterArray = new MasterBody[noMasterTasks];
+		Collection<Task> workersTasks = new LinkedList<Task>();
 		
-		for (int i = 0; i < noMasterTasks; i++)
+		for (long j = 0; j < NO_TASKS; j++)
 		{
-			masterArray[i] = new MasterBody(Long.parseLong(args[2]),
-								Long.parseLong(args[3]));	
-			
-			Task taskMain = rt.createNonBlockingTask(masterArray[i], Runtime.NO_HINTS);
-			rt.schedule(taskMain, Runtime.NO_PARENT, Runtime.NO_DEPS);
+			WorkerBody body = new WorkerBody(DARTS, j);
+			Task task = rt.createNonBlockingTask(body, Runtime.NO_HINTS);
+			rt.schedule(task, Runtime.NO_PARENT, Runtime.NO_DEPS);
+
+			workersBodies.add(body);
+			workersTasks.add(task);
 		}
+		
+		BodySum bodySum = new BodySum(workersBodies, NO_TASKS);
+		Task taskSum = rt.createNonBlockingTask(bodySum, Runtime.NO_HINTS);
+		rt.schedule(taskSum, Runtime.NO_PARENT, workersTasks);
 
 		rt.shutdown();
 		
-		double pi = 0;
-		
-		System.out.println("Counting " + noMasterTasks);
-		
-		for (int i = 0; i < noMasterTasks; i++)
-			pi += masterArray[i].PIValue;
-		
-		System.out.println(pi/noMasterTasks);
+		System.out.println(bodySum.PIValue);
 		
         long endTime = System.nanoTime();
         
         long finalTime = endTime - startTime;
         
-        System.out.println("Time: " + finalTime);
+        System.out.println("Time for " + NO_TASKS + ": " + finalTime/1000000.0);
+	}
+}
+
+class BodySum implements Body
+{
+	private LinkedList<WorkerBody> workersBodies;
+	private long NO_TASKS;
+	public double PIValue;
+	
+	public BodySum(LinkedList<WorkerBody> workersBodies, long NO_TASKS)
+	{
+		this.workersBodies = workersBodies;
+		this.NO_TASKS = NO_TASKS;
+	}
+
+	@Override
+	public void execute(Runtime rt, Task current)
+		throws Exception
+	{
+		double value = 0;
+		
+		/* Sums the values from all the tasks, dividing it to get the mean. */
+		for (WorkerBody body : this.workersBodies)
+			value += body.value;
+		
+		value /= this.NO_TASKS;
+		
+		/* If we already have values for the parent, we have to calculate the
+		 * mean of both. Otherwise, just assign the calculated PI value.
+		 */
+		if (this.PIValue > 0)
+			this.PIValue = (this.PIValue + value) / 2;
+		else
+			this.PIValue = value;
 	}
 }

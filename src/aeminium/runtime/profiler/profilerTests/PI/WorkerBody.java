@@ -8,10 +8,12 @@ public class WorkerBody implements Body
 {
 	private long darts = 0;
 	public double value = 0;
+	private long workerID = 0;
 	
-	public WorkerBody(long darts)
+	public WorkerBody(long darts, long id)
 	{
 		this.darts = darts;
+		this.workerID = id;
 	}
 	
 
