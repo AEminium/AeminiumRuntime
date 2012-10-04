@@ -39,20 +39,19 @@ public class OfflineExtractor
 		if (args.length >= 1)
 			NO_EXPERIENCES = Integer.parseInt(args[0]);
 		if (args.length >= 2)
-			NO_RUNS = Integer.parseInt(args[0]);
+			NO_RUNS = Integer.parseInt(args[1]);
 		if (args.length >= 3)
-			fullPath = args[2];
+			filenamePrefix = args[2];
 		if (args.length >= 4)
-			filenamePrefix = args[3];
+			fullPath = args[3];
 		if (args.length == 5)
 			samplesTable = args[4];
-		
-		
+
 		for (int k = 1; k <= NO_EXPERIENCES; k++)
 		{
 			for (int m = 1; m <= NO_RUNS; m++)
 			{
-				String filetemp = filenamePrefix + "_" + k + "_" + m + ".jps";
+				String filetemp = "\\" + filenamePrefix + "_" + k + "_" + m + ".jps";
 				
 				String probeId = "aeminium.runtime.profiler.CountersProbe";
 				//String filename = fullPath + args[0];
@@ -65,7 +64,7 @@ public class OfflineExtractor
 				else
 					justFileNameSQL = fullPath + "\\extracted\\" + filetemp.substring(0, filetemp.length() - 7);
 		
-				System.out.println(filename);
+				System.out.println("FILENAME IS: " + filename);
 				
 				/* There are 10 different telemetryGroups.
 				 * 	1.  Atomic tasks completed

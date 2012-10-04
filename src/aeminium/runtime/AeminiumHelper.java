@@ -1,7 +1,10 @@
 package aeminium.runtime;
 
+import aeminium.runtime.*;
 import aeminium.runtime.implementations.Factory;
+
 import java.util.Collection;
+import java.util.ArrayList;
 
 public class AeminiumHelper
 {
