@@ -24,6 +24,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+
+
+/*
+ * Loads configuration info from aeminiumrt.config file.
+ * The AEMINIUMRT_CONFIG env variable can be used to override the file.
+ */
 public final class Configuration {
 	protected static final String GLOBAL_PREFIX = "global.";
 	protected static int processorCount;

@@ -48,7 +48,7 @@ public interface WorkStealingAlgorithm {
 	 * 
 	 * @return The thread that should be woken up or null.
 	 */
-	public WorkStealingThread singalWorkInSubmissionQueue();
+	public WorkStealingThread signalWorkInSubmissionQueue();
 	
 	/**
 	 * This method is called when a new item has been added into the local 
@@ -62,7 +62,7 @@ public interface WorkStealingAlgorithm {
 	 *                local queue.
 	 * @return The thread that should be woken up.
 	 */
-	public WorkStealingThread singalWorkInLocalQueue(WorkStealingThread current);
+	public WorkStealingThread signalWorkInLocalQueue(WorkStealingThread current);
 
 	/**
 	 * This method is called before a worker thread is parked/pasued.
