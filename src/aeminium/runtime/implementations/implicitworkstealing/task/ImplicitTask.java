@@ -44,7 +44,7 @@ public abstract class ImplicitTask implements Task {
 	public ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
 	public byte depCount;
 	public byte childCount;
-	public List<ImplicitTask> dependents = new ArrayList<ImplicitTask>();  
+	public List<ImplicitTask> dependents = new ArrayList<ImplicitTask>();
 	public List<ImplicitTask> children;     // children are only used for debugging purposes => could be removed
 	public ImplicitTask parent;
 	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
@@ -117,10 +117,8 @@ public abstract class ImplicitTask implements Task {
 		
 		synchronized (this) {
 			childCount -= 1;
-			if ( childCount == 0 ) {
-				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
-					shouldComplete = true;
-				}
+			if ( childCount == 0 && state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
+				shouldComplete = true;
 			}
 		}
 		
@@ -129,13 +127,13 @@ public abstract class ImplicitTask implements Task {
 	}
 
 	public final int addDependent(ImplicitTask task) {
-	  if ( state == ImplicitTaskState.COMPLETED || dependents == null ) {
-		  return 0;
+	  synchronized (this) {
+		  if ( state == ImplicitTaskState.COMPLETED) {
+			  return 0;
+		  }
+		  dependents.add(task);
+		  return 1;
 	  }
-	  synchronized (dependents) {
-			dependents.add(task);
-			return 1;
-		}
 	}
 	
 	public final void decDependencyCount(ImplicitWorkStealingRuntime rt) {
@@ -153,13 +151,16 @@ public abstract class ImplicitTask implements Task {
 	}
 	
 	public final void taskFinished(ImplicitWorkStealingRuntime rt) {
+		boolean completed = false;
 		synchronized (this) {
 			state = ImplicitTaskState.WAITING_FOR_CHILDREN;
 
 			if ( childCount == 0 ) {
-				taskCompleted(rt);
+				completed = true;
 			}
 		}
+		if (completed)
+			taskCompleted(rt);
 	}
 	
 	public void taskCompleted(ImplicitWorkStealingRuntime rt) {
@@ -171,12 +172,10 @@ public abstract class ImplicitTask implements Task {
 			this.parent = null;
 		}
 
-    synchronized (dependents) {
-			for ( ImplicitTask t : dependents) {
-				t.decDependencyCount(rt);
-			}
-			this.dependents = null;
+		for ( ImplicitTask t : dependents) {
+			t.decDependencyCount(rt);
 		}
+		this.dependents = null;
 
 		// cleanup references 
 		this.body = null;
@@ -214,7 +213,7 @@ public abstract class ImplicitTask implements Task {
 		} else {
 			Collection<ImplicitTask> nextDependents;
 			synchronized (dep) {
-				 nextDependents = Collections.unmodifiableList((List<? extends ImplicitTask>) dep.dependents);
+				nextDependents = Collections.unmodifiableList(dep.dependents);
 			}
 			checkForCycles(task, nextDependents, em);
 		}
