@@ -27,6 +27,10 @@ import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealin
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
+/*  
+ * A DataGroup (DG) implementation that supports nested atomic tasks on the same DG.
+ * It works by having a stack of locks that grows as nesting increases.
+ */
 public final class NestedAtomicTasksDataGroup implements ImplicitWorkStealingRuntimeDataGroup {
 	protected final ArrayList<ImplicitWorkStealingRuntimeDataGroup> dataGroups = new ArrayList<ImplicitWorkStealingRuntimeDataGroup>();
 	protected final ImplicitWorkStealingRuntimeDataGroupFactory factory;

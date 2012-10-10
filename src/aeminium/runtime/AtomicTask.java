@@ -19,6 +19,11 @@
 
 
 package aeminium.runtime;
-
+/*
+ * Task associated with a DataGroup. Only one AtomicTask can be executed
+ * at a given time for each DataGroup.
+ * 
+ * The behavior should be similar to synchronize(dg).
+ */
 public interface AtomicTask extends Task {
 }

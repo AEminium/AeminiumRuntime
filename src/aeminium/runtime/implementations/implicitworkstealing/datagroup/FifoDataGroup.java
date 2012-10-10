@@ -33,6 +33,10 @@ import aeminium.runtime.utils.graphviz.DiGraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz.Color;
 import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
 
+
+/*  
+ * A DataGroup (DG) implementation that works similar to a lock.
+ */
 public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup {	
 	protected static final boolean checkForDeadlocks        = Configuration.getProperty(FifoDataGroup.class, "checkForDeadlocks", false);
 	protected static final boolean graphVizEnabled          = Configuration.getProperty(ImplicitWorkStealingRuntime.class, "enableGraphViz", false);
@@ -44,6 +48,7 @@ public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup
 	protected ImplicitTask previousOwner;
 	protected final int id = idGen.incrementAndGet();
 	
+	// Tries to hold the lock on the DG.
 	public final boolean trylock(ImplicitWorkStealingRuntime rt, ImplicitTask task) {
 		
 		synchronized (this) {
@@ -67,6 +72,7 @@ public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup
 		}
 	}
 
+	// Releases the lock on the DG
 	public final void unlock(ImplicitWorkStealingRuntime rt, ImplicitTask task) {
 		ImplicitTask head = null;
 		synchronized (this) {

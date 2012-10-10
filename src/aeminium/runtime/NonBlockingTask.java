@@ -19,6 +19,10 @@
 
 package aeminium.runtime;
 
+
+/*
+ * Computational Task that does not perform and IO or Synchronization.
+ */
 public interface NonBlockingTask extends Task {
 
 }

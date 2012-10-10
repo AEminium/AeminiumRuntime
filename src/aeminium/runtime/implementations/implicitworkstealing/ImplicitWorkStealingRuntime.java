@@ -62,6 +62,10 @@ import aeminium.runtime.utils.graphviz.GraphViz.Color;
 import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
 import aeminium.runtime.utils.graphviz.GraphViz.RankDir;
 
+
+/*
+ * This is the Runtime implementation that holds all Runtime Components such as the Graph, Scheduler and Error Manager.
+ */
 public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final ImplicitGraph graph;
 	public final BlockingWorkStealingScheduler scheduler;
@@ -90,6 +94,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		errorManager = new ErrorManagerAdapter();
 	}
 	
+	
+	/* Initializes all components of the runtime. */
 	@Override
 	public final void init()  {
 		if ( state != State.UNINITIALIZED ) {
@@ -249,6 +255,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		return errorManager;
 	}
 	
+	/* External representation of the Runtime as the ExecutorService interface. */
 	protected final static class ImplicitWorkStealingExecutorService implements ExecutorService {
 		private ImplicitWorkStealingRuntime rt;		
 		
