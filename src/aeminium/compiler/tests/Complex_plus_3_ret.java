@@ -9,11 +9,8 @@ class Complex_plus_3_ret implements aeminium.runtime.Body {
     AeminiumHelper.schedule(this.ae_task,ae_parent == null ? AeminiumHelper.NO_PARENT : ae_parent.ae_task,java.util.Arrays.asList(this.ae_Complex_plus_3_ret_1_new.ae_task));
   }
   public void execute(  aeminium.runtime.Runtime rt,  aeminium.runtime.Task task) throws Exception {
-    if (!this.ae_parent.ae_finished) {
-      this.ae_parent.ae_ret=this.ae_Complex_plus_3_ret_1_new.ae_ret;
-      if (this.ae_parent.ae_parent != null)       this.ae_parent.ae_parent.ae_ret=this.ae_parent.ae_ret;
-      this.ae_parent.ae_finished=true;
-    }
+    this.ae_parent.ae_ret=this.ae_Complex_plus_3_ret_1_new.ae_ret;
+    if (this.ae_parent.ae_parent != null)     this.ae_parent.ae_parent.ae_ret=this.ae_parent.ae_ret;
   }
   public aeminium.runtime.Task ae_task;
   public Complex_plus ae_parent;

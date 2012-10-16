@@ -1,34 +1,11 @@
 package aeminium.compiler.tests;
 import aeminium.runtime.AeminiumHelper;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-
-import com.jprofiler.api.agent.Controller;
 class Integrate {
   static double f(  double x){
     return (x * x + 1.0) * x;
   }
   public static void main(  String[] args){
-	  
-	  /* Activation of profiling options according to the parameters given. */
-		Controller.startVMTelemetryRecording();
-      Controller.startThreadProfiling();
-      Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
-      
-      try 
-      {
-      	File file = new File(args[0]);
-			file.createNewFile();
-			Controller.saveSnapshotOnExit(file);
-			
-		} catch (IOException e)
-		{
-			System.out.println("File error: " + e.getMessage());
-			System.exit(-1);
-		}
-	  
     AeminiumHelper.init();
     new Integrate_main(null,args);
     AeminiumHelper.shutdown();

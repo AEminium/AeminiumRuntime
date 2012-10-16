@@ -20,6 +20,7 @@
 package aeminium.runtime.implementations.implicitworkstealing;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +34,8 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.jprofiler.api.agent.Controller;
 
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.AtomicTask;
@@ -75,6 +78,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
 	public final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", true);
+	public final boolean offlineProfiling	  = Configuration.getProperty(getClass(), "offlineProfiling", false);
+	public final String outputOffline = Configuration.getProperty(getClass(), "outputOffline", "snapshot.jsp");
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
 	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
@@ -103,6 +108,25 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			throw new Error("Cannot initialize runtime multiple times.");
 		}
 		
+		if (offlineProfiling) {
+			/* Activation of profiling options according to the parameters given. */
+			Controller.startVMTelemetryRecording();
+	        Controller.startThreadProfiling();
+	        Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
+	        Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
+	        
+	        try 
+	        {
+	        	File file = new File(outputOffline);
+				file.createNewFile();
+				Controller.saveSnapshotOnExit(file);
+				
+			} catch (IOException e)
+			{
+				System.out.println("File error: " + e.getMessage());
+			}
+		}
+
 		eventManager.init();
 		graph.init(eventManager);
 		scheduler.init(eventManager);

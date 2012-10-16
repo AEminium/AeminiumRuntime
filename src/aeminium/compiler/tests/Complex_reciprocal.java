@@ -5,7 +5,6 @@ class Complex_reciprocal implements aeminium.runtime.Body {
   Complex_reciprocal(  aeminium.runtime.CallerBodyWithReturn<Complex> ae_parent,  Complex ae_this){
     this.ae_parent=ae_parent;
     this.ae_this=ae_this;
-    this.ae_finished=false;
     this.ae_task=AeminiumHelper.createNonBlockingTask(this,AeminiumHelper.NO_HINTS);
     this.ae_Complex_reciprocal_1_varstmt=new Complex_reciprocal_1_varstmt(this);
     this.ae_Complex_reciprocal_2_ret=new Complex_reciprocal_2_ret(this);
@@ -17,7 +16,6 @@ class Complex_reciprocal implements aeminium.runtime.Body {
   public aeminium.runtime.CallerBodyWithReturn<Complex> ae_parent;
   public Complex ae_this;
   public aeminium.runtime.Task ae_task;
-  public volatile boolean ae_finished;
   public Complex_reciprocal_1_varstmt ae_Complex_reciprocal_1_varstmt;
   public Complex_reciprocal_2_ret ae_Complex_reciprocal_2_ret;
 }

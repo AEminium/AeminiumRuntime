@@ -9,7 +9,6 @@ class Integrate_computeRec implements aeminium.runtime.Body {
     this.fl=fl;
     this.fr=fr;
     this.a=a;
-    this.ae_finished=false;
     this.ae_task=AeminiumHelper.createNonBlockingTask(this,AeminiumHelper.NO_HINTS);
     this.ae_Integrate_computeRec_1_varstmt=new Integrate_computeRec_1_varstmt(this);
     this.ae_Integrate_computeRec_2_varstmt=new Integrate_computeRec_2_varstmt(this);
@@ -31,7 +30,6 @@ class Integrate_computeRec implements aeminium.runtime.Body {
   public double fr;
   public double a;
   public aeminium.runtime.Task ae_task;
-  public volatile boolean ae_finished;
   public Integrate_computeRec_1_varstmt ae_Integrate_computeRec_1_varstmt;
   public Integrate_computeRec_2_varstmt ae_Integrate_computeRec_2_varstmt;
   public Integrate_computeRec_3_varstmt ae_Integrate_computeRec_3_varstmt;

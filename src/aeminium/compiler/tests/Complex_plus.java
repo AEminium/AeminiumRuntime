@@ -6,7 +6,6 @@ class Complex_plus implements aeminium.runtime.Body {
     this.ae_parent=ae_parent;
     this.ae_this=ae_this;
     this.b=b;
-    this.ae_finished=false;
     this.ae_task=AeminiumHelper.createNonBlockingTask(this,AeminiumHelper.NO_HINTS);
     this.ae_Complex_plus_1_varstmt=new Complex_plus_1_varstmt(this);
     this.ae_Complex_plus_2_varstmt=new Complex_plus_2_varstmt(this);
@@ -20,7 +19,6 @@ class Complex_plus implements aeminium.runtime.Body {
   public Complex ae_this;
   public Complex b;
   public aeminium.runtime.Task ae_task;
-  public volatile boolean ae_finished;
   public Complex_plus_1_varstmt ae_Complex_plus_1_varstmt;
   public Complex_plus_2_varstmt ae_Complex_plus_2_varstmt;
   public Complex_plus_3_ret ae_Complex_plus_3_ret;

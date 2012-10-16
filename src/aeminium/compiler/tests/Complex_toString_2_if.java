@@ -17,6 +17,6 @@ class Complex_toString_2_if implements aeminium.runtime.Body {
   }
   public aeminium.runtime.Task ae_task;
   public Complex_toString ae_parent;
-  public Complex_toString_2_if_2_if ae_Complex_toString_2_if_2_if;
   public Complex_toString_2_if_1_ret ae_Complex_toString_2_if_1_ret;
+  public Complex_toString_2_if_2_if ae_Complex_toString_2_if_2_if;
 }

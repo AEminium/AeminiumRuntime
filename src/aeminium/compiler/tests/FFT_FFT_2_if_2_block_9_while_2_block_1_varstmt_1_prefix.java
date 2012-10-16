@@ -1,19 +1,19 @@
 package aeminium.compiler.tests;
+import java.util.Random;
 import aeminium.runtime.AeminiumHelper;
 import java.util.ArrayList;
-class Complex_re implements aeminium.runtime.Body {
-  Complex_re(  aeminium.runtime.CallerBodyWithReturn<Double> ae_parent,  Complex ae_this){
+class FFT_FFT_2_if_2_block_9_while_2_block_1_varstmt_1_prefix implements aeminium.runtime.Body {
+  FFT_FFT_2_if_2_block_9_while_2_block_1_varstmt_1_prefix(  FFT_FFT_2_if_2_block_9_while_2_block_1_varstmt ae_parent){
     this.ae_parent=ae_parent;
-    this.ae_this=ae_this;
     this.ae_task=AeminiumHelper.createNonBlockingTask(this,AeminiumHelper.NO_HINTS);
     AeminiumHelper.schedule(this.ae_task,ae_parent == null ? AeminiumHelper.NO_PARENT : ae_parent.ae_task,AeminiumHelper.NO_DEPS);
   }
   public void execute(  aeminium.runtime.Runtime rt,  aeminium.runtime.Task task) throws Exception {
-    this.ae_ret=this.ae_this.re;
-    if (this.ae_parent != null)     this.ae_parent.ae_ret=this.ae_ret;
+    this.ae_ret=-2;
   }
-  public volatile double ae_ret;
-  public aeminium.runtime.CallerBodyWithReturn<Double> ae_parent;
-  public Complex ae_this;
+  FFT_FFT_2_if_2_block_9_while_2_block_1_varstmt_1_prefix(){
+  }
+  public volatile int ae_ret;
   public aeminium.runtime.Task ae_task;
+  public FFT_FFT_2_if_2_block_9_while_2_block_1_varstmt ae_parent;
 }

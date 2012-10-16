@@ -18,7 +18,7 @@ class FFT_createRandomComplexArray_4_while implements aeminium.runtime.Body {
   }
   public aeminium.runtime.Task ae_task;
   public FFT_createRandomComplexArray ae_parent;
-  public FFT_createRandomComplexArray_4_whileloop ae_FFT_createRandomComplexArray_4_while;
   public FFT_createRandomComplexArray_4_while_1_block ae_FFT_createRandomComplexArray_4_while_1_block;
+  public FFT_createRandomComplexArray_4_whileloop ae_FFT_createRandomComplexArray_4_while;
   public FFT_createRandomComplexArray_4_while ae_previous;
 }

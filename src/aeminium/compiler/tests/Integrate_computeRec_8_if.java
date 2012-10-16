@@ -9,7 +9,7 @@ class Integrate_computeRec_8_if implements aeminium.runtime.Body {
     AeminiumHelper.schedule(this.ae_task,ae_parent == null ? AeminiumHelper.NO_PARENT : ae_parent.ae_task,java.util.Arrays.asList(this.ae_Integrate_computeRec_8_if_1_invoke.ae_task));
   }
   public void execute(  aeminium.runtime.Runtime rt,  aeminium.runtime.Task task) throws Exception {
-    if (this.ae_Integrate_computeRec_8_if_1_invoke.ae_ret <= 1.0e-14) {
+    if (this.ae_Integrate_computeRec_8_if_1_invoke.ae_ret <= 1.0e-6) {
       this.ae_Integrate_computeRec_8_if_2_ret=new Integrate_computeRec_8_if_2_ret(this);
     }
  else {

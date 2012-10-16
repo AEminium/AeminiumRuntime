@@ -7,7 +7,6 @@ class FFT_createRandomComplexArray implements aeminium.runtime.Body {
     this.ae_parent=ae_parent;
     this.n=n;
     this.seed=seed;
-    this.ae_finished=false;
     this.ae_task=AeminiumHelper.createNonBlockingTask(this,AeminiumHelper.NO_HINTS);
     this.ae_FFT_createRandomComplexArray_1_varstmt=new FFT_createRandomComplexArray_1_varstmt(this);
     this.ae_FFT_createRandomComplexArray_2_varstmt=new FFT_createRandomComplexArray_2_varstmt(this);
@@ -23,7 +22,6 @@ class FFT_createRandomComplexArray implements aeminium.runtime.Body {
   public int n;
   public long seed;
   public aeminium.runtime.Task ae_task;
-  public volatile boolean ae_finished;
   public FFT_createRandomComplexArray_1_varstmt ae_FFT_createRandomComplexArray_1_varstmt;
   public FFT_createRandomComplexArray_2_varstmt ae_FFT_createRandomComplexArray_2_varstmt;
   public FFT_createRandomComplexArray_3_varstmt ae_FFT_createRandomComplexArray_3_varstmt;

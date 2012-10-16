@@ -5,7 +5,6 @@ class Complex_toString implements aeminium.runtime.Body {
   Complex_toString(  aeminium.runtime.CallerBodyWithReturn<String> ae_parent,  Complex ae_this){
     this.ae_parent=ae_parent;
     this.ae_this=ae_this;
-    this.ae_finished=false;
     this.ae_task=AeminiumHelper.createNonBlockingTask(this,AeminiumHelper.NO_HINTS);
     AeminiumHelper.schedule(this.ae_task,ae_parent == null ? AeminiumHelper.NO_PARENT : ae_parent.ae_task,AeminiumHelper.NO_DEPS);
   }
@@ -21,7 +20,6 @@ class Complex_toString implements aeminium.runtime.Body {
   public aeminium.runtime.CallerBodyWithReturn<String> ae_parent;
   public Complex ae_this;
   public aeminium.runtime.Task ae_task;
-  public volatile boolean ae_finished;
   public Complex_toString_2_if ae_Complex_toString_2_if;
   public Complex_toString_1_ret ae_Complex_toString_1_ret;
 }

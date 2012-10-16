@@ -20,7 +20,7 @@ class FFT_FFT_2_if_2_block_9_while implements aeminium.runtime.Body {
   public aeminium.runtime.Task ae_task;
   public FFT_FFT_2_if_2_block ae_parent;
   public FFT_FFT_2_if_2_block_9_while_1_infix ae_FFT_FFT_2_if_2_block_9_while_1_infix;
-  public FFT_FFT_2_if_2_block_9_whileloop ae_FFT_FFT_2_if_2_block_9_while;
   public FFT_FFT_2_if_2_block_9_while_2_block ae_FFT_FFT_2_if_2_block_9_while_2_block;
+  public FFT_FFT_2_if_2_block_9_whileloop ae_FFT_FFT_2_if_2_block_9_while;
   public FFT_FFT_2_if_2_block_9_while ae_previous;
 }

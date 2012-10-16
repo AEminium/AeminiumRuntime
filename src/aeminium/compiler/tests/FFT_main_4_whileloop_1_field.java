@@ -6,10 +6,9 @@ class FFT_main_4_whileloop_1_field extends FFT_main_4_while_1_field implements a
   FFT_main_4_whileloop_1_field(  FFT_main_4_whileloop ae_parent){
     this.ae_parent=ae_parent;
     this.ae_task=AeminiumHelper.createNonBlockingTask(this,AeminiumHelper.NO_HINTS);
-    this.ae_FFT_main_4_while_1_field_1_paren=new FFT_main_4_whileloop_1_field_1_paren(this);
-    AeminiumHelper.schedule(this.ae_task,ae_parent == null ? AeminiumHelper.NO_PARENT : ae_parent.ae_task,java.util.Arrays.asList(this.ae_FFT_main_4_while_1_field_1_paren.ae_task,this.ae_parent.ae_previous.ae_parent.ae_FFT_main_2_varstmt.ae_task,this.ae_parent.ae_previous.ae_FFT_main_4_while_1_field.ae_FFT_main_4_while_1_field_1_paren.ae_task,this.ae_parent.ae_previous.ae_parent.ae_FFT_main_2_varstmt.ae_FFT_main_2_varstmt_1_invoke.ae_task));
+    AeminiumHelper.schedule(this.ae_task,ae_parent == null ? AeminiumHelper.NO_PARENT : ae_parent.ae_task,java.util.Arrays.asList(this.ae_parent.ae_previous.ae_FFT_main_4_while_1_field.ae_task));
   }
   public void execute(  aeminium.runtime.Runtime rt,  aeminium.runtime.Task task) throws Exception {
-    this.ae_ret=this.ae_FFT_main_4_while_1_field_1_paren.ae_ret.length;
+    this.ae_ret=(this.ae_parent.ae_previous.ae_parent.ae_FFT_main_2_varstmt.output).length;
   }
 }
