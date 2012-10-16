@@ -29,6 +29,10 @@ import aeminium.runtime.DataGroup;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.ImplicitWorkStealingRuntimeDataGroup;
 
+/*
+ * Handles all synchronization and locking related to the DataGroups associated with an
+ * Atomic Task.
+ * */
 public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask {
 	protected ImplicitWorkStealingRuntimeDataGroup datagroup;
 	protected ImplicitAtomicTask atomicParent = null;
@@ -39,6 +43,7 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		this.datagroup = datagroup;
 	}
 
+	/* Associates another datagroup with the current Task. */
 	public void addDataGroupDependecy(DataGroup required) {
 		if ( requiredGroups == null ) {
 			synchronized (this) {
@@ -50,6 +55,7 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		requiredGroups.add(required);
 	}
 	
+	/* Detaches another datagroup with the current Task. */
 	public void removeDataGroupDependecy(DataGroup required) {
 		if ( requiredGroups == null ) {
 			synchronized (this) {
@@ -61,6 +67,7 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		requiredGroups.remove(required);
 	}
 	
+	/* Retrives all datagroups associated with the current task. */
 	public Set<DataGroup> getDataGroupDependencies() {
 		if ( requiredGroups == null ) {
 			return Collections.emptySet();
@@ -69,6 +76,9 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		}
 	}
 	
+	/* In case of nested synchronization, returns the task that held the lock
+	 * before executing this task.
+	 *  */
 	public  ImplicitAtomicTask getAtomicParent() {
 		ImplicitAtomicTask result = atomicParent;
 		if ( result == null ) {

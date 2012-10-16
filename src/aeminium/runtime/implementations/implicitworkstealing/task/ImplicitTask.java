@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -33,19 +33,23 @@ import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 
 
-public abstract class ImplicitTask implements Task {
-	protected static final Object UNSET = new Object() {
+public abstract class ImplicitTask implements Task
+{
+	protected static final Object UNSET = new Object()
+	{
 		@Override
-		public String toString() {
+		public String toString()
+		{
 			return "UNSET";
 		}
 	};
-	protected volatile Object result = UNSET;  // could merge result with body  
+
+	protected volatile Object result = UNSET;  // could merge result with body
 	public Body body;
 	private ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
 	public byte depCount;
 	public byte childCount;
-	public List<ImplicitTask> dependents = new ArrayList<ImplicitTask>();  
+	public List<ImplicitTask> dependents;
 	public List<ImplicitTask> children;     // children are only used for debugging purposes => could be removed
 	public ImplicitTask parent;
 	public static final boolean debug = Configuration.getProperty(ImplicitTask.class, "debug", false);
@@ -72,55 +76,109 @@ public abstract class ImplicitTask implements Task {
 		
 		try {
 			body.execute(rt, this);
-		} catch (Throwable e) {
+		} catch (Throwable e)
+		{
 			rt.getErrorManager().signalTaskException(this, e);
 			setResult(e);
-		} finally {
+		} finally
+		{
 			taskFinished(rt);
 		}
 	}
-	
-	public final void attachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child) {
-		synchronized (this) {
-			childCount += 1;
-			if ( debug ) {
-				if ( children == null ) {
-					children = new ArrayList<ImplicitTask>(10);
+
+	@Override
+	public final void setResult(Object result)
+	{
+		this.result = result;
+	}
+
+	@Override
+	public final Object getResult()
+	{
+		if (this.isCompleted())
+		{
+			return result;
+		} else
+		{
+			Thread thread = Thread.currentThread();
+			if ( thread instanceof WorkStealingThread )
+			{
+				((WorkStealingThread)thread).progressToCompletion(this);
+			} else
+			{
+				synchronized (this)
+				{
+					while (!isCompleted())
+					{
+						waiter = thread;
+
+						try
+						{
+							this.wait();
+						} catch (InterruptedException e)
+						{
+							e.printStackTrace();
+						}
+					}
 				}
+			}
+
+			return result;
+		}
+	}
+
+	public final void attachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child)
+	{
+		synchronized (this)
+		{
+			childCount += 1;
+
+			if (debug)
+			{
+				if (children == null )
+					children = new ArrayList<ImplicitTask>(10);
+
 				children.add(child);
 			}
 		}
 	}
-	
-	public final void detachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child) {
+
+	public final void detachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child)
+	{
 		boolean shouldComplete = false;
-		
-		synchronized (this) {
+
+		synchronized (this)
+		{
 			childCount -= 1;
-			if ( childCount == 0 ) {
-				if ( state == ImplicitTaskState.WAITING_FOR_CHILDREN ) {
-					shouldComplete = true;
-				}
-			}
+
+			if (childCount == 0 && state == ImplicitTaskState.WAITING_FOR_CHILDREN)
+				shouldComplete = true;
 		}
-		
+
 		if (shouldComplete)
 			taskCompleted(rt);
 	}
 
-	public final int addDependent(ImplicitTask task) {
-	  if ( state == ImplicitTaskState.COMPLETED || dependents == null ) {
-		  return 0;
-	  }
-	  synchronized (dependents) {
-			dependents.add(task);
+	public final int addDependent(ImplicitTask task)
+	{
+		synchronized (this)
+		{
+			if ( state == ImplicitTaskState.COMPLETED)
+				return 0;
+
+			if (this.dependents == null)
+				this.dependents = new ArrayList<ImplicitTask>();
+
+			this.dependents.add(task);
 			return 1;
 		}
 	}
-	
-	public final void decDependencyCount(ImplicitWorkStealingRuntime rt) {
+
+	public final void decDependencyCount(ImplicitWorkStealingRuntime rt)
+	{
 		boolean schedule = false;
-		synchronized (this) {
+		synchronized (this)
+		{
 			depCount -= 1;
 			if ( depCount == 0 ) {
 				if (enableProfiler) {
@@ -128,16 +186,17 @@ public abstract class ImplicitTask implements Task {
 				} else {
 					this.setState(ImplicitTaskState.WAITING_IN_QUEUE);
 				}
-				
 				schedule = true;
 			}
 		}
 		if ( schedule ) {
-			rt.scheduler.scheduleTask(this);	
+			rt.scheduler.scheduleTask(this);
 		}
 	}
-	
-	public final void taskFinished(ImplicitWorkStealingRuntime rt) {
+
+	public final void taskFinished(ImplicitWorkStealingRuntime rt)
+	{
+		boolean completed = false;
 		synchronized (this) {
 
 			if (enableProfiler) {
@@ -146,71 +205,87 @@ public abstract class ImplicitTask implements Task {
 				this.setState(ImplicitTaskState.WAITING_FOR_CHILDREN);
 			}
 
-			if ( childCount == 0 ) {
-				taskCompleted(rt);
-			}
+			if (childCount == 0)
+				completed = true;
 		}
-	}
-	
-	public void taskCompleted(ImplicitWorkStealingRuntime rt) {
-		assert( state == ImplicitTaskState.WAITING_FOR_CHILDREN );
 
+		if (completed)
+			taskCompleted(rt);
+	}
+
+	public void taskCompleted(ImplicitWorkStealingRuntime rt)
+	{
+		
 		if (enableProfiler) {
 			this.setState(ImplicitTaskState.COMPLETED, rt.graph);
 		} else {
 			this.setState(ImplicitTaskState.COMPLETED);
 		}
+		
+		synchronized(this)
+		{
+			this.state = ImplicitTaskState.COMPLETED;
+		}
 
-		if ( parent != null) {
+		if (parent != null)
+		{
 			parent.detachChild(rt, this);
 			this.parent = null;
 		}
 
-    synchronized (dependents) {
-			for ( ImplicitTask t : dependents) {
+		if (this.dependents != null)
+		{
+			for ( ImplicitTask t : this.dependents)
 				t.decDependencyCount(rt);
-			}
+
 			this.dependents = null;
 		}
 
-		// cleanup references 
+		// cleanup references
 		this.body = null;
 		this.children = null;
-		
+
 		rt.graph.taskCompleted(this);
-		
-		if ( waiter != null ) {
+
+		if (waiter != null)
 			notifyAll();
-		}
 	}
 
-	public final boolean isCompleted() {
+	public final boolean isCompleted()
+	{
 		return state == ImplicitTaskState.COMPLETED;
 	}
-	
-	public void checkForCycles(final ErrorManager em) {
-		synchronized (this) {
+
+	public void checkForCycles(final ErrorManager em)
+	{
+		synchronized (this)
+		{
 			checkForCycles(this, dependents, em);
 		}
 	}
-	
-	protected void checkForCycles(final ImplicitTask task, final Collection<ImplicitTask> deps, final ErrorManager em) {
-		if ( deps == null ) {
+
+	protected void checkForCycles(final ImplicitTask task, final Collection<ImplicitTask> deps, final ErrorManager em)
+	{
+		if (deps == null)
 			return;
-		}
-		for ( ImplicitTask t : deps ) {
+
+		for (ImplicitTask t : deps)
 			checkPath(task, t, em);
-		}
 	}
-	
-	protected void checkPath(final ImplicitTask task, ImplicitTask dep, final ErrorManager em) {
-		if ( task == dep ) {
+
+	protected void checkPath(final ImplicitTask task, ImplicitTask dep, final ErrorManager em)
+	{
+		if (task == dep)
+		{
 			em.signalDependencyCycle(task);
-		} else {
+		} else
+		{
 			Collection<ImplicitTask> nextDependents;
-			synchronized (dep) {
-				 nextDependents = Collections.unmodifiableList((List<? extends ImplicitTask>) dep.dependents);
+			synchronized (dep)
+			{
+				nextDependents = Collections.unmodifiableList(dep.dependents);
 			}
+
 			checkForCycles(task, nextDependents, em);
 		}
 	}
@@ -265,41 +340,10 @@ public abstract class ImplicitTask implements Task {
 	public ImplicitTaskState getState() {
 		return this.state;
 	}
-	
+
 	@Override
-	public final void setResult(Object result) {
-		if ( result == null ) {
-			//throw new RuntimeError("Cannot set result to 'null'.");
-		}
-		this.result = result;
-	}
-	
-	@Override
-	public final Object getResult() {
-		if ( isCompleted() ) {
-			return result;
-		} else {
-			Thread thread = Thread.currentThread();
-			if ( thread instanceof WorkStealingThread ) {
-				((WorkStealingThread)thread).progressToCompletion(this);
-			} else {
-				synchronized (this) {
-					while ( !isCompleted() ) {
-						waiter = thread;
-						try {
-							this.wait();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-			return result;
-		}
-	}
-	
-	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "Task<"+body+">[children:"+childCount+", deps:"+depCount+", state:"+state+"]";
 	}
 }

@@ -39,7 +39,10 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskSt
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
 
-
+/*
+ * This Graph hosts task information and pre and post processes
+ * tasks before and after scheduling.
+ */
 public class ImplicitGraph {
 	protected final ImplicitWorkStealingRuntime rt;
 	protected List<TaskCounter> taskCounterList;
@@ -133,6 +136,10 @@ public class ImplicitGraph {
 		taskCounters    = null;
 	}
 	
+	/*
+	 * Sets up a new task in relation to another tasks (dependents and dependencies)
+	 * and schedules it for execution if it is the case.
+	 */
 	public final void addTask(ImplicitTask itask, Task parent, Collection<Task> deps) {
 
 		// update thread specific task counter
@@ -205,6 +212,8 @@ public class ImplicitGraph {
 		}
 	}
 
+	
+	/* taskCompleted is executed when a task has completed */
 	public final void taskCompleted(ImplicitTask task) {
 		Thread thread = Thread.currentThread();
 		if ( thread instanceof AeminiumThread ) {
@@ -231,6 +240,7 @@ public class ImplicitGraph {
 		return count == 0;
 	}
 
+	/* Blocks until all tasks have completed. */
 	public final void waitToEmpty() {
 		synchronized (taskCounterList) {
 			boolean empty = false;

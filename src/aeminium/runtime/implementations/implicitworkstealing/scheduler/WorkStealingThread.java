@@ -30,6 +30,14 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
 
+/*
+ * Thread that is part of the threadpool that executes NonBlocking tasks
+ * and Atomic Tasks.
+ * 
+ * A thread has its own queue of tasks to executed and follows a work-stealing 
+ * technique. If a task finds its queue empty, it will try to get another task
+ * from the scheduler.
+ */
 public final class WorkStealingThread extends AeminiumThread {
 	protected final ImplicitWorkStealingRuntime rt;
 	public final int index;
@@ -61,6 +69,9 @@ public final class WorkStealingThread extends AeminiumThread {
 		shutdown = true;
 	}
 	
+	/* Main loop that executes tasks from queue, steals if empty, 
+	 * or parks until some task awakes it. 
+	 */
 	@Override
 	public final void run() {
 		super.run();
@@ -115,6 +126,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		taskQueue = null;
 	}
 
+	/* External access for stealing a task from the current thread queue. */
 	public final ImplicitTask tryStealingTask() {
 		WorkStealingQueue<ImplicitTask> queue = taskQueue;
 		if ( queue != null ) {
@@ -123,6 +135,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		return null;
 	}
 	
+	/* External access to look at the top of the queue. */
 	public final ImplicitTask peekStealingTask() {
 		WorkStealingQueue<ImplicitTask> queue = taskQueue;
 		if ( queue != null ) {
@@ -131,6 +144,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		return null;
 	}
 	
+	/* Returns the number of tasks in queue. */
 	public final int getLocalQueueSize() {
 		WorkStealingQueue<ImplicitTask> queue = taskQueue;
 		if ( queue != null ) {
@@ -139,6 +153,11 @@ public final class WorkStealingThread extends AeminiumThread {
 		return 0;
 	}
 	
+	/* A secondary loop inside the main loop that tries to fulfil a certain task
+	 * before continuing on the outter loop. Supports nested loops.
+	 * 
+	 * This method is only called when using the getResult() API.
+	 */
 	public final void progressToCompletion(ImplicitTask toComplete) {
 		int pollCounter = pollingCount;
 		while ( !toComplete.isCompleted() ) {

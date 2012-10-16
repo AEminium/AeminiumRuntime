@@ -35,6 +35,10 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
 
+
+/* This scheduler works as a manager of all the tasks.
+ * The scheduler decides to which thread a new task is sent.
+ */
 public final class BlockingWorkStealingScheduler {
 	protected final ImplicitWorkStealingRuntime rt;
 	protected ConcurrentLinkedQueue<WorkStealingThread> parkedThreads;
@@ -63,6 +67,10 @@ public final class BlockingWorkStealingScheduler {
 		this.maxParallelism = maxParallelism;
 	}
 	
+	/*
+	 * Initializes the scheduler, creating threads, queues
+	 * and loads the WorkStealing algorith. 
+	 */
 	public void init(EventManager eventManager) {
 		this.eventManager    = eventManager;
 		this.parkedThreads   = new ConcurrentLinkedQueue<WorkStealingThread>();
@@ -89,6 +97,7 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 
+	/* Shutdowns all threads and releases all states. */
 	public void shutdown() {
 		counter.set(threads.length);
 		while ( counter.get() > 0 ) {
@@ -110,10 +119,11 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 
+	
 	protected WorkStealingAlgorithm loadWorkStealingAlgorithm(String name) {
 		WorkStealingAlgorithm wsa = null;
 		
-		Class<?> wsaClass = null;;
+		Class<?> wsaClass = null;
 		try {
 			wsaClass = getClass().getClassLoader().loadClass("aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing."+name);
 		} catch (ClassNotFoundException e) {
@@ -138,12 +148,13 @@ public final class BlockingWorkStealingScheduler {
 		counter.decrementAndGet();
 	}
 
+	/* Receives a new task and forwards it to one of the executor threads. */
 	public final void scheduleTask(ImplicitTask task) {
 		if ( task instanceof ImplicitBlockingTask && useBlockingThreadPool ) {
 			blockingThreadPool.submitTask((ImplicitBlockingTask) task);
 			return;
 		}
-		if ( 0 < maxQueueLength) {
+		if (maxQueueLength > 0) {
 			Thread thread = Thread.currentThread();
 			if ( thread instanceof WorkStealingThread) {
 				WorkStealingThread wthread = (WorkStealingThread)thread;
@@ -213,34 +224,39 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 
+	/* Awakes a specific thread. */
 	public final void signalWork(WorkStealingThread thread) {
 		// TODO: need to fix that to wake up thread waiting for objects to complete
 		LockSupport.unpark(thread);
-		WorkStealingThread next = wsa.singalWorkInLocalQueue(thread);
+		WorkStealingThread next = wsa.signalWorkInLocalQueue(thread);
 		LockSupport.unpark(next);
 	}
 	
+	/* Awakes a thread to perform some work. */
 	public final void signalWork() {
-		WorkStealingThread threadParked = wsa.singalWorkInSubmissionQueue();
+		WorkStealingThread threadParked = wsa.signalWorkInSubmissionQueue();
 		if ( threadParked != null ) {
 			LockSupport.unpark(threadParked);
 		}
 	}
 	
+	/* Parks a thread to wait an interval before looking for new work. */
 	public final void parkThread(WorkStealingThread thread) {
 		eventManager.signalThreadSuspend(thread);
 		wsa.threadGoingToPark(thread);
-		if ( 0 < unparkInterval ) {
+		if (unparkInterval > 0) {
 			LockSupport.parkNanos(thread, unparkInterval);
 		} else {
 			LockSupport.park(thread);
 		}
 	}
 	
+	/* Steals work from queues using an algorithm. */
 	public final ImplicitTask scanQueues(WorkStealingThread thread) {
 		return wsa.stealWork(thread);
 	}
 
+	/* Removes a task from que submission queue. */
 	public boolean cancelTask(ImplicitTask task) {
 		boolean result = submissionQueue.remove(task);
 		if ( result ) {

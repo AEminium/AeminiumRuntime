@@ -19,6 +19,10 @@
 
 package aeminium.runtime;
 
+/*
+ * Computational Task that performs IO or has some kind of CPU blocking.
+ * This task may be handled different than NonBlocking to improve performance.
+ */
 public interface BlockingTask extends Task {
 
 }
