@@ -130,18 +130,8 @@ public class ImplicitGraph {
 		}
 		
 		boolean schedule = false;
-		synchronized (itask) {			
-			// check for double scheduling
-			if ( itask.state != ImplicitTaskState.UNSCHEDULED) {
-				if ( thread instanceof AeminiumThread ) {
-					((AeminiumThread)thread).taskCount--;
-				} else {
-					taskCounters.get().taskCount--;
-				}
-				rt.getErrorManager().signalTaskDuplicatedSchedule(itask);
-				return;
-			}
-
+		synchronized (itask)
+		{
 			// setup parent connection
 			if ( parent != Runtime.NO_PARENT ) {
 				ImplicitTask iparent = (ImplicitTask) parent;
@@ -158,7 +148,7 @@ public class ImplicitGraph {
 					ImplicitTask it = (ImplicitTask)t;
 					count += it.addDependent(itask);						
 				}
-				itask.depCount += count;
+				itask.depCount = count;
 				if ( itask.depCount == 0 ) {
 					itask.state = ImplicitTaskState.RUNNING;
 					schedule = true;
@@ -166,7 +156,7 @@ public class ImplicitGraph {
 			} else {
 				itask.state = ImplicitTaskState.RUNNING;
 				schedule = true;
-			}			
+			}
 		}
 		
 		// schedule task if it's marked as running

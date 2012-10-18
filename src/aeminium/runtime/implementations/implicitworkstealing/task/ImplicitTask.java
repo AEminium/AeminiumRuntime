@@ -46,8 +46,8 @@ public abstract class ImplicitTask implements Task
 	protected volatile Object result = UNSET;  // could merge result with body
 	public Body body;
 	public ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
-	public byte depCount;
-	public byte childCount;
+	public int depCount;
+	public int childCount;
 	public List<ImplicitTask> dependents;
 	public List<ImplicitTask> children;     // children are only used for debugging purposes => could be removed
 	public ImplicitTask parent;
@@ -66,7 +66,7 @@ public abstract class ImplicitTask implements Task
 	{
 		try
 		{
-			body.execute(rt, this);
+			this.body.execute(rt, this);
 		} catch (Throwable e)
 		{
 			rt.getErrorManager().signalTaskException(this, e);
@@ -170,10 +170,10 @@ public abstract class ImplicitTask implements Task
 		boolean schedule = false;
 		synchronized (this)
 		{
-			depCount -= 1;
-			if (depCount == 0)
+			this.depCount -= 1;
+			if (this.depCount == 0)
 			{
-				state = ImplicitTaskState.RUNNING;
+				this.state = ImplicitTaskState.RUNNING;
 				schedule = true;
 			}
 		}
