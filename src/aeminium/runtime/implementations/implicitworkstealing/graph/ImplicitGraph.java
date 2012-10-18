@@ -151,6 +151,7 @@ public class ImplicitGraph {
 		}
 		
 		boolean schedule = false;
+
 		synchronized (itask) {			
 			// check for double scheduling
 			if ( itask.getState() != ImplicitTaskState.UNSCHEDULED) {
@@ -187,13 +188,13 @@ public class ImplicitGraph {
 					ImplicitTask it = (ImplicitTask)t;
 					count += it.addDependent(itask);						
 				}
-				itask.depCount += count;
+				itask.depCount = count;
 				if ( itask.depCount == 0 ) {
 					schedule = true;
 				}
 			} else {
 				schedule = true;
-			}			
+			}
 		}
 		
 		// schedule task if it's marked as waiting in queue

@@ -47,8 +47,8 @@ public abstract class ImplicitTask implements Task
 	protected volatile Object result = UNSET;  // could merge result with body
 	public Body body;
 	private ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
-	public byte depCount;
-	public byte childCount;
+	public int depCount;
+	public int childCount;
 	public List<ImplicitTask> dependents;
 	public List<ImplicitTask> children;     // children are only used for debugging purposes => could be removed
 	public ImplicitTask parent;

@@ -6,7 +6,7 @@ public class OfflineExtractor
 {
 	private final static int NO_TELEMETRY_GROUPS = 10;
 	private final static int TOTAL_PARAMETERS = 13;
-	private static String fullPath = "C:\\Users\\Ivo\\Desktop\\PIFinal\\";
+	private static String fullPath = "C:\\Users\\Ivo\\Desktop\\PIFinal";
 	private static String filenamePrefix = "PIThreads_offline_run";
 	private static String samplesTable = "samples";
 
@@ -18,6 +18,7 @@ public class OfflineExtractor
 	
 	private static int NO_EXPERIENCES = 19;
 	private static int NO_RUNS = 30;
+	private static int OFFSET = 0;
 	
 	
 	public static void main(String[] args)
@@ -25,13 +26,14 @@ public class OfflineExtractor
 		/* Arguments treatment. */
 		if (args.length == 0 || args.length > 5)
 		{
-			System.out.println("Usage: java -jar Extractor.jar [NO_EXPERIENCES] [NO_RUNS] " +
+			System.out.println("Usage: java -jar Extractor.jar [NO_EXPERIENCES] [NO_RUNS] [OFFSET] " +
 									"[full path] [input file name prefix] [samples table name]");
 			System.out.println("DEFAULT:\n" +
+						"OFFSET = 0\n" +
 						"NO_EXPERIENCES = 19\n" +
 						"NO_RUNS = 30\n" + 
-						"INPUT FILE NAME PREFIX = 'PIThreads_offline_run'\n" + 
-						"FULL PATH = 'C:\\Users\\Ivo\\Desktop\\PIFinal\\'\n" +
+						"FULL PATH = 'C:\\Users\\Ivo\\Desktop\\PIFinal'\n" +
+						"INPUT FILE NAME PREFIX = 'PIThreads_offline_run'\n" +
 						"SAMPLES TABLE NAME = 'samples'");
 			System.exit(0);
 		}
@@ -41,13 +43,15 @@ public class OfflineExtractor
 		if (args.length >= 2)
 			NO_RUNS = Integer.parseInt(args[1]);
 		if (args.length >= 3)
-			filenamePrefix = args[2];
+			OFFSET = Integer.parseInt(args[2]);
 		if (args.length >= 4)
 			fullPath = args[3];
-		if (args.length == 5)
-			samplesTable = args[4];
+		if (args.length >= 5)
+			filenamePrefix = args[4];
+		if (args.length == 6)
+			samplesTable = args[5];
 
-		for (int k = 1; k <= NO_EXPERIENCES; k++)
+		for (int k = 1 + OFFSET; k <= NO_EXPERIENCES + OFFSET; k++)
 		{
 			for (int m = 1; m <= NO_RUNS; m++)
 			{
