@@ -134,22 +134,6 @@ public abstract class ImplicitTask implements Task
 		}
 	}
 
-	public final void detachChild(ImplicitWorkStealingRuntime rt, ImplicitTask child)
-	{
-		boolean shouldComplete = false;
-
-		synchronized (this)
-		{
-			childCount -= 1;
-
-			if (childCount == 0 && state == ImplicitTaskState.WAITING_FOR_CHILDREN)
-				shouldComplete = true;
-		}
-
-		if (shouldComplete)
-			taskCompleted(rt);
-	}
-
 	public final int addDependent(ImplicitTask task)
 	{
 		synchronized (this)
@@ -197,35 +181,55 @@ public abstract class ImplicitTask implements Task
 			taskCompleted(rt);
 	}
 
-	public void taskCompleted(ImplicitWorkStealingRuntime rt)
+	public boolean detachChild()
 	{
 		synchronized(this)
 		{
-			this.state = ImplicitTaskState.COMPLETED;
+			this.childCount--;
+			
+			if (this.childCount == 0 && state == ImplicitTaskState.WAITING_FOR_CHILDREN)
+				return true;
 		}
-
-		if (parent != null)
+		
+		return false;
+	}
+	
+	public void taskCompleted(ImplicitWorkStealingRuntime rt)
+	{
+		ImplicitTask task = this;
+		ImplicitTask next;
+		
+		do
 		{
-			parent.detachChild(rt, this);
-			this.parent = null;
-		}
+			synchronized(task)
+			{
+				task.state = ImplicitTaskState.COMPLETED;
+			}
 
-		if (this.dependents != null)
-		{
-			for ( ImplicitTask t : this.dependents)
-				t.decDependencyCount(rt);
+			if (task.parent != null && task.parent.detachChild())
+				next = task.parent;
+			else
+				next = null;
+				
+			if (task.dependents != null)
+			{
+				for (ImplicitTask t : task.dependents)
+					t.decDependencyCount(rt);
 
-			this.dependents = null;
-		}
+				task.dependents = null;
+			}
 
-		// cleanup references
-		this.body = null;
-		this.children = null;
+			// cleanup references
+			task.body = null;
+			task.children = null;
 
-		rt.graph.taskCompleted(this);
+			rt.graph.taskCompleted(task);
 
-		if (waiter != null)
-			notifyAll();
+			if (task.waiter != null)
+				notifyAll();
+			
+			task = next;
+		} while (task != null);
 	}
 
 	public final boolean isCompleted()
