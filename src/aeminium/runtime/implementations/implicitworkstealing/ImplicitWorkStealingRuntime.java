@@ -81,18 +81,26 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ErrorManager errorManager;
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
-	public final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", true);
-	public final boolean offlineProfiling	  = Configuration.getProperty(getClass(), "offlineProfiling", false);
-	public final String outputOffline = Configuration.getProperty(getClass(), "outputOffline", "snapshot.jsp");
+	
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
+	
+	public final boolean enableProfiler 	= Configuration.getProperty(getClass(), "enableProfiler", true);
+	public final boolean offlineProfiling	= Configuration.getProperty(getClass(), "offlineProfiling", false);
+	public final String outputOffline 		= Configuration.getProperty(getClass(), "outputOffline", "snapshot.jsp");
+	
+	public final boolean profileCPU	  			= Configuration.getProperty(getClass(), "profileCPU", false);
+	public final boolean profileTelemetry		= Configuration.getProperty(getClass(), "profileTelemetry", true);
+	public final boolean profileThreads			= Configuration.getProperty(getClass(), "profileThreads", true);
+	public final boolean profileAeCounters		= Configuration.getProperty(getClass(), "profileAeCounters", true);
+	public final boolean profileAeTaskDetails	= Configuration.getProperty(getClass(), "profileAeTaskDetails", true);
+	
 	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
 	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
 	
-	/* Added for profiler. */
-	private AtomicInteger idCounter = new AtomicInteger(0);
+	private AtomicInteger idCounter = new AtomicInteger(0); // Required for Profiling
 	
 	public enum State {
 		UNINITIALIZED,
@@ -116,10 +124,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		
 		if (offlineProfiling) {
 			/* Activation of profiling options according to the parameters given. */
-			Controller.startVMTelemetryRecording();
-	        Controller.startThreadProfiling();
-	        Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
-	        Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
+			if (profileCPU) Controller.startCPURecording(true);
+			if (profileTelemetry) Controller.startVMTelemetryRecording();
+	        if (profileThreads) Controller.startThreadProfiling();
+	        if (profileAeCounters) Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
+	        if (profileAeTaskDetails) Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
 	        
 	        try 
 	        {
