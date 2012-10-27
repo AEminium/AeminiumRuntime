@@ -38,8 +38,8 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 	protected ImplicitAtomicTask atomicParent = null;
 	protected volatile Set<DataGroup> requiredGroups;
 
-	public ImplicitAtomicTask(Body body, ImplicitWorkStealingRuntimeDataGroup datagroup, short hints) {
-		super(body, hints);
+	public ImplicitAtomicTask(Body body, ImplicitWorkStealingRuntimeDataGroup datagroup, short hints, boolean enableProfiler) {
+		super(body, hints, enableProfiler);
 		this.datagroup = datagroup;
 	}
 

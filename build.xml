@@ -8,11 +8,12 @@
 	<property name="build.dir"	 value="bin"/> 
 	<property name="dist.dir"	value="dist"/>	
 	<property name="lib.dir"   value="lib"/>  
-
-
+	
 	<path id="rt.classpath">
 		<pathelement path="${build.dir}/" />
 		<pathelement path="${lib.dir}/junit-4.8.2.jar" />
+		<pathelement path="${lib.dir}/api.jar" /><!-- JProfiler -->
+		<pathelement path="${lib.dir}/apisrc.jar" /><!-- JProfiler -->
 	</path>
 	
 	<path id="rt.classpath.debug">

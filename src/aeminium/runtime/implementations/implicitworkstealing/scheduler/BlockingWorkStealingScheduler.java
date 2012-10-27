@@ -27,8 +27,12 @@ import java.util.concurrent.locks.LockSupport;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
+import aeminium.runtime.implementations.implicitworkstealing.profiler.AeminiumProfiler;
+import aeminium.runtime.implementations.implicitworkstealing.profiler.DataCollection;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.WorkStealingAlgorithm;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 
@@ -49,6 +53,9 @@ public final class BlockingWorkStealingScheduler {
 	protected static final boolean useBlockingThreadPool = Configuration.getProperty(BlockingWorkStealingScheduler.class, "useBlockingThreadPool", false);
 	protected static final int maxQueueLength            = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
 	protected static final int unparkInterval            = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 0);
+	
+	protected final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", true);
+	protected AeminiumProfiler profiler;
 	
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt        = rt;
@@ -152,7 +159,7 @@ public final class BlockingWorkStealingScheduler {
 			if ( thread instanceof WorkStealingThread) {
 				WorkStealingThread wthread = (WorkStealingThread)thread;
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
-				if ( taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0 ) {
+				if ( taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0 ) {					
 					taskQueue.push(task);
 					if ( taskQueue.size() <= 1 ) {
 						signalWork();
@@ -161,8 +168,17 @@ public final class BlockingWorkStealingScheduler {
 					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
 					wthread.remainingRecursionDepth++;
+					
+					if (enableProfiler) {
+						if (task instanceof ImplicitAtomicTask)
+							wthread.incrementNoAtomicTasksHandled();
+						else if (task instanceof ImplicitBlockingTask)
+							wthread.incrementNoBlockingTasksHandled();
+						else if (task instanceof ImplicitNonBlockingTask)
+							wthread.incrementNoNonBlockingTasksHandled();
+					}
 				}
-			} else {
+			} else {				
 				submissionQueue.add(task);
 				signalWork();
 			}
@@ -178,7 +194,17 @@ public final class BlockingWorkStealingScheduler {
 						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
 						wthread.remainingRecursionDepth++;
-					} else {
+						
+						if (enableProfiler) {
+							if (task instanceof ImplicitAtomicTask)
+								wthread.incrementNoAtomicTasksHandled();
+							else if (task instanceof ImplicitBlockingTask)
+								wthread.incrementNoBlockingTasksHandled();
+							else if (task instanceof ImplicitNonBlockingTask)
+								wthread.incrementNoNonBlockingTasksHandled();
+						}
+						
+					} else {						
 						taskQueue.push(task);
 						if ( taskQueue.size() <= 1 ) {
 							signalWork(wthread);
@@ -191,7 +217,7 @@ public final class BlockingWorkStealingScheduler {
 					}
 				}
 			} else {
-				// external thread
+				// external thread				
 				submissionQueue.add(task);
 				signalWork();
 			}
@@ -237,5 +263,37 @@ public final class BlockingWorkStealingScheduler {
 			task.taskFinished(rt);
 		}
 		return result;
+	}
+	
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 *                                          PROFILER                                               *      
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	public synchronized void collectData(DataCollection data) {
+		
+		if (threads == null)
+			return;
+		
+		for (int i = 0; i < threads.length; i++)
+		{
+			data.taskInNonBlockingQueue[i] = threads[i].getLocalQueueSize();
+			threads[i].getNoTasksHandled(data.tasksHandled[i]);
+			
+			if (blockingThreadPool != null)
+				data.taskInBlockingQueue = blockingThreadPool.getTaskQueueSize();
+		}
+		
+		return;
+	}
+	
+	public int getMaxParallelism() {
+		return maxParallelism;
+	}
+	
+	public void setProfiler (AeminiumProfiler profiler) {
+		this.profiler = profiler;
+		
+		for ( int i = 0; i < threads.length; i++ ) {
+			threads[i].setProfiler(this.profiler);
+		}
 	}
 }

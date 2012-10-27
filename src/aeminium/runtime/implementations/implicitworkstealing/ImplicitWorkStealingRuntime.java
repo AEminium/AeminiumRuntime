@@ -20,6 +20,7 @@
 package aeminium.runtime.implementations.implicitworkstealing;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +33,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.jprofiler.api.agent.Controller;
 
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
@@ -50,6 +54,7 @@ import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerAdapter;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
+import aeminium.runtime.implementations.implicitworkstealing.profiler.AeminiumProfiler;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
@@ -72,15 +77,30 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ExecutorService executorService;
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
+	protected AeminiumProfiler profiler;
 	protected ErrorManager errorManager;
 	protected State state = State.UNINITIALIZED;  
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
+	
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
+	
+	public final boolean enableProfiler 	= Configuration.getProperty(getClass(), "enableProfiler", true);
+	public final boolean offlineProfiling	= Configuration.getProperty(getClass(), "offlineProfiling", false);
+	public final String outputOffline 		= Configuration.getProperty(getClass(), "outputOffline", "snapshot.jsp");
+	
+	public final boolean profileCPU	  			= Configuration.getProperty(getClass(), "profileCPU", false);
+	public final boolean profileTelemetry		= Configuration.getProperty(getClass(), "profileTelemetry", true);
+	public final boolean profileThreads			= Configuration.getProperty(getClass(), "profileThreads", true);
+	public final boolean profileAeCounters		= Configuration.getProperty(getClass(), "profileAeCounters", true);
+	public final boolean profileAeTaskDetails	= Configuration.getProperty(getClass(), "profileAeTaskDetails", true);
+	
 	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
 	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
+	
+	private AtomicInteger idCounter = new AtomicInteger(0); // Required for Profiling
 	
 	public enum State {
 		UNINITIALIZED,
@@ -101,9 +121,38 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		if ( state != State.UNINITIALIZED ) {
 			throw new Error("Cannot initialize runtime multiple times.");
 		}
+		
+		if (offlineProfiling) {
+			/* Activation of profiling options according to the parameters given. */
+			if (profileCPU) Controller.startCPURecording(true);
+			if (profileTelemetry) Controller.startVMTelemetryRecording();
+	        if (profileThreads) Controller.startThreadProfiling();
+	        if (profileAeCounters) Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
+	        if (profileAeTaskDetails) Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
+	        
+	        try 
+	        {
+	        	File file = new File(outputOffline);
+				file.createNewFile();
+				Controller.saveSnapshotOnExit(file);
+				
+			} catch (IOException e)
+			{
+				System.out.println("File error: " + e.getMessage());
+			}
+		}
+
 		eventManager.init();
 		graph.init(eventManager);
 		scheduler.init(eventManager);
+		
+		if (enableProfiler) {
+			profiler = new AeminiumProfiler(scheduler, graph);
+			
+			this.graph.setProfiler(profiler);
+			this.scheduler.setProfiler(profiler);
+		}
+		
 		if ( enableGraphViz ) {
 			digraphviz = new DiGraphViz(graphVizName, ranksep, rankdir);
 		}
@@ -177,19 +226,31 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	
 	@Override
 	public final AtomicTask createAtomicTask(Body body, DataGroup datagroup, short hints) {
-		return new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints);
+		
+		ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints, this.enableProfiler);
+		task.id = idCounter.getAndIncrement();
+		
+		return task;
 	}
 
 	@Override
 	public final BlockingTask createBlockingTask(Body body, short hints)
 			 {
-		return new ImplicitBlockingTask(body, hints);
+
+		ImplicitBlockingTask task = new ImplicitBlockingTask(body, hints, this.enableProfiler);
+		task.id = idCounter.getAndIncrement();
+		
+		return task;
 	}
 	
 	@Override
 	public final NonBlockingTask createNonBlockingTask(Body body, short hints)
 			 {
-		return new ImplicitNonBlockingTask(body, hints);
+		
+		ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints, this.enableProfiler);
+		task.id = idCounter.getAndIncrement();
+		
+		return task;
 	}
 
 	@Override
@@ -212,6 +273,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 				}
  			}
 		}
+		
 		graph.addTask((ImplicitTask)task, parent, deps);
 	}
 
