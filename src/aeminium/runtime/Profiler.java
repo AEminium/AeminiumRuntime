@@ -2,7 +2,7 @@ package aeminium.runtime;
 
 import java.util.LinkedList;
 
-import aeminium.runtime.profiler.DataCollection;
+import aeminium.runtime.implementations.implicitworkstealing.profiler.DataCollection;
 
 public interface Profiler {
 	

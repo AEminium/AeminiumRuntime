@@ -1,4 +1,4 @@
-package aeminium.runtime.profiler.analyzer;
+package aeminium.runtime.implementations.implicitworkstealing.profiler.analyzer;
 
 import java.io.*;
 

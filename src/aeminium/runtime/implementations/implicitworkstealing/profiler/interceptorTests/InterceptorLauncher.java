@@ -1,4 +1,4 @@
-package aeminium.runtime.profiler.interceptorTests;
+package aeminium.runtime.implementations.implicitworkstealing.profiler.interceptorTests;
 
 public class InterceptorLauncher
 {

@@ -1,4 +1,4 @@
-package aeminium.runtime.profiler;
+package aeminium.runtime.implementations.implicitworkstealing.profiler;
 
 public class TaskInfo {
 	

@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.jprofiler.api.agent.Controller;
 
-import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -55,6 +54,7 @@ import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerAdapter;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
+import aeminium.runtime.implementations.implicitworkstealing.profiler.AeminiumProfiler;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;

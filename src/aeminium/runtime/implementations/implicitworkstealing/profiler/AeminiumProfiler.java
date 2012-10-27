@@ -1,4 +1,4 @@
-package aeminium.runtime.profiler;
+package aeminium.runtime.implementations.implicitworkstealing.profiler;
 
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;

@@ -23,12 +23,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
+import aeminium.runtime.implementations.implicitworkstealing.profiler.AeminiumProfiler;
+import aeminium.runtime.implementations.implicitworkstealing.profiler.DataCollection;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
-import aeminium.runtime.profiler.AeminiumProfiler;
-import aeminium.runtime.profiler.DataCollection;
 
 /*
  * Thread that is part of the threadpool that executes NonBlocking tasks
