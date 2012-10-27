@@ -190,7 +190,7 @@ public final class BlockingWorkStealingScheduler {
 				if ( oneTaskPerLevel ) {
 					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
-					/*if ( head != null && head.level == task.level && wthread.remainingRecursionDepth > 0 ) {
+					if ( head != null && head.level == task.level && wthread.remainingRecursionDepth > 0 ) {
 						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
 						wthread.remainingRecursionDepth++;
@@ -204,7 +204,7 @@ public final class BlockingWorkStealingScheduler {
 								wthread.incrementNoNonBlockingTasksHandled();
 						}
 						
-					} else */{						
+					} else {						
 						taskQueue.push(task);
 						if ( taskQueue.size() <= 1 ) {
 							signalWork(wthread);
