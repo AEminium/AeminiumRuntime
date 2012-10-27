@@ -197,7 +197,7 @@ public abstract class ImplicitTask implements Task
 			taskCompleted(rt);
 	}
 
-	public boolean detachChild()
+	public boolean detachChild(ImplicitWorkStealingRuntime rt)
 	{
 		
 		if (enableProfiler) {
@@ -229,7 +229,7 @@ public abstract class ImplicitTask implements Task
 				task.state = ImplicitTaskState.COMPLETED;
 			}
 
-			if (task.parent != null && task.parent.detachChild())
+			if (task.parent != null && task.parent.detachChild(rt))
 				next = task.parent;
 			else
 				next = null;
