@@ -127,8 +127,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			if (profileCPU) Controller.startCPURecording(true);
 			if (profileTelemetry) Controller.startVMTelemetryRecording();
 	        if (profileThreads) Controller.startThreadProfiling();
-	        if (profileAeCounters) Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
-	        if (profileAeTaskDetails) Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
+	        if (profileAeCounters) Controller.startProbeRecording("aeminium.runtime.implementations.implicitworkstealing.profiler.CountersProbe", true);
+	        if (profileAeTaskDetails) Controller.startProbeRecording("aeminium.runtime.implementations.implicitworkstealing.profiler.TaskDetailsProbe", true);
 	        
 	        try 
 	        {
