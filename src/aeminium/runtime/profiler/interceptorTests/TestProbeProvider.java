@@ -1,4 +1,4 @@
-package aeminium.runtime.implementations.implicitworkstealing.profiler.interceptorTests;
+package aeminium.runtime.profiler.interceptorTests;
 
 import com.jprofiler.api.agent.probe.Probe;
 import com.jprofiler.api.agent.probe.ProbeProvider;

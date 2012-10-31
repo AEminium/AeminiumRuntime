@@ -27,13 +27,13 @@ import java.util.concurrent.locks.LockSupport;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
-import aeminium.runtime.implementations.implicitworkstealing.profiler.AeminiumProfiler;
-import aeminium.runtime.implementations.implicitworkstealing.profiler.DataCollection;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing.WorkStealingAlgorithm;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
+import aeminium.runtime.profiler.AeminiumProfiler;
+import aeminium.runtime.profiler.DataCollection;
 
 
 /* This scheduler works as a manager of all the tasks.

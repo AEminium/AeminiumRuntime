@@ -1,4 +1,4 @@
-package aeminium.runtime.implementations.implicitworkstealing.profiler;
+package aeminium.runtime.profiler;
 
 import java.util.concurrent.ConcurrentHashMap;
 

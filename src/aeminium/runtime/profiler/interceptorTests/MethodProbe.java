@@ -1,4 +1,4 @@
-package aeminium.runtime.implementations.implicitworkstealing.profiler.interceptorTests;
+package aeminium.runtime.profiler.interceptorTests;
 
 import com.jprofiler.api.agent.probe.*;
 
@@ -50,14 +50,14 @@ public class MethodProbe implements InterceptorProbe, TelemetryProbe {
     	
     	InterceptionMethod[] methods2Intercept = new InterceptionMethod[2];
     	
-    	methods2Intercept[0] = new InterceptionMethod("aeminium.runtime.implementations.implicitworkstealing.profiler.interceptorTests.InterceptorLauncher", 
+    	methods2Intercept[0] = new InterceptionMethod("aeminium.runtime.profiler.interceptorTests.InterceptorLauncher", 
         		"methodOne", "(Ljava/lang/String;)V");
-    	methods2Intercept[1] = new InterceptionMethod("aeminium.runtime.implementations.implicitworkstealing.profiler.interceptorTests.InterceptorLauncher", 
+    	methods2Intercept[1] = new InterceptionMethod("aeminium.runtime.profiler.interceptorTests.InterceptorLauncher", 
         		"methodTwo", "(Ljava/lang/String;)V");
     	
         /*return new InterceptionMethod[] {
             // this is java.awt.EventQueue.dispatchEvent(java.awt.AWTEvent event)
-            new InterceptionMethod("aeminium.runtime.implementations.implicitworkstealing.profiler.interceptorTests.InterceptorLauncher", 
+            new InterceptionMethod("aeminium.runtime.profiler.interceptorTests.InterceptorLauncher", 
             		"methodOne", "(Ljava/lang/String;)V")
         };*/
     	

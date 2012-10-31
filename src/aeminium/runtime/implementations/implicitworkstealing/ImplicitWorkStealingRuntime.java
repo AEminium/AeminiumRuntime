@@ -54,13 +54,13 @@ import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerAdapter;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
-import aeminium.runtime.implementations.implicitworkstealing.profiler.AeminiumProfiler;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
+import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.utils.graphviz.DiGraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz.Color;
@@ -127,8 +127,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			if (profileCPU) Controller.startCPURecording(true);
 			if (profileTelemetry) Controller.startVMTelemetryRecording();
 	        if (profileThreads) Controller.startThreadProfiling();
-	        if (profileAeCounters) Controller.startProbeRecording("aeminium.runtime.implementations.implicitworkstealing.profiler.CountersProbe", true);
-	        if (profileAeTaskDetails) Controller.startProbeRecording("aeminium.runtime.implementations.implicitworkstealing.profiler.TaskDetailsProbe", true);
+	        if (profileAeCounters) Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
+	        if (profileAeTaskDetails) Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
 	        
 	        try 
 	        {

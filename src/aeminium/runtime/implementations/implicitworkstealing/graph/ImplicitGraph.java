@@ -30,14 +30,14 @@ import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.events.RuntimeEventListener;
-import aeminium.runtime.implementations.implicitworkstealing.profiler.AeminiumProfiler;
-import aeminium.runtime.implementations.implicitworkstealing.profiler.DataCollection;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.AeminiumThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
+import aeminium.runtime.profiler.AeminiumProfiler;
+import aeminium.runtime.profiler.DataCollection;
 
 /*
  * This Graph hosts task information and pre and post processes
