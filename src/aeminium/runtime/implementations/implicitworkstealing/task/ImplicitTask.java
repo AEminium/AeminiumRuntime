@@ -200,17 +200,11 @@ public abstract class ImplicitTask implements Task
 	public boolean detachChild(ImplicitWorkStealingRuntime rt)
 	{
 		
-		if (enableProfiler) {
-			this.setState(ImplicitTaskState.COMPLETED, rt.graph);
-		} else {
-			this.setState(ImplicitTaskState.COMPLETED);
-		}
-		
 		synchronized(this)
 		{
 			this.childCount--;
 			
-			if (this.childCount == 0 && state == ImplicitTaskState.WAITING_FOR_CHILDREN)
+			if (this.childCount <= 0 && state == ImplicitTaskState.WAITING_FOR_CHILDREN)
 				return true;
 		}
 		
@@ -226,7 +220,11 @@ public abstract class ImplicitTask implements Task
 		{
 			synchronized(task)
 			{
-				task.state = ImplicitTaskState.COMPLETED;
+				if (enableProfiler) {
+					this.setState(ImplicitTaskState.COMPLETED, rt.graph);
+				} else {
+					this.setState(ImplicitTaskState.COMPLETED);
+				}
 			}
 
 			if (task.parent != null && task.parent.detachChild(rt))
