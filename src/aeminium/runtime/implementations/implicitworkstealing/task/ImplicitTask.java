@@ -47,7 +47,7 @@ public abstract class ImplicitTask implements Task
 	protected volatile Object result = UNSET;  // could merge result with body
 	public Body body;
 	private ImplicitTaskState state = ImplicitTaskState.UNSCHEDULED;  // could be a byte instead of a reference
-	public int depCount;
+	public volatile int depCount;
 	public int childCount;
 	public List<ImplicitTask> dependents;
 	public List<ImplicitTask> children;     // children are only used for debugging purposes => could be removed
@@ -154,6 +154,7 @@ public abstract class ImplicitTask implements Task
 				this.dependents = new ArrayList<ImplicitTask>();
 
 			this.dependents.add(task);
+			//System.err.println("Added " + task.id + " to dependents of " + this.id);
 			return 1;
 		}
 	}
@@ -164,6 +165,8 @@ public abstract class ImplicitTask implements Task
 		synchronized (this)
 		{
 			depCount -= 1;
+			//System.err.println("Decrementing " + this.id + " - " + depCount);
+
 			if ( depCount == 0 ) {
 				if (enableProfiler) {
 					this.setState(ImplicitTaskState.WAITING_IN_QUEUE, rt.graph);
@@ -174,6 +177,7 @@ public abstract class ImplicitTask implements Task
 			}
 		}
 		if ( schedule ) {
+			//System.err.println("Scheduling " + this.id);
 			rt.scheduler.scheduleTask(this);
 		}
 	}

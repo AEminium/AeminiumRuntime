@@ -35,7 +35,6 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
 
-
 /* This scheduler works as a manager of all the tasks.
  * The scheduler decides to which thread a new task is sent.
  */
@@ -49,42 +48,45 @@ public final class BlockingWorkStealingScheduler {
 	protected final int maxParallelism;
 	protected WorkStealingAlgorithm wsa;
 	protected BlockingThreadPool blockingThreadPool;
-	protected static final boolean oneTaskPerLevel       = Configuration.getProperty(BlockingWorkStealingScheduler.class, "oneTaskPerLevel", true);
+	protected static final boolean oneTaskPerLevel = Configuration.getProperty(BlockingWorkStealingScheduler.class, "oneTaskPerLevel", false);
 	protected static final boolean useBlockingThreadPool = Configuration.getProperty(BlockingWorkStealingScheduler.class, "useBlockingThreadPool", false);
-	protected static final int maxQueueLength            = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
-	protected static final int unparkInterval            = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 0);
+	protected static final int maxQueueLength = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
+	protected static final int initialUnparkInterval = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 100);
+
+	public static volatile int unparkInterval = initialUnparkInterval;
+	protected static Boolean active_park = false;
 	
-	protected final boolean enableProfiler	  = Configuration.getProperty(getClass(), "enableProfiler", true);
+	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected AeminiumProfiler profiler;
-	
+
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
-		this.rt        = rt;
+		this.rt = rt;
 		maxParallelism = Configuration.getProcessorCount();
 	}
 
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt, int maxParallelism) {
-		this.rt             = rt;	
+		this.rt = rt;
 		this.maxParallelism = maxParallelism;
 	}
-	
+
 	/*
-	 * Initializes the scheduler, creating threads, queues
-	 * and loads the WorkStealing algorith. 
+	 * Initializes the scheduler, creating threads, queues and loads the
+	 * WorkStealing algorith.
 	 */
 	public void init(EventManager eventManager) {
-		this.eventManager    = eventManager;
-		this.parkedThreads   = new ConcurrentLinkedQueue<WorkStealingThread>();
-		this.threads         = new WorkStealingThread[maxParallelism];
-		this.counter         = new AtomicInteger(threads.length);
+		this.eventManager = eventManager;
+		this.parkedThreads = new ConcurrentLinkedQueue<WorkStealingThread>();
+		this.threads = new WorkStealingThread[maxParallelism];
+		this.counter = new AtomicInteger(threads.length);
 		this.submissionQueue = new ConcurrentLinkedQueue<ImplicitTask>();
-		this.wsa             = loadWorkStealingAlgorithm(Configuration.getProperty(BlockingWorkStealingScheduler.class, "workStealingAlgorithm", "SequentialReverseScan"));
-		if ( useBlockingThreadPool ) {
+		this.wsa = loadWorkStealingAlgorithm(Configuration.getProperty(BlockingWorkStealingScheduler.class, "workStealingAlgorithm", "SequentialReverseScan"));
+		if (useBlockingThreadPool) {
 			blockingThreadPool = new BlockingThreadPool();
 			blockingThreadPool.init(rt, eventManager);
 		}
-		
+
 		// initialize data structures
-		for ( int i = 0; i < threads.length; i++ ) {
+		for (int i = 0; i < threads.length; i++) {
 			threads[i] = new WorkStealingThread(rt, i);
 		}
 
@@ -92,7 +94,7 @@ public final class BlockingWorkStealingScheduler {
 		wsa.init(threads, submissionQueue);
 
 		// start and register threads threads
-		for ( WorkStealingThread thread : threads ) {
+		for (WorkStealingThread thread : threads) {
 			thread.start();
 		}
 	}
@@ -100,8 +102,8 @@ public final class BlockingWorkStealingScheduler {
 	/* Shutdowns all threads and releases all states. */
 	public void shutdown() {
 		counter.set(threads.length);
-		while ( counter.get() > 0 ) {
-			for ( WorkStealingThread thread : threads ){
+		while (counter.get() > 0) {
+			for (WorkStealingThread thread : threads) {
 				thread.shutdown();
 				LockSupport.unpark(thread);
 			}
@@ -109,37 +111,36 @@ public final class BlockingWorkStealingScheduler {
 
 		// cleanup
 		wsa.shutdown();
-		wsa             = null;
-		threads         = null;
-		parkedThreads   = null;
-		counter         = null;
+		wsa = null;
+		threads = null;
+		parkedThreads = null;
+		counter = null;
 		submissionQueue = null;
-		if ( useBlockingThreadPool ) {
+		if (useBlockingThreadPool) {
 			blockingThreadPool.shutdown();
 		}
 	}
 
-	
 	protected WorkStealingAlgorithm loadWorkStealingAlgorithm(String name) {
 		WorkStealingAlgorithm wsa = null;
-		
+
 		Class<?> wsaClass = null;
 		try {
-			wsaClass = getClass().getClassLoader().loadClass("aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing."+name);
+			wsaClass = getClass().getClassLoader().loadClass("aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing." + name);
 		} catch (ClassNotFoundException e) {
 			rt.getErrorManager().signalInternalError(new Error("Cannot load work stealing algorithm class : aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing." + name));
 		}
-		
+
 		try {
-			wsa = (WorkStealingAlgorithm)wsaClass.newInstance();
+			wsa = (WorkStealingAlgorithm) wsaClass.newInstance();
 		} catch (Exception e) {
 			rt.getErrorManager().signalInternalError(new Error("Cannot load work stealing algorithm class : aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing." + name));
 			throw new Error("Cannot load work stealing algorithm class : aeminium.runtime.implementations.implicitworkstealing.scheduler.stealing." + name);
 		}
-		
+
 		return wsa;
 	}
-	
+
 	public final void registerThread(WorkStealingThread thread) {
 		eventManager.signalNewThread(thread);
 	}
@@ -150,25 +151,25 @@ public final class BlockingWorkStealingScheduler {
 
 	/* Receives a new task and forwards it to one of the executor threads. */
 	public final void scheduleTask(ImplicitTask task) {
-		if ( task instanceof ImplicitBlockingTask && useBlockingThreadPool ) {
+		if (task instanceof ImplicitBlockingTask && useBlockingThreadPool) {
 			blockingThreadPool.submitTask((ImplicitBlockingTask) task);
 			return;
 		}
 		if (maxQueueLength > 0) {
 			Thread thread = Thread.currentThread();
-			if ( thread instanceof WorkStealingThread) {
-				WorkStealingThread wthread = (WorkStealingThread)thread;
+			if (thread instanceof WorkStealingThread) {
+				WorkStealingThread wthread = (WorkStealingThread) thread;
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
-				if ( taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0 ) {					
+				if (taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0) {
 					taskQueue.push(task);
-					if ( taskQueue.size() <= 1 ) {
+					if (taskQueue.size() <= 1) {
 						signalWork();
 					}
 				} else {
 					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
 					wthread.remainingRecursionDepth++;
-					
+
 					if (enableProfiler) {
 						if (task instanceof ImplicitAtomicTask)
 							wthread.incrementNoAtomicTasksHandled();
@@ -178,23 +179,23 @@ public final class BlockingWorkStealingScheduler {
 							wthread.incrementNoNonBlockingTasksHandled();
 					}
 				}
-			} else {				
+			} else {
 				submissionQueue.add(task);
 				signalWork();
 			}
 		} else {
 			Thread thread = Thread.currentThread();
-			if ( thread instanceof WorkStealingThread ) {
-				// worker thread 
-				WorkStealingThread wthread = (WorkStealingThread)thread;
-				if ( oneTaskPerLevel ) {
+			if (thread instanceof WorkStealingThread) {
+				// worker thread
+				WorkStealingThread wthread = (WorkStealingThread) thread;
+				if (oneTaskPerLevel) {
 					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
-					if ( head != null && head.level == task.level && wthread.remainingRecursionDepth > 0 ) {
+					if (head != null && head.level == task.level && wthread.remainingRecursionDepth > 0) {
 						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
 						wthread.remainingRecursionDepth++;
-						
+
 						if (enableProfiler) {
 							if (task instanceof ImplicitAtomicTask)
 								wthread.incrementNoAtomicTasksHandled();
@@ -203,21 +204,21 @@ public final class BlockingWorkStealingScheduler {
 							else if (task instanceof ImplicitNonBlockingTask)
 								wthread.incrementNoNonBlockingTasksHandled();
 						}
-						
-					} else {						
+
+					} else {
 						taskQueue.push(task);
-						if ( taskQueue.size() <= 1 ) {
+						if (taskQueue.size() <= 1) {
 							signalWork(wthread);
 						}
 					}
 				} else {
 					wthread.getTaskQueue().push(task);
-					if ( wthread.getTaskQueue().size() <= 1 ) {
+					if (wthread.getTaskQueue().size() <= 1) {
 						signalWork(wthread);
 					}
 				}
 			} else {
-				// external thread				
+				// external thread
 				submissionQueue.add(task);
 				signalWork();
 			}
@@ -226,31 +227,52 @@ public final class BlockingWorkStealingScheduler {
 
 	/* Awakes a specific thread. */
 	public final void signalWork(WorkStealingThread thread) {
-		// TODO: need to fix that to wake up thread waiting for objects to complete
+		// TODO: need to fix that to wake up thread waiting for objects to
+		// complete
 		LockSupport.unpark(thread);
 		WorkStealingThread next = wsa.signalWorkInLocalQueue(thread);
 		LockSupport.unpark(next);
 	}
-	
+
 	/* Awakes a thread to perform some work. */
 	public final void signalWork() {
 		WorkStealingThread threadParked = wsa.signalWorkInSubmissionQueue();
-		if ( threadParked != null ) {
+		if (threadParked != null) {
 			LockSupport.unpark(threadParked);
 		}
 	}
-	
+
 	/* Parks a thread to wait an interval before looking for new work. */
 	public final void parkThread(WorkStealingThread thread) {
 		eventManager.signalThreadSuspend(thread);
 		wsa.threadGoingToPark(thread);
-		if (unparkInterval > 0) {
-			LockSupport.parkNanos(thread, unparkInterval);
-		} else {
-			LockSupport.park(thread);
+		
+		boolean active;
+		
+		synchronized (active_park)
+		{
+			if (active_park)
+				active = false;
+			else
+			{
+				active = true;
+				active_park = true;
+			}
 		}
+		
+		if (active)
+		{
+			LockSupport.parkNanos(thread, unparkInterval);
+			unparkInterval *= 2;
+			
+			synchronized (active_park)
+			{
+				active_park = false;
+			}
+		} else
+			LockSupport.park(thread);
 	}
-	
+
 	/* Steals work from queues using an algorithm. */
 	public final ImplicitTask scanQueues(WorkStealingThread thread) {
 		return wsa.stealWork(thread);
@@ -259,40 +281,40 @@ public final class BlockingWorkStealingScheduler {
 	/* Removes a task from que submission queue. */
 	public boolean cancelTask(ImplicitTask task) {
 		boolean result = submissionQueue.remove(task);
-		if ( result ) {
+		if (result) {
 			task.taskFinished(rt);
 		}
 		return result;
 	}
-	
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-	 *                                          PROFILER                                               *      
-	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	 * PROFILER * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * * * * * * * * * * * * * * * * * *
+	 */
 	public synchronized void collectData(DataCollection data) {
-		
+
 		if (threads == null)
 			return;
-		
-		for (int i = 0; i < threads.length; i++)
-		{
+
+		for (int i = 0; i < threads.length; i++) {
 			data.taskInNonBlockingQueue[i] = threads[i].getLocalQueueSize();
 			threads[i].getNoTasksHandled(data.tasksHandled[i]);
-			
+
 			if (blockingThreadPool != null)
 				data.taskInBlockingQueue = blockingThreadPool.getTaskQueueSize();
 		}
-		
+
 		return;
 	}
-	
+
 	public int getMaxParallelism() {
 		return maxParallelism;
 	}
-	
-	public void setProfiler (AeminiumProfiler profiler) {
+
+	public void setProfiler(AeminiumProfiler profiler) {
 		this.profiler = profiler;
-		
-		for ( int i = 0; i < threads.length; i++ ) {
+
+		for (int i = 0; i < threads.length; i++) {
 			threads[i].setProfiler(this.profiler);
 		}
 	}

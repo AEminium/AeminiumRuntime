@@ -43,7 +43,7 @@ public final class WorkStealingThread extends AeminiumThread {
 	public final int index;
 	protected volatile boolean shutdown = false;
 	protected final int pollingCount   = Configuration.getProperty(getClass(), "pollingCount", 5);
-	public int remainingRecursionDepth = Configuration.getProperty(getClass(), "maxRecursionDepth", 512);;
+	public int remainingRecursionDepth = Configuration.getProperty(getClass(), "maxRecursionDepth", 512);
 	protected WorkStealingQueue<ImplicitTask> taskQueue;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
 	
@@ -100,6 +100,13 @@ public final class WorkStealingThread extends AeminiumThread {
 				task = rt.scheduler.scanQueues(this);
 				if ( task != null ) {
 					task.invoke(rt);
+					
+					rt.scheduler.signalWork();
+					BlockingWorkStealingScheduler.unparkInterval = Math.max
+					(
+						BlockingWorkStealingScheduler.unparkInterval / 4,
+						BlockingWorkStealingScheduler.initialUnparkInterval
+					);
 					
 					if (enableProfiler) {
 						if (task instanceof ImplicitAtomicTask)
