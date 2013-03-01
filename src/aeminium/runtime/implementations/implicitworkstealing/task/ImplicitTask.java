@@ -186,17 +186,16 @@ public abstract class ImplicitTask implements Task
 	{
 		boolean completed = false;
 		synchronized (this) {
-
-			if (enableProfiler) {
-				this.setState(ImplicitTaskState.WAITING_FOR_CHILDREN, rt.graph);
-			} else {
-				this.setState(ImplicitTaskState.WAITING_FOR_CHILDREN);
-			}
-
-			if (childCount == 0)
+			if (childCount == 0) {
 				completed = true;
+			} else {
+				if (enableProfiler) {
+					this.setState(ImplicitTaskState.WAITING_FOR_CHILDREN, rt.graph);
+				} else {
+					this.setState(ImplicitTaskState.WAITING_FOR_CHILDREN);
+				}
+			}
 		}
-
 		if (completed)
 			taskCompleted(rt);
 	}
