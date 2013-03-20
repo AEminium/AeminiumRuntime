@@ -61,6 +61,12 @@ public abstract class ImplicitTask implements Task
 	/* Added for profiler. */
 	public int id;
 	
+	/*statistics*/
+	public int id_type;
+	public List<ImplicitTask> total_dependents;
+	public int id_worker;
+
+	
 	public ImplicitTask(Body body, short hints, boolean enableProfiler) {
 		this.body = body;
 		this.hints = hints;

@@ -61,6 +61,7 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlocki
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.profiler.AeminiumProfiler;
+import aeminium.runtime.tasktype.TaskTypeAnalyzer;
 import aeminium.runtime.utils.graphviz.DiGraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz;
 import aeminium.runtime.utils.graphviz.GraphViz.Color;
@@ -246,10 +247,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	@Override
 	public final NonBlockingTask createNonBlockingTask(Body body, short hints)
 			 {
-		
+		System.out.println("Type:"+TaskTypeAnalyzer.getTaskType(body));
 		ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints, this.enableProfiler);
 		task.id = idCounter.getAndIncrement();
-		
 		return task;
 	}
 

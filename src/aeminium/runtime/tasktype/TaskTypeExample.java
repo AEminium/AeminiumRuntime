@@ -13,7 +13,7 @@ public class TaskTypeExample {
 			}			
 		};
 
-		System.out.println("Value: " + TaskTypeAnalyzer.getTaskType(r) );
+		//System.out.println("Value: " + TaskTypeAnalyzer.getTaskType(r) );
 		
 	}
 
