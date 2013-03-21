@@ -55,13 +55,25 @@ public final class BlockingWorkStealingScheduler {
 
 	public static volatile int unparkInterval = initialUnparkInterval;
 	protected static Boolean active_park = false;
-	
+
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected AeminiumProfiler profiler;
+
+	/**************** Statistics******** */
+	public int numberOfTasks = 0;
+	public int[] numberOfTasksByWorker;
+	public int[] numberOfStealsByWorker;
+	public int[] numberOfNoStealsByWorker;
+	public int[] totalByTypeId = new int[1000];
+	public int[] numberOfTasksByQueue = new int[3];
 
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt = rt;
 		maxParallelism = Configuration.getProcessorCount();
+		// statistics
+		numberOfTasksByWorker = new int[maxParallelism];
+		numberOfStealsByWorker = new int[maxParallelism];
+		numberOfNoStealsByWorker = new int[maxParallelism];
 	}
 
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt, int maxParallelism) {
@@ -101,6 +113,9 @@ public final class BlockingWorkStealingScheduler {
 
 	/* Shutdowns all threads and releases all states. */
 	public void shutdown() {
+		// statistiscs print
+		printStatistics();
+
 		counter.set(threads.length);
 		while (counter.get() > 0) {
 			for (WorkStealingThread thread : threads) {
@@ -166,6 +181,10 @@ public final class BlockingWorkStealingScheduler {
 						signalWork();
 					}
 				} else {
+					// statistics
+					rt.scheduler.setStatistics(task, wthread.index, "executed");
+					// **********
+
 					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
 					wthread.remainingRecursionDepth++;
@@ -192,6 +211,10 @@ public final class BlockingWorkStealingScheduler {
 					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
 					if (head != null && head.level == task.level && wthread.remainingRecursionDepth > 0) {
+						// statistics
+						rt.scheduler.setStatistics(task, wthread.index, "executed");
+						// **********
+
 						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
 						wthread.remainingRecursionDepth++;
@@ -246,27 +269,23 @@ public final class BlockingWorkStealingScheduler {
 	public final void parkThread(WorkStealingThread thread) {
 		eventManager.signalThreadSuspend(thread);
 		wsa.threadGoingToPark(thread);
-		
+
 		boolean active;
-		
-		synchronized (active_park)
-		{
+
+		synchronized (active_park) {
 			if (active_park)
 				active = false;
-			else
-			{
+			else {
 				active = true;
 				active_park = true;
 			}
 		}
-		
-		if (active)
-		{
+
+		if (active) {
 			LockSupport.parkNanos(thread, unparkInterval);
 			unparkInterval *= 2;
-			
-			synchronized (active_park)
-			{
+
+			synchronized (active_park) {
 				active_park = false;
 			}
 		} else
@@ -318,4 +337,81 @@ public final class BlockingWorkStealingScheduler {
 			threads[i].setProfiler(this.profiler);
 		}
 	}
+
+	/*********** Statistics ************/
+	public void incrementNumberOfTasks() {
+		numberOfTasks++;
+	}
+
+	public void incrementNumberOfTasksByWorker(int index) {
+		numberOfTasksByWorker[index]++;
+	}
+
+	public void incrementNumberOfStealsByWorker(int index) {
+		numberOfStealsByWorker[index]++;
+	}
+
+	public void incrementNumberOfNoStealsByWorker(int index) {
+		numberOfNoStealsByWorker[index]++;
+	}
+
+	public void incrementTotalByTypeId(int typeId) {
+		totalByTypeId[typeId]++;
+	}
+
+	public void incrementNumberOfTasksByQueue(String queueName) {
+		// taskQueue
+		if (queueName.compareTo("taskQueue") == 0) {
+			numberOfTasksByQueue[0]++;
+			// stealQueue
+		} else if (queueName.compareTo("stealQueue") == 0) {
+			numberOfTasksByQueue[1]++;
+			// executed
+		} else if (queueName.compareTo("executed") == 0) {
+			numberOfTasksByQueue[2]++;
+		}
+
+	}
+
+	private void printStatistics() {
+		System.out.println("TOTAL TASKS PERFORMED BY WORKER:");
+		for (int i = 0; i < maxParallelism; i++)
+			System.out.print("workerId" + i + ": " + numberOfTasksByWorker[i] + " | ");
+		System.out.println();
+
+		System.out.println("TOTAL STEALS PERFORMED BY WORKER:");
+		for (int i = 0; i < maxParallelism; i++)
+			System.out.print("workerId" + i + ": " + numberOfStealsByWorker[i] + " | ");
+		System.out.println();
+
+		System.out.println("TOTAL OF NO STEALS PERFORMED BY WORKER:");
+		for (int i = 0; i < maxParallelism; i++)
+			System.out.print("workerId" + i + ": " + numberOfNoStealsByWorker[i] + " | ");
+		System.out.println();
+
+		System.out.println("TOTAL OF TASKS BY TYPE:");
+		for (int i = 0; i < 1000; i++) {
+			if (totalByTypeId[i] > 0) {
+				System.out.print("typeId" + i + ": " + totalByTypeId[i] + " | ");
+			}
+		}
+		System.out.println();
+
+		System.out.println("TOTAL OF TASKS BY QUEUE:");
+		System.out.print("taskQueue: " + numberOfTasksByQueue[0] + " | " + "stealQueue: " + numberOfTasksByQueue[1] + " | " + "executed: " + numberOfTasksByQueue[2]);
+
+		System.out.println();
+
+	}
+
+	// Set the values to the statistics
+	public void setStatistics(ImplicitTask task, int workerId, String queueName) {
+		task.setWorkerId(workerId);
+		task.setQueueName(queueName);
+		rt.scheduler.incrementNumberOfTasksByWorker(workerId);
+		rt.scheduler.incrementNumberOfNoStealsByWorker(workerId);
+		rt.scheduler.incrementTotalByTypeId(task.typeId);
+		rt.scheduler.incrementNumberOfTasksByQueue(queueName);
+	}
+
 }

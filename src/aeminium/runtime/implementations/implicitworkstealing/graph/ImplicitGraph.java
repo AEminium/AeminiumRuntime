@@ -38,6 +38,7 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTaskState;
 import aeminium.runtime.profiler.AeminiumProfiler;
 import aeminium.runtime.profiler.DataCollection;
+import aeminium.runtime.tasktype.TaskTypeAnalyzer;
 
 /*
  * This Graph hosts task information and pre and post processes
@@ -51,54 +52,54 @@ public class ImplicitGraph {
 	protected final int pollingTimeout;
 	protected final boolean debug;
 	protected boolean polling = false;
-	
+
 	/* Profiler information. */
 	protected AeminiumProfiler profiler;
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
-	
+
 	private AtomicInteger noAtomicTasksCompleted = new AtomicInteger(0);
 	private AtomicInteger noBlockingTasksCompleted = new AtomicInteger(0);
 	private AtomicInteger noNonBlockingTasksCompleted = new AtomicInteger(0);
-	
+
 	public AtomicInteger noUnscheduledTasks = new AtomicInteger(0);
 	public AtomicInteger noRunningTasks = new AtomicInteger(0);
 	public AtomicInteger noWaitingForDependenciesTasks = new AtomicInteger(0);
 	public AtomicInteger noWaitingForChildrenTasks = new AtomicInteger(0);
 	public AtomicInteger noTasksWaitingInQueue = new AtomicInteger(0);
 	public AtomicInteger noCompletedTasks = new AtomicInteger(0);
-	
+
 	private static final class TaskCounter {
 		protected final Thread thread;
 		public volatile int taskCount = 0;
-		
+
 		public TaskCounter(Thread thread) {
 			this.thread = thread;
 		}
-		
+
 		public final int getTaskCount() {
-			if ( thread instanceof AeminiumThread ) {
-				return ((AeminiumThread)thread).taskCount;
+			if (thread instanceof AeminiumThread) {
+				return ((AeminiumThread) thread).taskCount;
 			} else {
 				return taskCount;
 			}
 		}
-		
-		@Override 
+
+		@Override
 		public final String toString() {
-			return "TaskCounter<"+getTaskCount()+">";
+			return "TaskCounter<" + getTaskCount() + ">";
 		}
 	}
 
 	public ImplicitGraph(ImplicitWorkStealingRuntime rt) {
 		this.rt = rt;
-		debug          = Configuration.getProperty(getClass(), "debug", false);
+		debug = Configuration.getProperty(getClass(), "debug", false);
 		checkForCycles = Configuration.getProperty(getClass(), "checkForCycles", false);
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
 	}
-	
+
 	public final void init(EventManager eventManager) {
-		taskCounterList  = new ArrayList<TaskCounter>(); 
-		taskCounters     = new ThreadLocal<TaskCounter>(){
+		taskCounterList = new ArrayList<TaskCounter>();
+		taskCounters = new ThreadLocal<TaskCounter>() {
 			@Override
 			protected TaskCounter initialValue() {
 				TaskCounter tc = new TaskCounter(Thread.currentThread());
@@ -106,16 +107,16 @@ public class ImplicitGraph {
 					taskCounterList.add(tc);
 				}
 				return tc;
-			}		
+			}
 		};
-		eventManager.registerRuntimeEventListener(new RuntimeEventListener() {		
+		eventManager.registerRuntimeEventListener(new RuntimeEventListener() {
 			@Override
 			public final void onThreadSuspend(Thread thread) {
 				synchronized (taskCounterList) {
-					if ( isEmpty() ) {
+					if (isEmpty()) {
 						taskCounterList.notifyAll();
 					}
-				}				
+				}
 			}
 
 			@Override
@@ -133,42 +134,44 @@ public class ImplicitGraph {
 
 	public final void shutdown() {
 		taskCounterList = null;
-		taskCounters    = null;
+		taskCounters = null;
 	}
-	
+
 	/*
-	 * Sets up a new task in relation to another tasks (dependents and dependencies)
-	 * and schedules it for execution if it is the case.
+	 * Sets up a new task in relation to another tasks (dependents and
+	 * dependencies) and schedules it for execution if it is the case.
 	 */
 	public final void addTask(ImplicitTask itask, Task parent, Collection<Task> deps) {
-
+		//set type id
+		itask.setTypeId();
+		
 		// update thread specific task counter
 		Thread thread = Thread.currentThread();
-		if ( thread instanceof AeminiumThread ) {
-			((AeminiumThread)thread).taskCount++;
+		if (thread instanceof AeminiumThread) {
+			((AeminiumThread) thread).taskCount++;
 		} else {
 			taskCounters.get().taskCount++;
 		}
-		
+
 		boolean schedule = false;
 
-		synchronized (itask) {			
+		synchronized (itask) {
 			// check for double scheduling
-			if ( itask.getState() != ImplicitTaskState.UNSCHEDULED) {
-				if ( thread instanceof AeminiumThread ) {
-					((AeminiumThread)thread).taskCount--;
+			if (itask.getState() != ImplicitTaskState.UNSCHEDULED) {
+				if (thread instanceof AeminiumThread) {
+					((AeminiumThread) thread).taskCount--;
 				} else {
 					taskCounters.get().taskCount--;
 				}
 				rt.getErrorManager().signalTaskDuplicatedSchedule(itask);
 				return;
 			}
-			
+
 			if (enableProfiler)
 				this.noUnscheduledTasks.incrementAndGet();
 
 			// setup parent connection
-			if ( parent != Runtime.NO_PARENT ) {
+			if (parent != Runtime.NO_PARENT) {
 				ImplicitTask iparent = (ImplicitTask) parent;
 				itask.parent = iparent;
 				itask.level = (short) (iparent.level + 1);
@@ -180,45 +183,43 @@ public class ImplicitGraph {
 				itask.setState(ImplicitTaskState.WAITING_FOR_DEPENDENCIES, this);
 			else
 				itask.setState(ImplicitTaskState.WAITING_FOR_DEPENDENCIES);
-			
-			
-			if ( (Object)deps != Runtime.NO_DEPS ) {
+
+			if ((Object) deps != Runtime.NO_DEPS) {
 				int count = 0;
-				for ( Task t : deps) {
-					ImplicitTask it = (ImplicitTask)t;
-					count += it.addDependent(itask);						
+				for (Task t : deps) {
+					ImplicitTask it = (ImplicitTask) t;
+					count += it.addDependent(itask);
 				}
 				itask.depCount = count;
-				if ( itask.depCount == 0 ) {
+				if (itask.depCount == 0) {
 					schedule = true;
 				}
 			} else {
 				schedule = true;
 			}
 		}
-		
+
 		// schedule task if it's marked as waiting in queue
 		if (schedule) {
 			if (enableProfiler)
 				itask.setState(ImplicitTaskState.WAITING_IN_QUEUE, this);
 			else
 				itask.setState(ImplicitTaskState.WAITING_IN_QUEUE);
-			
+
 			rt.scheduler.scheduleTask(itask);
 		}
 
-		if ( checkForCycles ) {
+		if (checkForCycles) {
 			itask.checkForCycles(rt.getErrorManager());
 			return;
 		}
 	}
 
-	
 	/* taskCompleted is executed when a task has completed */
 	public final void taskCompleted(ImplicitTask task) {
 		Thread thread = Thread.currentThread();
-		if ( thread instanceof AeminiumThread ) {
-			((AeminiumThread)thread).taskCount--;
+		if (thread instanceof AeminiumThread) {
+			((AeminiumThread) thread).taskCount--;
 		} else {
 			taskCounters.get().taskCount--;
 		}
@@ -232,10 +233,10 @@ public class ImplicitGraph {
 				this.noNonBlockingTasksCompleted.getAndIncrement();
 		}
 	}
-	
+
 	protected final boolean isEmpty() {
 		int count = 0;
-		for(TaskCounter tc : taskCounterList ) {
+		for (TaskCounter tc : taskCounterList) {
 			count += tc.getTaskCount();
 		}
 		return count == 0;
@@ -245,41 +246,43 @@ public class ImplicitGraph {
 	public final void waitToEmpty() {
 		synchronized (taskCounterList) {
 			boolean empty = false;
-			while ( !empty ) {
+			while (!empty) {
 				empty = isEmpty();
-				if ( !empty ) {
+				if (!empty) {
 					try {
-						if ( polling || debug ) {
+						if (polling || debug) {
 							taskCounterList.wait(pollingTimeout);
 						} else {
 							taskCounterList.wait();
 						}
-					} catch (InterruptedException e) {}
+					} catch (InterruptedException e) {
+					}
 				}
 			}
 		}
 	}
-	
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-	 *                                          PROFILER                                               *      
-	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	 * PROFILER * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * * * * * * * * * * * * * * * * * *
+	 */
 	public synchronized void collectData(DataCollection data) {
-		
+
 		data.noTasksCompleted[DataCollection.ATOMIC_TASK] = this.noAtomicTasksCompleted.get();
 		data.noTasksCompleted[DataCollection.BLOCKING_TASK] = this.noBlockingTasksCompleted.get();
 		data.noTasksCompleted[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksCompleted.get();
-		
+
 		data.noUnscheduledTasks = this.noUnscheduledTasks.get();
 		data.noWaitingForDependenciesTasks = this.noWaitingForDependenciesTasks.get();
 		data.noWaitingForChildrenTasks = this.noWaitingForChildrenTasks.get();
 		data.noRunningTasks = this.noRunningTasks.get();
 		data.noTasksWaitingInQueue = this.noTasksWaitingInQueue.get();
 		data.noCompletedTasks = this.noCompletedTasks.get();
-		
+
 		return;
 	}
-	
-	public void setProfiler (AeminiumProfiler profiler) {
+
+	public void setProfiler(AeminiumProfiler profiler) {
 		this.profiler = profiler;
 	}
 

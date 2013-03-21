@@ -68,7 +68,6 @@ import aeminium.runtime.utils.graphviz.GraphViz.Color;
 import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
 import aeminium.runtime.utils.graphviz.GraphViz.RankDir;
 
-
 /*
  * This is the Runtime implementation that holds all Runtime Components such as the Graph, Scheduler and Error Manager.
  */
@@ -80,65 +79,70 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected DiGraphViz digraphviz;
 	protected AeminiumProfiler profiler;
 	protected ErrorManager errorManager;
-	protected State state = State.UNINITIALIZED;  
+	protected State state = State.UNINITIALIZED;
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
-	
+
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
-	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
-	
-	public final boolean enableProfiler 	= Configuration.getProperty(getClass(), "enableProfiler", true);
-	public final boolean offlineProfiling	= Configuration.getProperty(getClass(), "offlineProfiling", false);
-	public final String outputOffline 		= Configuration.getProperty(getClass(), "outputOffline", "snapshot.jsp");
-	
-	public final boolean profileCPU	  			= Configuration.getProperty(getClass(), "profileCPU", false);
-	public final boolean profileTelemetry		= Configuration.getProperty(getClass(), "profileTelemetry", true);
-	public final boolean profileThreads			= Configuration.getProperty(getClass(), "profileThreads", true);
-	public final boolean profileAeCounters		= Configuration.getProperty(getClass(), "profileAeCounters", true);
-	public final boolean profileAeTaskDetails	= Configuration.getProperty(getClass(), "profileAeTaskDetails", true);
-	
-	protected final boolean enableGraphViz    = Configuration.getProperty(getClass(), "enableGraphViz", false);
-	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
-	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
-	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
-	
-	private AtomicInteger idCounter = new AtomicInteger(0); // Required for Profiling
-	
+	protected final int parallelizeThreshold = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
+
+	public final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
+	public final boolean offlineProfiling = Configuration.getProperty(getClass(), "offlineProfiling", false);
+	public final String outputOffline = Configuration.getProperty(getClass(), "outputOffline", "snapshot.jsp");
+
+	public final boolean profileCPU = Configuration.getProperty(getClass(), "profileCPU", false);
+	public final boolean profileTelemetry = Configuration.getProperty(getClass(), "profileTelemetry", true);
+	public final boolean profileThreads = Configuration.getProperty(getClass(), "profileThreads", true);
+	public final boolean profileAeCounters = Configuration.getProperty(getClass(), "profileAeCounters", true);
+	public final boolean profileAeTaskDetails = Configuration.getProperty(getClass(), "profileAeTaskDetails", true);
+
+	protected final boolean enableGraphViz = Configuration.getProperty(getClass(), "enableGraphViz", false);
+	protected final String graphVizName = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
+	protected final int ranksep = Configuration.getProperty(getClass(), "ranksep", 1);
+	protected final RankDir rankdir = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
+
+	private AtomicInteger idCounter = new AtomicInteger(0); // Required for
+															// Profiling
+
 	public enum State {
-		UNINITIALIZED,
-		INITIALIZED
+		UNINITIALIZED, INITIALIZED
 	}
-	
+
 	public ImplicitWorkStealingRuntime() {
-		graph        = new ImplicitGraph(this);
-		scheduler    = new BlockingWorkStealingScheduler(this);
+		graph = new ImplicitGraph(this);
+		scheduler = new BlockingWorkStealingScheduler(this);
 		eventManager = new EventManager();
 		errorManager = new ErrorManagerAdapter();
 	}
-	
-	
+
 	/* Initializes all components of the runtime. */
 	@Override
-	public final void init()  {
-		if ( state != State.UNINITIALIZED ) {
+	public final void init() {
+		if (state != State.UNINITIALIZED) {
 			throw new Error("Cannot initialize runtime multiple times.");
 		}
-		
+
 		if (offlineProfiling) {
-			/* Activation of profiling options according to the parameters given. */
-			if (profileCPU) Controller.startCPURecording(true);
-			if (profileTelemetry) Controller.startVMTelemetryRecording();
-	        if (profileThreads) Controller.startThreadProfiling();
-	        if (profileAeCounters) Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
-	        if (profileAeTaskDetails) Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
-	        
-	        try 
-	        {
-	        	File file = new File(outputOffline);
+			/*
+			 * Activation of profiling options according to the parameters
+			 * given.
+			 */
+			if (profileCPU)
+				Controller.startCPURecording(true);
+			if (profileTelemetry)
+				Controller.startVMTelemetryRecording();
+			if (profileThreads)
+				Controller.startThreadProfiling();
+			if (profileAeCounters)
+				Controller.startProbeRecording("aeminium.runtime.profiler.CountersProbe", true);
+			if (profileAeTaskDetails)
+				Controller.startProbeRecording("aeminium.runtime.profiler.TaskDetailsProbe", true);
+
+			try {
+				File file = new File(outputOffline);
 				file.createNewFile();
 				Controller.saveSnapshotOnExit(file);
-				
-			} catch (IOException e)
-			{
+
+			} catch (IOException e) {
 				System.out.println("File error: " + e.getMessage());
 			}
 		}
@@ -146,24 +150,24 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		eventManager.init();
 		graph.init(eventManager);
 		scheduler.init(eventManager);
-		
+
 		if (enableProfiler) {
 			profiler = new AeminiumProfiler(scheduler, graph);
-			
+
 			this.graph.setProfiler(profiler);
 			this.scheduler.setProfiler(profiler);
 		}
-		
-		if ( enableGraphViz ) {
+
+		if (enableGraphViz) {
 			digraphviz = new DiGraphViz(graphVizName, ranksep, rankdir);
 		}
-		dataGroupFactory = new ImplicitWorkStealingRuntimeDataGroupFactory() {	
+		dataGroupFactory = new ImplicitWorkStealingRuntimeDataGroupFactory() {
 			@Override
 			public ImplicitWorkStealingRuntimeDataGroup create() {
 				return new FifoDataGroup();
 			}
 		};
-		if ( nestedAtomicTasks ) {
+		if (nestedAtomicTasks) {
 			final ImplicitWorkStealingRuntimeDataGroupFactory innerFactory = dataGroupFactory;
 			dataGroupFactory = new ImplicitWorkStealingRuntimeDataGroupFactory() {
 				@Override
@@ -174,27 +178,27 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		}
 		errorManager.addErrorHandler(new ErrorHandler() {
 			private final String PREFIX = "[AEMINIUM] ";
-			
+
 			@Override
 			public void handleTaskException(Task task, Throwable t) {
 				System.err.println(PREFIX + "Task " + task + " threw exception: " + t);
 			}
-			
+
 			@Override
 			public void handleTaskDuplicatedSchedule(Task task) {
 				System.err.println(PREFIX + "Duplicated task : " + task);
 			}
-			
+
 			@Override
 			public void handleLockingDeadlock() {
 				System.err.println(PREFIX + "Locking Deadlock.");
 			}
-			
+
 			@Override
 			public void handleInternalError(Error error) {
 				System.err.println(PREFIX + "INTERNAL ERROR : " + error);
 			}
-			
+
 			@Override
 			public void handleDependencyCycle(Task task) {
 				// TODO Auto-generated method stub
@@ -203,16 +207,16 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		});
 		state = State.INITIALIZED;
 	}
-	
+
 	@Override
-	public final void shutdown()  {
-		if ( state != State.UNINITIALIZED ) {
+	public final void shutdown() {
+		if (state != State.UNINITIALIZED) {
 			graph.waitToEmpty();
 			scheduler.shutdown();
 			eventManager.shutdown();
 			graph.shutdown();
-			if ( enableGraphViz ) {
-				digraphviz.dump(new File(digraphviz.getName()+".dot"));
+			if (enableGraphViz) {
+				digraphviz.dump(new File(digraphviz.getName() + ".dot"));
 				digraphviz = null;
 			}
 			executorService = null;
@@ -220,68 +224,64 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			state = State.UNINITIALIZED;
 		}
 	}
-	
+
 	public final void waitToEmpty() {
 		graph.waitToEmpty();
 	}
-	
+
 	@Override
 	public final AtomicTask createAtomicTask(Body body, DataGroup datagroup, short hints) {
-		
-		ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup)datagroup, hints, this.enableProfiler);
+
+		ImplicitAtomicTask task = new ImplicitAtomicTask(body, (ImplicitWorkStealingRuntimeDataGroup) datagroup, hints, this.enableProfiler);
 		task.id = idCounter.getAndIncrement();
-		
+
 		return task;
 	}
 
 	@Override
-	public final BlockingTask createBlockingTask(Body body, short hints)
-			 {
+	public final BlockingTask createBlockingTask(Body body, short hints) {
 
 		ImplicitBlockingTask task = new ImplicitBlockingTask(body, hints, this.enableProfiler);
 		task.id = idCounter.getAndIncrement();
-		
+
 		return task;
 	}
-	
+
 	@Override
-	public final NonBlockingTask createNonBlockingTask(Body body, short hints)
-			 {
-		System.out.println("Type:"+TaskTypeAnalyzer.getTaskType(body));
+	public final NonBlockingTask createNonBlockingTask(Body body, short hints) {
 		ImplicitNonBlockingTask task = new ImplicitNonBlockingTask(body, hints, this.enableProfiler);
 		task.id = idCounter.getAndIncrement();
 		return task;
 	}
 
 	@Override
-	public final DataGroup createDataGroup()  {
+	public final DataGroup createDataGroup() {
 		return dataGroupFactory.create();
 	}
 
 	@Override
-	public final void schedule(Task task, Task parent, Collection<Task> deps)
-			 {
-		if ( enableGraphViz ) {
-			ImplicitTask itask = (ImplicitTask)task;
+	public final void schedule(Task task, Task parent, Collection<Task> deps) {
+		if (enableGraphViz) {
+			ImplicitTask itask = (ImplicitTask) task;
 			digraphviz.addNode(itask.hashCode(), itask.body.toString());
-			if ( parent != NO_PARENT ) {
+			if (parent != NO_PARENT) {
 				digraphviz.addConnection(itask.hashCode(), parent.hashCode(), LineStyle.DASHED, Color.RED, "");
 			}
-			if ( deps != NO_DEPS ) {
-				for ( Task dep : deps) {
+			if (deps != NO_DEPS) {
+				for (Task dep : deps) {
 					digraphviz.addConnection(itask.hashCode(), dep.hashCode(), LineStyle.SOLID, Color.BLUE, "");
 				}
- 			}
+			}
 		}
-		
-		graph.addTask((ImplicitTask)task, parent, deps);
+
+		graph.addTask((ImplicitTask) task, parent, deps);
 	}
 
 	@Override
 	public final boolean parallelize() {
 		Thread thread = Thread.currentThread();
-		if ( thread instanceof WorkStealingThread ) {
-			if ( ((WorkStealingThread)thread).getTaskQueue().size() > parallelizeThreshold ) {
+		if (thread instanceof WorkStealingThread) {
+			if (((WorkStealingThread) thread).getTaskQueue().size() > parallelizeThreshold) {
 				return false;
 			} else {
 				return true;
@@ -289,38 +289,38 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		}
 		return true;
 	}
-	
+
 	public final ExecutorService getExecutorService() {
 		synchronized (this) {
-			if ( executorService == null ) {
+			if (executorService == null) {
 				executorService = new ImplicitWorkStealingExecutorService(this);
 			}
 			return executorService;
 		}
 	}
-	
+
 	public DiGraphViz getGraphViz() {
 		return this.digraphviz;
 	}
 
 	@Override
 	public final void addErrorHandler(final ErrorHandler eh) {
-		errorManager.addErrorHandler(eh);		
+		errorManager.addErrorHandler(eh);
 	}
 
 	@Override
 	public final void removeErrorHandler(final ErrorHandler eh) {
 		errorManager.removeErrorHandler(eh);
 	}
-	
+
 	public final ErrorManager getErrorManager() {
 		return errorManager;
 	}
-	
+
 	/* External representation of the Runtime as the ExecutorService interface. */
 	protected final static class ImplicitWorkStealingExecutorService implements ExecutorService {
-		private ImplicitWorkStealingRuntime rt;		
-		
+		private ImplicitWorkStealingRuntime rt;
+
 		public ImplicitWorkStealingExecutorService(ImplicitWorkStealingRuntime rt) {
 			super();
 			this.rt = rt;
@@ -332,59 +332,53 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		}
 
 		@Override
-		public <T> List<Future<T>> invokeAll(
-				Collection<? extends Callable<T>> tasks)
-				throws InterruptedException {
+		public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
 			List<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
-			for ( Callable<T> c : tasks) {
+			for (Callable<T> c : tasks) {
 				futures.add(submit(c));
 			}
 			return futures;
 		}
 
 		@Override
-		public <T> List<Future<T>> invokeAll(
-				Collection<? extends Callable<T>> tasks, long timeout,
-				TimeUnit unit) throws InterruptedException {
+		public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
 			List<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
-			for ( Callable<T> c : tasks) {
+			for (Callable<T> c : tasks) {
 				futures.add(submit(c, timeout, unit));
 			}
 			return futures;
 		}
 
 		@Override
-		public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
-				throws InterruptedException, ExecutionException {
+		public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
 			Exception ex = null;
-			for ( Callable<T> c : tasks) {
+			for (Callable<T> c : tasks) {
 				Future<T> f = submit(c);
-				if ( f.get() == null || (f.get() != null && !(f.get() instanceof Exception ))) {
+				if (f.get() == null || (f.get() != null && !(f.get() instanceof Exception))) {
 					return f.get();
-				} else if ( f.get() != null && f.get() instanceof Exception  ) {
-					ex = (Exception)f.get();
+				} else if (f.get() != null && f.get() instanceof Exception) {
+					ex = (Exception) f.get();
 				}
 			}
 			throw new ExecutionException(ex);
 		}
 
 		@Override
-		public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
-		        throws InterruptedException, ExecutionException, TimeoutException {
+		public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 			final long start = System.nanoTime();
 			final Iterator<?> it = tasks.iterator();
 			Callable<T> current = null;
-			while ( System.nanoTime() < start + unit.toNanos(timeout) ) {
-				if ( current == null && it.hasNext() ) {
+			while (System.nanoTime() < start + unit.toNanos(timeout)) {
+				if (current == null && it.hasNext()) {
 					@SuppressWarnings("unchecked")
-					Callable<T> tmp = (Callable<T>)it.next();
+					Callable<T> tmp = (Callable<T>) it.next();
 					current = tmp;
-				} else if ( !it.hasNext() ) {
+				} else if (!it.hasNext()) {
 					break;
 				}
 				Future<T> f = submit(current);
 				T result = f.get();
-				if ( result != null && !(result instanceof Exception)) {
+				if (result != null && !(result instanceof Exception)) {
 					return result;
 				} else {
 					current = null;
@@ -405,38 +399,38 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 		@Override
 		public void shutdown() {
-			rt.shutdown();			
+			rt.shutdown();
 		}
 
 		@Override
 		public List<Runnable> shutdownNow() {
 			shutdown();
 			@SuppressWarnings("unchecked")
-			List<Runnable> result = (List<Runnable>)Collections.EMPTY_LIST;
+			List<Runnable> result = (List<Runnable>) Collections.EMPTY_LIST;
 			return result;
 		}
 
 		public <T> Future<T> submit(Callable<T> task, long timeout, TimeUnit unit) {
 			@SuppressWarnings("unchecked")
-			final RunnableFutureTask rft = new RunnableFutureTask((Callable<Object>)task);
+			final RunnableFutureTask rft = new RunnableFutureTask((Callable<Object>) task);
 			ImplicitTask aetask = (ImplicitTask) rt.createBlockingTask(rft, NO_HINTS);
 			rft.setTask(aetask);
-			rft.setTimeOut(System.nanoTime()+unit.toNanos(timeout));
+			rft.setTimeOut(System.nanoTime() + unit.toNanos(timeout));
 			rt.schedule(aetask, NO_PARENT, NO_DEPS);
 			@SuppressWarnings("unchecked")
 			Future<T> result = (Future<T>) rft;
 			return result;
 		}
-		
+
 		@Override
 		public <T> Future<T> submit(Callable<T> task) {
 			@SuppressWarnings("unchecked")
-			final RunnableFutureTask rft = new RunnableFutureTask((Callable<Object>)task);
+			final RunnableFutureTask rft = new RunnableFutureTask((Callable<Object>) task);
 			ImplicitTask aetask = (ImplicitTask) rt.createBlockingTask(rft, NO_HINTS);
 			rft.setTask(aetask);
 			rt.schedule(aetask, NO_PARENT, NO_DEPS);
 			@SuppressWarnings("unchecked")
-			Future<T> result = (Future<T>)rft;
+			Future<T> result = (Future<T>) rft;
 			return result;
 		}
 
@@ -449,7 +443,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 					task.run();
 					return null;
 				}
-				
+
 			});
 		}
 
@@ -462,31 +456,31 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 		@Override
 		public void execute(Runnable command) {
-			submit(command);			
+			submit(command);
 		}
-	
-		protected class RunnableFutureTask implements RunnableFuture<Object>, Body{
+
+		protected class RunnableFutureTask implements RunnableFuture<Object>, Body {
 			private final Callable<Object> body;
 			private ImplicitTask task;
 			private boolean cancelled = false;
 			private long timeout = 0;
-			
+
 			RunnableFutureTask(final Callable<Object> body) {
 				super();
 				this.body = body;
 			}
-			
+
 			public void setTask(ImplicitTask task) {
 				this.task = task;
 			}
-			
+
 			public void setTimeOut(long timeout) {
 				this.timeout = timeout;
 			}
-			
+
 			@Override
 			public void run() {
-				throw new Error("Cannot execute the run method.");				
+				throw new Error("Cannot execute the run method.");
 			}
 
 			@Override
@@ -498,26 +492,26 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			@Override
 			public Object get() throws InterruptedException, ExecutionException {
 				Object result = task.getResult();
-				if ( result instanceof Exception ) {
-					throw new ExecutionException((Exception)result);
+				if (result instanceof Exception) {
+					throw new ExecutionException((Exception) result);
 				} else {
 					return result;
 				}
 			}
 
 			@Override
-			public Object get(long timeout, TimeUnit unit) 	throws InterruptedException, ExecutionException, TimeoutException {
+			public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 				final long start = System.nanoTime();
-				while ( System.nanoTime() < start + unit.toNanos(timeout) ) {
-					if ( !task.isCompleted() ) {
+				while (System.nanoTime() < start + unit.toNanos(timeout)) {
+					if (!task.isCompleted()) {
 						// TODO: make step depending
 						Thread.sleep(1);
 					}
 				}
-				if ( task.isCompleted() ) {
-					Object result =  task.getResult();
-					if ( result instanceof Exception ) {
-						throw new ExecutionException((Exception)result);
+				if (task.isCompleted()) {
+					Object result = task.getResult();
+					if (result instanceof Exception) {
+						throw new ExecutionException((Exception) result);
 					} else {
 						return result;
 					}
@@ -538,13 +532,13 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 			@Override
 			public void execute(Runtime rt, Task current) throws Exception {
-				if ( timeout < System.nanoTime() ) {
+				if (timeout < System.nanoTime()) {
 					current.setResult(body.call());
 				} else {
 					cancelled = true;
 				}
 			}
-			
+
 		}
 	}
 
