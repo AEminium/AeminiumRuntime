@@ -19,6 +19,7 @@
 
 package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
+import java.text.DecimalFormat;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,8 +65,10 @@ public final class BlockingWorkStealingScheduler {
 	public int[] numberOfTasksByWorker;
 	public int[] numberOfStealsByWorker;
 	public int[] numberOfNoStealsByWorker;
-	public int[] totalByTypeId = new int[1000];
 	public int[] numberOfTasksByQueue = new int[3];
+	public int MAX_TASK_TYPES = 10000;
+	public int[] totalByTypeId = new int[MAX_TASK_TYPES];
+	public int[] totalDependentsByTypeId = new int[MAX_TASK_TYPES];
 
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt = rt;
@@ -359,6 +362,10 @@ public final class BlockingWorkStealingScheduler {
 		totalByTypeId[typeId]++;
 	}
 
+	public void incrementTotalDependentsByTypeId(int totaldependents, int typeId) {
+		totalDependentsByTypeId[typeId] += totaldependents;
+	}
+
 	public void incrementNumberOfTasksByQueue(String queueName) {
 		// taskQueue
 		if (queueName.compareTo("taskQueue") == 0) {
@@ -374,44 +381,86 @@ public final class BlockingWorkStealingScheduler {
 	}
 
 	private void printStatistics() {
-		System.out.println("TOTAL TASKS PERFORMED BY WORKER:");
+		System.out.println("***************************************STATISTICS BY WORKER******************************");
+		DecimalFormat df = new DecimalFormat("#.##");
+		double totalTasks = 0;
 		for (int i = 0; i < maxParallelism; i++)
-			System.out.print("workerId" + i + ": " + numberOfTasksByWorker[i] + " | ");
+			totalTasks += numberOfTasksByWorker[i];
+		System.out.println("TOTAL TASKS PERFORMED BY WORKER: " + totalTasks);
+		for (int i = 0; i < maxParallelism; i++)
+			System.out.print("workerId" + i + ": " + numberOfTasksByWorker[i] + "(" + df.format((numberOfTasksByWorker[i] / totalTasks) * 100) + "%) | ");
+		System.out.println();
+		// *********
+		totalTasks = 0;
+		for (int i = 0; i < maxParallelism; i++)
+			totalTasks += numberOfStealsByWorker[i];
+		System.out.println("TOTAL STEALS PERFORMED BY WORKER: " + totalTasks);
+		for (int i = 0; i < maxParallelism; i++)
+			System.out.print("workerId" + i + ": " + numberOfStealsByWorker[i] + "(" + df.format((numberOfStealsByWorker[i] / totalTasks) * 100) + "%) | ");
+		System.out.println();
+		// **********
+		totalTasks = 0;
+		for (int i = 0; i < maxParallelism; i++)
+			totalTasks += numberOfNoStealsByWorker[i];
+		System.out.println("TOTAL OF NO STEALS PERFORMED BY WORKER: " + totalTasks);
+		for (int i = 0; i < maxParallelism; i++)
+			System.out.print("workerId" + i + ": " + numberOfNoStealsByWorker[i] + "(" + df.format((numberOfNoStealsByWorker[i] / totalTasks) * 100) + "%) | ");
 		System.out.println();
 
-		System.out.println("TOTAL STEALS PERFORMED BY WORKER:");
-		for (int i = 0; i < maxParallelism; i++)
-			System.out.print("workerId" + i + ": " + numberOfStealsByWorker[i] + " | ");
-		System.out.println();
-
-		System.out.println("TOTAL OF NO STEALS PERFORMED BY WORKER:");
-		for (int i = 0; i < maxParallelism; i++)
-			System.out.print("workerId" + i + ": " + numberOfNoStealsByWorker[i] + " | ");
-		System.out.println();
-
-		System.out.println("TOTAL OF TASKS BY TYPE:");
-		for (int i = 0; i < 1000; i++) {
+		// **********
+		System.out.println("***************************************STATISTICS BY TASK TYPE***************************");
+		totalTasks = 0;
+		for (int i = 0; i < MAX_TASK_TYPES; i++) {
 			if (totalByTypeId[i] > 0) {
-				System.out.print("typeId" + i + ": " + totalByTypeId[i] + " | ");
+				totalTasks += totalByTypeId[i];
+			}
+		}
+		System.out.println("TOTAL OF TASKS BY TYPE: " + totalTasks);
+		for (int i = 0; i < MAX_TASK_TYPES; i++) {
+			if (totalByTypeId[i] > 0) {
+				System.out.print("typeId" + i + ": " + totalByTypeId[i] + "(" + df.format((totalByTypeId[i] / totalTasks) * 100) + "%) | ");
 			}
 		}
 		System.out.println();
 
-		System.out.println("TOTAL OF TASKS BY QUEUE:");
-		System.out.print("taskQueue: " + numberOfTasksByQueue[0] + " | " + "stealQueue: " + numberOfTasksByQueue[1] + " | " + "executed: " + numberOfTasksByQueue[2]);
+		// **********
+		totalTasks = 0;
+		for (int i = 0; i < MAX_TASK_TYPES; i++) {
+			if (totalDependentsByTypeId[i] > 0) {
+				totalTasks += totalDependentsByTypeId[i];
+			}
+		}
+		System.out.println("TOTAL OF DEPENDENTS BY TASKS TYPE: " + totalTasks);
+		for (int i = 0; i < MAX_TASK_TYPES; i++) {
+			if (totalDependentsByTypeId[i] > 0) {
+				System.out.print("typeId" + i + ": " + totalDependentsByTypeId[i] + "(" + df.format((totalDependentsByTypeId[i] / totalTasks) * 100) + "%) | ");
+			}
+		}
+		System.out.println();
 
+		// **********
+		System.out.println("***************************************STATISTICS BY QUEUE TYPE***************************");
+		totalTasks = numberOfTasksByQueue[0] + numberOfTasksByQueue[1] + numberOfTasksByQueue[2];
+		System.out.println("TOTAL OF TASKS BY QUEUE: " + totalTasks);
+		System.out.print("taskQueue: " + numberOfTasksByQueue[0] + " | " + "stealQueue: " + numberOfTasksByQueue[1] + " | " + "executed: " + numberOfTasksByQueue[2]);
 		System.out.println();
 
 	}
 
 	// Set the values to the statistics
 	public void setStatistics(ImplicitTask task, int workerId, String queueName) {
-		task.setWorkerId(workerId);
-		task.setQueueName(queueName);
-		rt.scheduler.incrementNumberOfTasksByWorker(workerId);
-		rt.scheduler.incrementNumberOfNoStealsByWorker(workerId);
-		rt.scheduler.incrementTotalByTypeId(task.typeId);
-		rt.scheduler.incrementNumberOfTasksByQueue(queueName);
+		synchronized (this) {
+			task.setWorkerId(workerId);
+			task.setQueueName(queueName);
+			incrementNumberOfTasksByWorker(workerId);
+			if (queueName.compareTo("taskQueue") == 0)
+				incrementNumberOfNoStealsByWorker(workerId);
+			else if (queueName.compareTo("executed") == 0)
+				incrementNumberOfNoStealsByWorker(workerId);
+			else if (queueName.compareTo("stealQueue") == 0)
+				incrementNumberOfStealsByWorker(workerId);
+			incrementTotalByTypeId(task.typeId);
+			incrementNumberOfTasksByQueue(queueName);
+		}
 	}
-
 }
