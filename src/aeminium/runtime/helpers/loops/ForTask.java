@@ -44,5 +44,39 @@ public class ForTask {
 			
 		}, Runtime.NO_HINTS);
 	}
+	
+public static Task createFor(Runtime rt, final Range range, final ForBody<Long> forBody) {
+		return rt.createNonBlockingTask(new Body() {
+
+			@Override
+			public void execute(Runtime rt, Task current) throws Exception {
+				long fullSize = (range.getEnd() - range.getStart()) / range.getIncrement();
+				if (fullSize > PARALLELISM_SIZE) {
+					long blockSize = fullSize/PARALLELISM_SIZE;
+					for (long i = 0; i < PARALLELISM_SIZE; i += 1 ) {
+						final long blockStart = i * blockSize * range.getIncrement();
+						final long blockEnd = (i + 1) * blockSize * range.getIncrement();
+						Task iterationBulk = rt.createNonBlockingTask(new Body() {
+							@Override
+							public void execute(Runtime rt, Task current)
+									throws Exception {
+								for (long s = blockStart; s < blockEnd; s+=range.getIncrement()) {
+									forBody.iterate(s);
+								}
+							}
+							
+						}, Runtime.NO_HINTS);
+						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
+					}
+				} else {
+					for (long i = range.getStart(); i < range.getEnd(); i+=range.getIncrement()) {
+						forBody.iterate(i);
+					}
+				}
+			}
+			
+		}, Runtime.NO_HINTS);
+	}
+
 
 }

@@ -1,5 +1,5 @@
 package aeminium.runtime.helpers.loops;
 
-public interface ForBody<T> {
-	public void iterate(T o);
+public abstract class ForBody<T> {
+	public abstract void iterate(T o);
 }
