@@ -20,6 +20,7 @@
 package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,6 +70,8 @@ public final class BlockingWorkStealingScheduler {
 	public int MAX_TASK_TYPES = 10000;
 	public int[] totalByTypeId = new int[MAX_TASK_TYPES];
 	public int[] totalDependentsByTypeId = new int[MAX_TASK_TYPES];
+	public ArrayList[] workerTaskId;
+	public ArrayList[] workerTaskTypeId;
 
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt = rt;
@@ -77,6 +80,12 @@ public final class BlockingWorkStealingScheduler {
 		numberOfTasksByWorker = new int[maxParallelism];
 		numberOfStealsByWorker = new int[maxParallelism];
 		numberOfNoStealsByWorker = new int[maxParallelism];
+		workerTaskId = new ArrayList[maxParallelism];
+		for (int i = 0; i < maxParallelism; i++)
+			workerTaskId[i] = new ArrayList<String>();
+		workerTaskTypeId = new ArrayList[maxParallelism];
+		for (int i = 0; i < maxParallelism; i++)
+			workerTaskTypeId[i] = new ArrayList<String>();
 	}
 
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt, int maxParallelism) {
@@ -346,8 +355,16 @@ public final class BlockingWorkStealingScheduler {
 		numberOfTasks++;
 	}
 
-	public void incrementNumberOfTasksByWorker(int index) {
-		numberOfTasksByWorker[index]++;
+	public void incrementNumberOfTasksByWorker(int workerId) {
+		numberOfTasksByWorker[workerId]++;
+	}
+
+	public void addTaskIdToWorker(int taskId, int workerId) {
+		workerTaskId[workerId].add(taskId);
+	}
+
+	public void addTaskTypeIdToWorker(int taskTypeId, int workerId) {
+		workerTaskTypeId[workerId].add(taskTypeId);
 	}
 
 	public void incrementNumberOfStealsByWorker(int index) {
@@ -362,8 +379,11 @@ public final class BlockingWorkStealingScheduler {
 		totalByTypeId[typeId]++;
 	}
 
-	public void incrementTotalDependentsByTypeId(int totaldependents, int typeId) {
-		totalDependentsByTypeId[typeId] += totaldependents;
+	public void incrementTotalDependentsByTypeId(ImplicitTask task) {
+		synchronized (this) {
+			totalDependentsByTypeId[task.typeId] += task.totalDependents;
+		}
+
 	}
 
 	public void incrementNumberOfTasksByQueue(String queueName) {
@@ -406,6 +426,24 @@ public final class BlockingWorkStealingScheduler {
 		for (int i = 0; i < maxParallelism; i++)
 			System.out.print("workerId" + i + ": " + numberOfNoStealsByWorker[i] + "(" + df.format((numberOfNoStealsByWorker[i] / totalTasks) * 100) + "%) | ");
 		System.out.println();
+		// **********
+		System.out.println("TASK ID SEQUENCE BY WORKER: ");
+		for (int w = 0; w < maxParallelism; w++) {
+			System.out.print("workerId" + w + ": ");
+			for (int i = 0; i < workerTaskId[w].size(); i++) {
+				System.out.print(workerTaskId[w].get(i) + ",");
+			}
+			System.out.println();
+		}
+		// **********
+		System.out.println("TASK TYPE ID SEQUENCE BY WORKER: ");
+		for (int w = 0; w < maxParallelism; w++) {
+			System.out.print("workerId" + w + ": ");
+			for (int i = 0; i < workerTaskTypeId[w].size(); i++) {
+				System.out.print(workerTaskTypeId[w].get(i) + ",");
+			}
+			System.out.println();
+		}
 
 		// **********
 		System.out.println("***************************************STATISTICS BY TASK TYPE***************************");
@@ -444,6 +482,7 @@ public final class BlockingWorkStealingScheduler {
 		System.out.println("TOTAL OF TASKS BY QUEUE: " + totalTasks);
 		System.out.print("taskQueue: " + numberOfTasksByQueue[0] + " | " + "stealQueue: " + numberOfTasksByQueue[1] + " | " + "executed: " + numberOfTasksByQueue[2]);
 		System.out.println();
+		System.out.println("*******************************************************************************************");
 
 	}
 
@@ -453,6 +492,8 @@ public final class BlockingWorkStealingScheduler {
 			task.setWorkerId(workerId);
 			task.setQueueName(queueName);
 			incrementNumberOfTasksByWorker(workerId);
+			addTaskIdToWorker(task.id, workerId);
+			addTaskTypeIdToWorker(task.typeId, workerId);
 			if (queueName.compareTo("taskQueue") == 0)
 				incrementNumberOfNoStealsByWorker(workerId);
 			else if (queueName.compareTo("executed") == 0)

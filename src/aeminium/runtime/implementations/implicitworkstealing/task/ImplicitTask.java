@@ -91,7 +91,11 @@ public abstract class ImplicitTask implements Task {
 			setResult(e);
 		} finally {
 			taskFinished(rt);
-			rt.scheduler.incrementTotalDependentsByTypeId(this.totalDependents,this.typeId);
+			// dependents statistics
+			synchronized (this) {
+				rt.scheduler.incrementTotalDependentsByTypeId(this);
+			}
+
 		}
 	}
 
@@ -150,6 +154,7 @@ public abstract class ImplicitTask implements Task {
 			this.dependents.add(task);
 			// increment number of dependents
 			totalDependents++;
+
 			// System.err.println("Added " + task.id + " to dependents of " +
 			// this.id);
 			return 1;
@@ -244,7 +249,7 @@ public abstract class ImplicitTask implements Task {
 		} while (task != null);
 
 		// print statistics when task completed
-		System.out.println(this.statisticsToString());
+		// System.out.println(this.statisticsToString());
 	}
 
 	public final boolean isCompleted() {
