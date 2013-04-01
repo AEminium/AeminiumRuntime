@@ -69,10 +69,10 @@ public class ForExample {
 		
 		rt.init();
 		
-		Task t = ForTask.createFor(rt, new Range(0, 100, 1), new ForBody<Long>() {
+		Task t = ForTask.createFor(rt, new Range(0, 100, 1), new ForBody<Integer>() {
 
 			@Override
-			public void iterate(Long i) {
+			public void iterate(Integer i) {
 				System.out.println("Bye " + i);
 			}
 			

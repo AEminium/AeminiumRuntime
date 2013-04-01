@@ -2,31 +2,31 @@ package aeminium.runtime.helpers.loops;
 
 import java.util.Iterator;
 
-public class Range implements Iterable<Integer> {
+public class LongRange implements Iterable<Long> {
 
-	public int start = 0;
-	public int end = 0;
-	public int increment = 0;
+	public long start = 0;
+	public long end = 0;
+	public long increment = 0;
 	
-	public Range(int darts) {
+	public LongRange(long darts) {
 		this(0, darts, 1);
 	}
 	
-	public Range(int min, int max) {
+	public LongRange(long min, long max) {
 		this(min, max, 1);
 	}
 	
-	public Range(int min, int max, int inc) {
+	public LongRange(long min, long max, long inc) {
 		this.start = min;
 		this.end = max-1;
 		this.increment = inc;
 	}
 	
 	@Override
-	public Iterator<Integer> iterator() {
-		return new Iterator<Integer>() {
+	public Iterator<Long> iterator() {
+		return new Iterator<Long>() {
 			
-			private int c = start;
+			private long c = start;
 
 			@Override
 			public boolean hasNext() {
@@ -34,7 +34,7 @@ public class Range implements Iterable<Integer> {
 			}
 
 			@Override
-			public Integer next() {
+			public Long next() {
 				c += increment;
 				return c;
 			}
@@ -48,15 +48,15 @@ public class Range implements Iterable<Integer> {
 	}
 	
 
-	public int getStart() {
+	public long getStart() {
 		return start;
 	}
 
-	public int getEnd() {
+	public long getEnd() {
 		return end;
 	}
 
-	public int getIncrement() {
+	public long getIncrement() {
 		return increment;
 	}
 
