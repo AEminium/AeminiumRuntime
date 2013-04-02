@@ -185,8 +185,10 @@ public class ImplicitGraph {
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
 				for ( Task t : deps) {
-					ImplicitTask it = (ImplicitTask)t;
-					count += it.addDependent(itask);						
+					if (t!= null) {
+						ImplicitTask it = (ImplicitTask)t;
+						count += it.addDependent(itask);
+					}
 				}
 				itask.depCount = count;
 				if ( itask.depCount == 0 ) {
