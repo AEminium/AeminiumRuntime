@@ -8,8 +8,8 @@ public class Range implements Iterable<Integer> {
 	public int end = 0;
 	public int increment = 0;
 	
-	public Range(int max) {
-		this(0, max, 1);
+	public Range(int darts) {
+		this(0, darts, 1);
 	}
 	
 	public Range(int min, int max) {
@@ -18,7 +18,7 @@ public class Range implements Iterable<Integer> {
 	
 	public Range(int min, int max, int inc) {
 		this.start = min;
-		this.end = max;
+		this.end = max-1;
 		this.increment = inc;
 	}
 	
@@ -46,5 +46,19 @@ public class Range implements Iterable<Integer> {
 			
 		};
 	}
+	
+
+	public int getStart() {
+		return start;
+	}
+
+	public int getEnd() {
+		return end;
+	}
+
+	public int getIncrement() {
+		return increment;
+	}
+
 	
 }
