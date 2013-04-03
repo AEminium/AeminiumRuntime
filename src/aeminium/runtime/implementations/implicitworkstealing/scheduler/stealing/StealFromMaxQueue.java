@@ -66,6 +66,9 @@ public class StealFromMaxQueue implements WorkStealingAlgorithm {
 		if ( submissionQueue != null && !submissionQueue.isEmpty() ) {
 			ImplicitTask task = submissionQueue.poll();
 			if ( task != null ) {
+				//statistics
+				task.stealedFromSubmissionQueue=true;
+				//********
 				return task;
 			}
 		}

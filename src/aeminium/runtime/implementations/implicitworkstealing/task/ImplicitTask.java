@@ -66,10 +66,12 @@ public abstract class ImplicitTask implements Task {
 	public int id;
 
 	/* Statistics */
-	public int typeId;
-	public int totalDependents = 0;
-	public long workerId;
+	public int typeId = -1;
+	public long workerId = -1;
 	public String queueName;
+	public boolean stealedFromSubmissionQueue = false;
+	public ArrayList<String> totalDependentsId = new ArrayList<String>();
+	public ArrayList<String> totalDependentsTypeId = new ArrayList<String>();
 
 	public ImplicitTask(Body body, short hints, boolean enableProfiler) {
 		this.body = body;
@@ -92,9 +94,7 @@ public abstract class ImplicitTask implements Task {
 		} finally {
 			taskFinished(rt);
 			// dependents statistics
-			synchronized (this) {
-				rt.scheduler.incrementTotalDependentsByTypeId(this);
-			}
+			rt.scheduler.incrementTotalDependentsByTypeId(typeId, totalDependentsId, totalDependentsTypeId);
 
 		}
 	}
@@ -153,10 +153,10 @@ public abstract class ImplicitTask implements Task {
 
 			this.dependents.add(task);
 			// increment number of dependents
-			totalDependents++;
+			this.totalDependentsId.add(String.valueOf(task.id));
+			this.totalDependentsTypeId.add(String.valueOf(task.typeId));
 
-			// System.err.println("Added " + task.id + " to dependents of " +
-			// this.id);
+			System.err.println("Added " + task.id + " to dependents of " + this.id);
 			return 1;
 		}
 	}
@@ -358,7 +358,7 @@ public abstract class ImplicitTask implements Task {
 
 	public String statisticsToString() {
 		return "[task id:" + this.id + ",task type:" + this.typeId + ",worker id:" + this.workerId + ",queue:" + this.queueName + ",children:" + childCount + ", total of dependents:"
-				+ totalDependents + ", state:" + state + "]";
+				+ totalDependentsId.size() + ", state:" + state + "]";
 	}
 
 }
