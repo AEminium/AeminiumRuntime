@@ -18,7 +18,7 @@ public class Range implements Iterable<Integer> {
 	
 	public Range(int min, int max, int inc) {
 		this.start = min;
-		this.end = max-1;
+		this.end = max;
 		this.increment = inc;
 	}
 	

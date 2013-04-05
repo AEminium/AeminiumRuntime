@@ -18,7 +18,7 @@ public class LongRange implements Iterable<Long> {
 	
 	public LongRange(long min, long max, long inc) {
 		this.start = min;
-		this.end = max-1;
+		this.end = max;
 		this.increment = inc;
 	}
 	

@@ -101,12 +101,11 @@ public class ForTask {
 				if (fullSize > PARALLELISM_SIZE) {
 					int blocks = PARALLELISM_SIZE;
 					int blockSize = fullSize / PARALLELISM_SIZE;
-					if (fullSize % PARALLELISM_SIZE != 0) blocks++;
 					for (int i = 0; i < blocks; i += 1) {
 						final int blockStart = i * blockSize
 								* range.getIncrement();
-						final int blockEnd = (i + 1) * blockSize
-								* range.getIncrement();
+						final int blockEnd = (i < blocks-1) ? ((i + 1) * blockSize
+								* range.getIncrement()) : range.getEnd();
 						Task iterationBulk = rt.createNonBlockingTask(
 								new Body() {
 									@Override
@@ -144,12 +143,11 @@ public class ForTask {
 				if (fullSize > PARALLELISM_SIZE) {
 					int blocks = PARALLELISM_SIZE;
 					float blockSize = fullSize / PARALLELISM_SIZE;
-					if (fullSize % PARALLELISM_SIZE != 0) blocks++;
 					for (int i = 0; i < blocks; i += 1) {
 						final float blockStart = i * blockSize
 								* range.getIncrement();
-						final float blockEnd = (i + 1) * blockSize
-								* range.getIncrement();
+						final float blockEnd = (i < blocks-1) ? ((i + 1) * blockSize
+								* range.getIncrement()) : range.getEnd();
 						Task iterationBulk = rt.createNonBlockingTask(
 								new Body() {
 									@Override
@@ -186,12 +184,11 @@ public class ForTask {
 				if (fullSize > PARALLELISM_SIZE) {
 					int blocks = PARALLELISM_SIZE;
 					double blockSize = fullSize / PARALLELISM_SIZE;
-					if (fullSize % PARALLELISM_SIZE != 0) blocks++;
 					for (int i = 0; i < blocks; i += 1) {
 						final double blockStart = i * blockSize
 								* range.getIncrement();
-						final double blockEnd = (i + 1) * blockSize
-								* range.getIncrement();
+						final double blockEnd = (i < blocks-1) ? ((i + 1) * blockSize
+								* range.getIncrement()) : range.getEnd();
 						Task iterationBulk = rt.createNonBlockingTask(
 								new Body() {
 									@Override

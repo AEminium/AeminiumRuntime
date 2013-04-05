@@ -18,7 +18,7 @@ public class DoubleRange implements Iterable<Double> {
 	
 	public DoubleRange(double min, double max, double inc) {
 		this.start = min;
-		this.end = max-1;
+		this.end = max;
 		this.increment = inc;
 	}
 	
