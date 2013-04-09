@@ -45,7 +45,7 @@ public class ForExample {
 		Task t = ForTask.createFor(rt, stringz, new ForBody<String>() {
 
 			@Override
-			public void iterate(String o) {
+			public void iterate(String o, Runtime rt, Task current) {
 				System.out.println(o.toUpperCase());
 			}
 			
@@ -72,7 +72,7 @@ public class ForExample {
 		Task t = ForTask.createFor(rt, new Range(0, 100, 1), new ForBody<Integer>() {
 
 			@Override
-			public void iterate(Integer i) {
+			public void iterate(Integer i, Runtime rt, Task current) {
 				System.out.println("Bye " + i);
 			}
 			

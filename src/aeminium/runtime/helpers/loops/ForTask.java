@@ -36,7 +36,7 @@ public class ForTask {
 						public void execute(Runtime rt, Task current)
 								throws Exception {
 							for (T obj : iterationSet) {
-								forBody.iterate(obj);
+								forBody.iterate(obj, rt, current);
 							}
 						}
 
@@ -72,7 +72,7 @@ public class ForTask {
 											throws Exception {
 										for (long s = blockStart; s < blockEnd && s < range.getEnd(); s += range
 												.getIncrement()) {
-											forBody.iterate(s);
+											forBody.iterate(s, rt, current);
 										}
 									}
 
@@ -82,7 +82,7 @@ public class ForTask {
 				} else {
 					for (long i = range.getStart(); i < range.getEnd(); i += range
 							.getIncrement()) {
-						forBody.iterate(i);
+						forBody.iterate(i, rt, current);
 					}
 				}
 			}
@@ -113,7 +113,7 @@ public class ForTask {
 											throws Exception {
 										for (int s = blockStart; s < blockEnd && s < range.getEnd(); s += range
 												.getIncrement()) {
-											forBody.iterate(s);
+											forBody.iterate(s, rt, current);
 										}
 									}
 
@@ -123,7 +123,7 @@ public class ForTask {
 				} else {
 					for (int i = range.getStart(); i < range.getEnd(); i += range
 							.getIncrement()) {
-						forBody.iterate(i);
+						forBody.iterate(i, rt, current);
 					}
 				}
 			}
@@ -155,7 +155,7 @@ public class ForTask {
 											throws Exception {
 										for (float s = blockStart; s < blockEnd && s < range.getEnd(); s += range
 												.getIncrement()) {
-											forBody.iterate(s);
+											forBody.iterate(s, rt, current);
 										}
 									}
 
@@ -165,7 +165,7 @@ public class ForTask {
 				} else {
 					for (float i = range.getStart(); i < range.getEnd(); i += range
 							.getIncrement()) {
-						forBody.iterate(i);
+						forBody.iterate(i, rt, current);
 					}
 				}
 			}
@@ -196,7 +196,7 @@ public class ForTask {
 											throws Exception {
 										for (double s = blockStart; s < blockEnd && s < range.getEnd(); s += range
 												.getIncrement()) {
-											forBody.iterate(s);
+											forBody.iterate(s, rt, current);
 										}
 									}
 
@@ -206,7 +206,7 @@ public class ForTask {
 				} else {
 					for (double i = range.getStart(); i < range.getEnd(); i += range
 							.getIncrement()) {
-						forBody.iterate(i);
+						forBody.iterate(i, rt, current);
 					}
 				}
 			}
