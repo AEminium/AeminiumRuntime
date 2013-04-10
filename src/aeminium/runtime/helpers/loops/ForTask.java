@@ -48,7 +48,7 @@ public class ForTask {
 		}, Runtime.NO_HINTS);
 	}
 
-	public static <T> Task createFor(Runtime rt, final ArrayList<T> collection,
+	public static <T> Task createFor(Runtime rt, final List<T> collection,
 			final ForBody<T> forBody) {
 		return rt.createNonBlockingTask(new Body() {
 
