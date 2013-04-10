@@ -6,16 +6,16 @@ import java.util.List;
 import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
+import aeminium.runtime.implementations.Configuration;
 
 public class ForTask {
 
-	public static int PARALLELISM_SIZE = 32;
+	public static int PARALLELISM_SIZE = Configuration.getProperty(ForTask.class, "ForParallelismSize", 64);
 
 	public static <T> Task createFor(Runtime rt, final Iterable<T> collection,
 			final ForBody<T> forBody) {
 
 		return rt.createNonBlockingTask(new Body() {
-
 			@Override
 			public void execute(Runtime rt, Task current) throws Exception {
 				// Initial Copy
