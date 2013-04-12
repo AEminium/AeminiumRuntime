@@ -94,7 +94,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		return buffer.get(base);
 	}
 
-	public final void push(E e) {
+	public final synchronized void push(E e) {
 		if ( isFull() ) {
 			growQueue();
 		}
@@ -102,7 +102,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		sp = ((length+sp+1)%length);
 	}
 	
-	public final E pop() {
+	public final synchronized E pop() {
 		int newSp = (length+sp-1)%length;
 		E result = buffer.get(newSp);
 		if ( result != null ) {

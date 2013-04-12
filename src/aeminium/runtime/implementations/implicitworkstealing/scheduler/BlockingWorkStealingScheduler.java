@@ -21,6 +21,7 @@ package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,12 +63,14 @@ public final class BlockingWorkStealingScheduler {
 	protected AeminiumProfiler profiler;
 
 	/**************** Statistics******** */
-	public int numberOfTasks = 0;
+
 	public int[] numberOfTasksByWorker;
 	public int[] numberOfStealsByWorker;
 	public int[] numberOfNoStealsByWorker;
 	public int[] numberOfStealedTasksInWorker;
 	public int[] numberOfTasksByQueue = new int[3];
+	public int[] numberOfTaskInsertedByWorkerQueue;
+	public int[] numberOfTaskInWorkerQueue;
 	public int numberOfStealedTasksInSubmissionQueue = 0;
 	public int MAX_TASK_TYPES = 10000;
 	public int[] totalByTypeId = new int[MAX_TASK_TYPES];
@@ -75,6 +78,9 @@ public final class BlockingWorkStealingScheduler {
 	public ArrayList[] workerTaskTypeId;
 	public ArrayList[] taskIdDependentsByTypeId;
 	public ArrayList[] taskTypeIdDependentsByTypeId;
+	public long totalTimestampWaitingInQueue=0;
+
+	public int positionThread = 0;
 
 	public BlockingWorkStealingScheduler(ImplicitWorkStealingRuntime rt) {
 		this.rt = rt;
@@ -83,6 +89,8 @@ public final class BlockingWorkStealingScheduler {
 		numberOfTasksByWorker = new int[maxParallelism];
 		numberOfStealsByWorker = new int[maxParallelism];
 		numberOfNoStealsByWorker = new int[maxParallelism];
+		numberOfTaskInsertedByWorkerQueue = new int[maxParallelism];
+		numberOfTaskInWorkerQueue = new int[maxParallelism];
 		workerTaskId = new ArrayList[maxParallelism];
 		for (int i = 0; i < maxParallelism; i++)
 			workerTaskId[i] = new ArrayList<String>();
@@ -191,20 +199,31 @@ public final class BlockingWorkStealingScheduler {
 			blockingThreadPool.submitTask((ImplicitBlockingTask) task);
 			return;
 		}
+		
+		task.timestampEnterQueue = new Date().getTime();
+
+		
 		if (maxQueueLength > 0) {
 			Thread thread = Thread.currentThread();
 			if (thread instanceof WorkStealingThread) {
 				WorkStealingThread wthread = (WorkStealingThread) thread;
 				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
+
 				if (taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0) {
+					// statistics (increment the total tasks inserted in worker
+					// queue)
+					rt.scheduler.incrementTotalTasksInsertedInWorker(wthread.index);
+
 					taskQueue.push(task);
 					if (taskQueue.size() <= 1) {
 						signalWork();
 					}
 				} else {
-					// statistics
+					// statistics (increment the total tasks inserted in worker
+					// queue)
+					rt.scheduler.incrementTotalTasksInsertedInWorker(wthread.index);
+					// statistics (called when task.invoke)
 					rt.scheduler.setStatistics(task, wthread.index, "executed");
-					// **********
 
 					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
@@ -224,18 +243,49 @@ public final class BlockingWorkStealingScheduler {
 				signalWork();
 			}
 		} else {
-			Thread thread = Thread.currentThread();
+			//Thread thread = Thread.currentThread();
+			
+			Thread thread =null;
+			int i; 
+			for (i = 0; i < maxParallelism; i++) {
+				if (numberOfTaskInWorkerQueue[i] < 1) {
+					thread = threads[i];
+					break;
+				}
+			}
+			if(thread==null){
+				thread=Thread.currentThread();
+			}
+
+			
+			
+			/*
+			Thread thread = parkedThreads.poll();
+			if(thread==null){
+				thread=Thread.currentThread();
+			}
+			*/
+
 			if (thread instanceof WorkStealingThread) {
+				
 				// worker thread
 				WorkStealingThread wthread = (WorkStealingThread) thread;
+				
+				//
+				numberOfTaskInWorkerQueue[wthread.index]++;
+				task.workerQueueId = wthread.index;
+				
 				if (oneTaskPerLevel) {
 					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
 					if (head != null && head.level == task.level && wthread.remainingRecursionDepth > 0) {
 						// statistics
 						rt.scheduler.setStatistics(task, wthread.index, "executed");
-						// **********
 
+						// statistics (increment the total tasks inserted in
+						// worker queue)
+						rt.scheduler.incrementTotalTasksInsertedInWorker(wthread.index);
+						// **********
 						wthread.remainingRecursionDepth--;
 						task.invoke(rt);
 						wthread.remainingRecursionDepth++;
@@ -250,16 +300,29 @@ public final class BlockingWorkStealingScheduler {
 						}
 
 					} else {
+						// statistics (increment the total tasks inserted in
+						// worker queue)
+						rt.scheduler.incrementTotalTasksInsertedInWorker(wthread.index);
+						// ***********
+
 						taskQueue.push(task);
 						if (taskQueue.size() <= 1) {
-							signalWork(wthread);
+							signalWork();
 						}
 					}
 				} else {
+
+					// statistics (increment the total tasks inserted in
+					// worker
+					// queue)
+					rt.scheduler.incrementTotalTasksInsertedInWorker(wthread.index);
+					// ***********
+
 					wthread.getTaskQueue().push(task);
 					if (wthread.getTaskQueue().size() <= 1) {
 						signalWork(wthread);
 					}
+
 				}
 			} else {
 				// external thread
@@ -360,53 +423,56 @@ public final class BlockingWorkStealingScheduler {
 	}
 
 	/*********** Statistics ************/
-	public void incrementNumberOfTasks() {
-		numberOfTasks++;
-	}
 
-	public void incrementNumberOfTasksByWorker(int workerId) {
+	private void incrementNumberOfTasksByWorker(int workerId) {
 		numberOfTasksByWorker[workerId]++;
 	}
 
-	public void addTaskIdToWorker(int taskId, int workerId) {
+	private void addTaskIdToWorker(int taskId, int workerId) {
 		workerTaskId[workerId].add(taskId);
 	}
 
-	public void addTaskTypeIdToWorker(int taskTypeId, int workerId) {
+	private void addTaskTypeIdToWorker(int taskTypeId, int workerId) {
 		workerTaskTypeId[workerId].add(taskTypeId);
 	}
 
-	public void incrementNumberOfStealsByWorker(int index) {
+	private void incrementNumberOfStealsByWorker(int index) {
 		numberOfStealsByWorker[index]++;
 	}
 
-	public void incrementNumberOfStealedTasksInWorker(int index) {
+	private void incrementNumberOfStealedTasksInWorker(int index) {
 		numberOfStealedTasksInWorker[index]++;
 	}
 
-	public void incrementNumberOfStealedTasksInSubmissionQueue() {
+	private void incrementNumberOfStealedTasksInSubmissionQueue() {
 		numberOfStealedTasksInSubmissionQueue++;
 	}
 
-	public void incrementNumberOfNoStealsByWorker(int index) {
+	private void incrementNumberOfNoStealsByWorker(int index) {
 		numberOfNoStealsByWorker[index]++;
 	}
 
-	public void incrementTotalByTypeId(int typeId) {
-		totalByTypeId[typeId]++;
+	private void incrementTotalByTypeId(int typeId) {
+		if (typeId >= 0)
+			totalByTypeId[typeId]++;
+		else
+			System.out.println("typeId Invalid");
 	}
 
 	public void incrementTotalDependentsByTypeId(int typeId, ArrayList<String> dependentsId, ArrayList<String> dependentsTypeId) {
-		synchronized (this) {
-			for (int i = 0; i < dependentsId.size(); i++)
-				taskIdDependentsByTypeId[typeId].add(dependentsId.get(i));
-			for (int i = 0; i < dependentsTypeId.size(); i++)
-				taskTypeIdDependentsByTypeId[typeId].add(dependentsTypeId.get(i));
+		if (typeId >= 0) {
+			synchronized (this) {
+				for (int i = 0; i < dependentsId.size(); i++)
+					taskIdDependentsByTypeId[typeId].add(dependentsId.get(i));
+				for (int i = 0; i < dependentsTypeId.size(); i++)
+					taskTypeIdDependentsByTypeId[typeId].add(dependentsTypeId.get(i));
+			}
+		} else {
+			System.out.println("typeId Invalid");
 		}
-
 	}
 
-	public void incrementNumberOfTasksByQueue(String queueName) {
+	private void incrementNumberOfTasksByQueue(String queueName) {
 		// taskQueue
 		if (queueName.compareTo("taskQueue") == 0) {
 			numberOfTasksByQueue[0]++;
@@ -417,10 +483,9 @@ public final class BlockingWorkStealingScheduler {
 		} else if (queueName.compareTo("executed") == 0) {
 			numberOfTasksByQueue[2]++;
 		}
-
 	}
 
-	private void printStatistics() {
+	public void printStatistics() {
 		System.out.println("***************************************STATISTICS BY WORKER******************************");
 		DecimalFormat df = new DecimalFormat("#.##");
 		double totalTasks = 0;
@@ -464,7 +529,14 @@ public final class BlockingWorkStealingScheduler {
 			}
 			System.out.println();
 		}
-
+		// **********
+		totalTasks = 0;
+		for (int i = 0; i < maxParallelism; i++)
+			totalTasks += numberOfTaskInsertedByWorkerQueue[i];
+		System.out.println("TOTAL OF TASKS INSERTED BY WORKER QUEUE: " + totalTasks);
+		for (int w = 0; w < maxParallelism; w++) {
+			System.out.println("workerId" + w + ": " + numberOfTaskInsertedByWorkerQueue[w] + "(" + df.format((numberOfTaskInsertedByWorkerQueue[w] / totalTasks) * 100) + "%)");
+		}
 		// **********
 		System.out.println("***************************************STATISTICS BY TASK TYPE***************************");
 		totalTasks = 0;
@@ -525,6 +597,15 @@ public final class BlockingWorkStealingScheduler {
 		System.out.println("TOTAL OF TASKS STEALED IN: ");
 		System.out.print("SubmissionQueue: " + numberOfStealedTasksInSubmissionQueue);
 		System.out.println();
+		// **********
+		totalTasks = 0;
+		for (int i = 0; i < maxParallelism; i++)
+			totalTasks += numberOfTasksByWorker[i];
+		System.out.println("***************************************STATISTICS BY TASK TIME*****************");
+		System.out.println("TOTAL OF TIME TASKS WAIT IN QUEUE: "+totalTimestampWaitingInQueue);
+		System.out.print("SubmissionQueue: " + numberOfStealedTasksInSubmissionQueue);
+		System.out.println();
+		
 
 	}
 
@@ -550,4 +631,18 @@ public final class BlockingWorkStealingScheduler {
 			incrementNumberOfTasksByQueue(queueName);
 		}
 	}
+
+	public void incrementTotalTasksInsertedInWorker(int index) {
+		synchronized (this) {
+			numberOfTaskInsertedByWorkerQueue[index]++;
+		}
+	}
+	
+	public void incrementTotalTimestampWaitingInQueue(long t) {
+		synchronized (this) {
+			totalTimestampWaitingInQueue+=t;
+		}
+	}
+	
+	
 }

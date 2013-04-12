@@ -22,6 +22,7 @@ package aeminium.runtime.implementations.implicitworkstealing.task;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import aeminium.runtime.Body;
@@ -67,11 +68,18 @@ public abstract class ImplicitTask implements Task {
 
 	/* Statistics */
 	public int typeId = -1;
-	public long workerId = -1;
+	// workerId inserted
+	public int workerId = -1;
+	public int workerQueueId = -1;
 	public String queueName;
 	public boolean stealedFromSubmissionQueue = false;
 	public ArrayList<String> totalDependentsId = new ArrayList<String>();
 	public ArrayList<String> totalDependentsTypeId = new ArrayList<String>();
+	public long timestampEnterQueue;
+	public long timestampStartExecuting;
+	public long timestampStopExecuting;
+	public long timestampExecutingTotalTime;
+	public long timestampWaitingInQueue;
 
 	public ImplicitTask(Body body, short hints, boolean enableProfiler) {
 		this.body = body;
@@ -87,15 +95,24 @@ public abstract class ImplicitTask implements Task {
 			this.setState(ImplicitTaskState.RUNNING);
 
 		try {
+			this.timestampStartExecuting = new Date().getTime();
 			body.execute(rt, this);
+			this.timestampStopExecuting = new Date().getTime();
+
 		} catch (Throwable e) {
 			rt.getErrorManager().signalTaskException(this, e);
 			setResult(e);
 		} finally {
 			taskFinished(rt);
-			// dependents statistics
+			// dependents statistics added when task finish
 			rt.scheduler.incrementTotalDependentsByTypeId(typeId, totalDependentsId, totalDependentsTypeId);
-
+			// decrement tasks in queue
+			if (this.workerQueueId >= 0)
+				rt.scheduler.numberOfTaskInWorkerQueue[this.workerQueueId]--;
+			this.timestampExecutingTotalTime=this.timestampStopExecuting-this.timestampStartExecuting;
+			this.timestampWaitingInQueue=this.timestampStartExecuting-this.timestampEnterQueue;
+			//System.out.println("ID:"+this.id+" TEMPO DE EXECUÇÃO:"+this.timestampExecutingTotalTime+" TEMPO DE ESPERA:"+this.timestampWaitingInQueue);
+			rt.scheduler.incrementTotalTimestampWaitingInQueue(this.timestampWaitingInQueue);
 		}
 	}
 
@@ -156,7 +173,8 @@ public abstract class ImplicitTask implements Task {
 			this.totalDependentsId.add(String.valueOf(task.id));
 			this.totalDependentsTypeId.add(String.valueOf(task.typeId));
 
-			System.err.println("Added " + task.id + " to dependents of " + this.id);
+			// System.err.println("Added " + task.id + " to dependents of " +
+			// this.id);
 			return 1;
 		}
 	}
@@ -347,7 +365,7 @@ public abstract class ImplicitTask implements Task {
 		this.typeId = TaskTypeAnalyzer.getTaskType(this.body);
 	}
 
-	public void setWorkerId(long workerId) {
+	public void setWorkerId(int workerId) {
 		this.workerId = workerId;
 	}
 
