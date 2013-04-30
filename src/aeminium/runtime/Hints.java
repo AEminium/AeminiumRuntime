@@ -31,7 +31,7 @@ public final class Hints {
 	/**
 	 * Base offset to leave the lower bits unused.
 	 */
-	protected static final short OFFSET		= 7;
+	protected static final short OFFSET		= 8;
 	/**
 	 * Task has no hints.
 	 */
@@ -59,11 +59,7 @@ public final class Hints {
 	/**
 	 * Task that are lightweight.
 	 */
-	public static final short MEDIUM  		= 1<<(OFFSET+6);
-	/**
-	 * Task that are lightweight.
-	 */
-	public static final short LARGE  		= 1<<(OFFSET+7);
+	public static final short LARGE  		= 1<<(OFFSET+6);
 	
 	/**
 	 * Convert hints to string representation.
@@ -88,7 +84,6 @@ public final class Hints {
 		addIfHint(hints, NO_DEPENDENTS, "NO_DEPENDENTS", sb);
 		addIfHint(hints, NO_CHILDREN, "NO_CHILDREN", sb);
 		addIfHint(hints, SMALL, "SMALL", sb);
-		addIfHint(hints, MEDIUM, "MEDIUM", sb);
 		addIfHint(hints, LARGE, "LARGE", sb);
 		if ( sb.length() > 1 ) sb.deleteCharAt(sb.length()-1);
 		sb.append("]");
