@@ -13,8 +13,14 @@ public class ForTask {
 
 	public static int PARALLELISM_SIZE = Configuration.getProperty(ForTask.class, "ForParallelismSize", 64);
 
+	/* This version is here for backwards compability. */
 	public static <T> Task createFor(Runtime rt, final Iterable<T> collection,
 			final ForBody<T> forBody) {
+		return createFor(rt, collection, forBody, Runtime.NO_HINTS);
+	}
+	
+	public static <T> Task createFor(Runtime rt, final Iterable<T> collection,
+			final ForBody<T> forBody, final short hints) {
 
 		return rt.createNonBlockingTask(new Body() {
 			@Override
@@ -41,7 +47,7 @@ public class ForTask {
 							}
 						}
 
-					}, Hints.LOOPS);
+					}, (short) (Hints.LOOPS | hints));
 					rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 				}
 			}
@@ -50,7 +56,7 @@ public class ForTask {
 	}
 
 	public static <T> Task createFor(Runtime rt, final List<T> collection,
-			final ForBody<T> forBody) {
+			final ForBody<T> forBody, final short hints) {
 		return rt.createNonBlockingTask(new Body() {
 
 			@Override
@@ -73,7 +79,7 @@ public class ForTask {
 										}
 									}
 
-								}, Hints.LOOPS);
+								}, (short) (Hints.LOOPS | hints));
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -87,7 +93,7 @@ public class ForTask {
 	}
 
 	public static Task createFor(Runtime rt, final LongRange range,
-			final ForBody<Long> forBody) {
+			final ForBody<Long> forBody, final short hints) {
 		return rt.createNonBlockingTask(new Body() {
 
 			@Override
@@ -114,7 +120,7 @@ public class ForTask {
 										}
 									}
 
-								}, Hints.LOOPS);
+								}, (short) (Hints.LOOPS | hints));
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -129,7 +135,7 @@ public class ForTask {
 	}
 
 	public static Task createFor(Runtime rt, final Range range,
-			final ForBody<Integer> forBody) {
+			final ForBody<Integer> forBody, final short hints) {
 		return rt.createNonBlockingTask(new Body() {
 
 			@Override
@@ -155,7 +161,7 @@ public class ForTask {
 										}
 									}
 
-								}, Hints.LOOPS);
+								}, (short) (Hints.LOOPS | hints));
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -171,7 +177,7 @@ public class ForTask {
 	
 	
 	public static Task createFor(Runtime rt, final FloatRange range,
-			final ForBody<Float> forBody) {
+			final ForBody<Float> forBody, final short hints) {
 		return rt.createNonBlockingTask(new Body() {
 
 			@Override
@@ -197,7 +203,7 @@ public class ForTask {
 										}
 									}
 
-								}, Runtime.NO_HINTS);
+								}, (short) (Hints.LOOPS | hints));
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -212,7 +218,7 @@ public class ForTask {
 	}
 	
 	public static Task createFor(Runtime rt, final DoubleRange range,
-			final ForBody<Double> forBody) {
+			final ForBody<Double> forBody, final short hints) {
 		return rt.createNonBlockingTask(new Body() {
 
 			@Override
@@ -238,7 +244,7 @@ public class ForTask {
 										}
 									}
 
-								}, Hints.LOOPS);
+								}, (short) (Hints.LOOPS | hints));
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
