@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import aeminium.runtime.Body;
+import aeminium.runtime.Hints;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
@@ -40,7 +41,7 @@ public class ForTask {
 							}
 						}
 
-					}, Runtime.NO_HINTS);
+					}, Hints.LOOPS);
 					rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 				}
 			}
@@ -72,7 +73,7 @@ public class ForTask {
 										}
 									}
 
-								}, Runtime.NO_HINTS);
+								}, Hints.LOOPS);
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -82,7 +83,7 @@ public class ForTask {
 				}
 			}
 
-		}, Runtime.NO_HINTS);
+		}, Hints.LOOPS);
 	}
 
 	public static Task createFor(Runtime rt, final LongRange range,
@@ -113,7 +114,7 @@ public class ForTask {
 										}
 									}
 
-								}, Runtime.NO_HINTS);
+								}, Hints.LOOPS);
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -124,7 +125,7 @@ public class ForTask {
 				}
 			}
 
-		}, Runtime.NO_HINTS);
+		}, Hints.LOOPS);
 	}
 
 	public static Task createFor(Runtime rt, final Range range,
@@ -154,7 +155,7 @@ public class ForTask {
 										}
 									}
 
-								}, Runtime.NO_HINTS);
+								}, Hints.LOOPS);
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -165,7 +166,7 @@ public class ForTask {
 				}
 			}
 
-		}, Runtime.NO_HINTS);
+		}, Hints.LOOPS);
 	}
 	
 	
@@ -237,7 +238,7 @@ public class ForTask {
 										}
 									}
 
-								}, Runtime.NO_HINTS);
+								}, Hints.LOOPS);
 						rt.schedule(iterationBulk, current, Runtime.NO_DEPS);
 					}
 				} else {
@@ -248,6 +249,6 @@ public class ForTask {
 				}
 			}
 
-		}, Runtime.NO_HINTS);
+		}, Hints.LOOPS);
 	}
 }
