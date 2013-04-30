@@ -72,8 +72,12 @@ public final class Hints {
 	 * @return
 	 */
 	
-	private static void addIfHint(short target, short hint, String name, StringBuilder sb) {
-		if ((target & hint) == hint) sb.append(name + "|");
+	public static boolean check(short hints, short test) {
+		return ((hints & test) == test);
+	} 
+	
+	private static void addIfHint(short hints, short test, String name, StringBuilder sb) {
+		if ((hints & test) == test) sb.append(name + "|");
 	}
 	
 	public static final String toString(short hints) {
