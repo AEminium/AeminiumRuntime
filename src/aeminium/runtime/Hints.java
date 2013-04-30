@@ -31,31 +31,61 @@ public final class Hints {
 	/**
 	 * Base offset to leave the lower bits unused.
 	 */
-	protected static final short OFFSET     = 8;
+	protected static final short OFFSET		= 7;
 	/**
-	 * Task has no dependencies.
+	 * Task has no hints.
 	 */
-	public static final short NO_HINTS       = 0;
+	public static final short NO_HINTS		= 0;
 	/**
 	 * Task has loops.
 	 */
-	public static final short LOOPS          = 1<<(OFFSET+1);
+	public static final short LOOPS			= 1<<(OFFSET+1);
 	/**
 	 * Task has recursions.
 	 */
-	public static final short RECURSION      = 1<<(OFFSET+2);
-
+	public static final short RECURSION		= 1<<(OFFSET+2);
+	/**
+	 * Task cannot have dependents.
+	 */
+	public static final short NO_DEPENDENTS	= 1<<(OFFSET+3);
+	/**
+	 * Task cannot have children.
+	 */
+	public static final short NO_CHILDREN  	= 1<<(OFFSET+4);
+	/**
+	 * Task that are lightweight.
+	 */
+	public static final short SMALL  		= 1<<(OFFSET+5);
+	/**
+	 * Task that are lightweight.
+	 */
+	public static final short MEDIUM  		= 1<<(OFFSET+6);
+	/**
+	 * Task that are lightweight.
+	 */
+	public static final short LARGE  		= 1<<(OFFSET+7);
+	
 	/**
 	 * Convert hints to string representation.
 	 *  
 	 * @param hints
 	 * @return
 	 */
+	
+	private static void addIfHint(short target, short hint, String name, StringBuilder sb) {
+		if ((target & hint) == hint) sb.append(name + "|");
+	}
+	
 	public static final String toString(short hints) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
-		if ( (hints & LOOPS) == LOOPS )         sb.append("LOOPS|");
-		if ( (hints & RECURSION) == RECURSION ) sb.append("RECURSION|");
+		addIfHint(hints, LOOPS, "LOOPS", sb);
+		addIfHint(hints, RECURSION, "RECURSION", sb);
+		addIfHint(hints, NO_DEPENDENTS, "NO_DEPENDENTS", sb);
+		addIfHint(hints, NO_CHILDREN, "NO_CHILDREN", sb);
+		addIfHint(hints, SMALL, "SMALL", sb);
+		addIfHint(hints, MEDIUM, "MEDIUM", sb);
+		addIfHint(hints, LARGE, "LARGE", sb);
 		if ( sb.length() > 1 ) sb.deleteCharAt(sb.length()-1);
 		sb.append("]");
 		return sb.toString();
