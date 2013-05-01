@@ -49,7 +49,7 @@ public class ForExample {
 				System.out.println(o.toUpperCase());
 			}
 			
-		});
+		}, Runtime.NO_HINTS);
 		
 		rt.schedule(t, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
@@ -76,7 +76,7 @@ public class ForExample {
 				System.out.println("Bye " + i);
 			}
 			
-		});
+		}, Runtime.NO_HINTS);
 		
 		rt.schedule(t, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		
