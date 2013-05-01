@@ -30,7 +30,7 @@ public class LongRange implements Iterable<Long> {
 
 			@Override
 			public boolean hasNext() {
-				return c < end;
+				return c < (end-increment);
 			}
 
 			@Override
