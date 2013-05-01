@@ -12,12 +12,6 @@ import aeminium.runtime.implementations.Configuration;
 public class ForTask {
 
 	public static int PARALLELISM_SIZE = Configuration.getProperty(ForTask.class, "ForParallelismSize", 64);
-
-	/* This version is here for backwards compability. */
-	public static <T> Task createFor(Runtime rt, final Iterable<T> collection,
-			final ForBody<T> forBody) {
-		return createFor(rt, collection, forBody, Runtime.NO_HINTS);
-	}
 	
 	public static <T> Task createFor(Runtime rt, final Iterable<T> collection,
 			final ForBody<T> forBody, final short hints) {
