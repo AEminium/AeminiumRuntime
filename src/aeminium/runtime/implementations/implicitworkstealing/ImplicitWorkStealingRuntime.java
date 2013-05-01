@@ -196,7 +196,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			
 			@Override
 			public void handleDependencyCycle(Task task) {
-				// TODO Auto-generated method stub
 				System.err.println(PREFIX + "Task " + task + " causes a dependency cycle.");
 			}
 		});
