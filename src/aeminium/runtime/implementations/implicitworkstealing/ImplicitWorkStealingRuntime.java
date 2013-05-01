@@ -35,8 +35,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.jprofiler.api.agent.Controller;
-
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
 import aeminium.runtime.Body;
@@ -47,15 +45,16 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.FifoDataGroup;
-import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.ImplicitWorkStealingRuntimeDataGroup;
+import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup.ImplicitWorkStealingRuntimeDataGroupFactory;
+import aeminium.runtime.implementations.implicitworkstealing.decider.DeciderFactory;
+import aeminium.runtime.implementations.implicitworkstealing.decider.ParallelizationDecider;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerAdapter;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;
-import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
@@ -67,6 +66,8 @@ import aeminium.runtime.utils.graphviz.GraphViz.Color;
 import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
 import aeminium.runtime.utils.graphviz.GraphViz.RankDir;
 
+import com.jprofiler.api.agent.Controller;
+
 
 /*
  * This is the Runtime implementation that holds all Runtime Components such as the Graph, Scheduler and Error Manager.
@@ -75,6 +76,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final ImplicitGraph graph;
 	public final BlockingWorkStealingScheduler scheduler;
 	protected ExecutorService executorService;
+	protected ParallelizationDecider decider;
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
 	protected AeminiumProfiler profiler;
@@ -83,7 +85,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
 	
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
-	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
 	
 	public final boolean enableProfiler 	= Configuration.getProperty(getClass(), "enableProfiler", true);
 	public final boolean offlineProfiling	= Configuration.getProperty(getClass(), "offlineProfiling", false);
@@ -112,6 +113,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		scheduler    = new BlockingWorkStealingScheduler(this);
 		eventManager = new EventManager();
 		errorManager = new ErrorManagerAdapter();
+		decider 	 = DeciderFactory.getDecider();
+		decider.setRuntime(this);
 	}
 	
 	
@@ -279,15 +282,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 	@Override
 	public final boolean parallelize() {
-		Thread thread = Thread.currentThread();
-		if ( thread instanceof WorkStealingThread ) {
-			if ( ((WorkStealingThread)thread).getTaskQueue().size() > parallelizeThreshold ) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-		return true;
+		return decider.parallelize();
 	}
 	
 	public final ExecutorService getExecutorService() {
