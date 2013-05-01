@@ -30,7 +30,7 @@ public class FloatRange implements Iterable<Float> {
 
 			@Override
 			public boolean hasNext() {
-				return c < end;
+				return c < (end-increment);
 			}
 
 			@Override

@@ -30,7 +30,7 @@ public class DoubleRange implements Iterable<Double> {
 
 			@Override
 			public boolean hasNext() {
-				return c < end;
+				return c < (end-increment);
 			}
 
 			@Override
