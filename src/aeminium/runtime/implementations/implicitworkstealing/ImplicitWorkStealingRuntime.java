@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -77,11 +79,13 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final BlockingWorkStealingScheduler scheduler;
 	protected ExecutorService executorService;
 	protected ParallelizationDecider decider;
+	protected boolean shouldParallelize = true;
+	protected Timer deciderTimer;
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
 	protected AeminiumProfiler profiler;
 	protected ErrorManager errorManager;
-	protected State state = State.UNINITIALIZED;  
+	protected State state = State.UNINITIALIZED;
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
 	
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
@@ -202,6 +206,13 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 				System.err.println(PREFIX + "Task " + task + " causes a dependency cycle.");
 			}
 		});
+		deciderTimer = new Timer();
+		deciderTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				shouldParallelize = decider.parallelize();
+			}
+		}, 50, 50);
 		state = State.INITIALIZED;
 	}
 	
@@ -218,6 +229,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			}
 			executorService = null;
 			dataGroupFactory = null;
+			deciderTimer.cancel();
+			deciderTimer.purge();
+			deciderTimer = null;
 			state = State.UNINITIALIZED;
 		}
 	}
@@ -281,7 +295,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 	@Override
 	public final boolean parallelize() {
-		return decider.parallelize();
+		return this.shouldParallelize;
 	}
 	
 	public final ExecutorService getExecutorService() {
