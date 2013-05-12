@@ -104,6 +104,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
+	protected final int parallelizeUpdateTimer = Configuration.getProperty(getClass(), "parallelizeUpdateTimer", 100);
 	
 	private AtomicInteger idCounter = new AtomicInteger(0); // Required for Profiling
 	
@@ -212,7 +213,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			public void run() {
 				shouldParallelize = decider.parallelize();
 			}
-		}, 50, 50);
+		}, parallelizeUpdateTimer, parallelizeUpdateTimer);
 		state = State.INITIALIZED;
 	}
 	
