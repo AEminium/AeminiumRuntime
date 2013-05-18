@@ -12,9 +12,11 @@ public class DefaultDecider implements ParallelizationDecider {
 	
 	@Override
 	public boolean parallelize() {
+		int c=0;
 		for (WorkStealingThread thread: runtime.scheduler.getThreads()) {
-			if (thread.getTaskQueue().size() < parallelizeThreshold) return true;
+			c += thread.getTaskQueue().size(); 
 		}
+		if (c < runtime.scheduler.getMaxParallelism() * parallelizeThreshold) return true;
 		return false;
 	}
 
