@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -34,8 +36,6 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.jprofiler.api.agent.Controller;
 
 import aeminium.runtime.AtomicTask;
 import aeminium.runtime.BlockingTask;
@@ -47,15 +47,16 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.FifoDataGroup;
-import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.ImplicitWorkStealingRuntimeDataGroup;
+import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup;
 import aeminium.runtime.implementations.implicitworkstealing.datagroup.NestedAtomicTasksDataGroup.ImplicitWorkStealingRuntimeDataGroupFactory;
+import aeminium.runtime.implementations.implicitworkstealing.decider.DeciderFactory;
+import aeminium.runtime.implementations.implicitworkstealing.decider.ParallelizationDecider;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManager;
 import aeminium.runtime.implementations.implicitworkstealing.error.ErrorManagerAdapter;
 import aeminium.runtime.implementations.implicitworkstealing.events.EventManager;
 import aeminium.runtime.implementations.implicitworkstealing.graph.ImplicitGraph;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingWorkStealingScheduler;
-import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
@@ -67,6 +68,8 @@ import aeminium.runtime.utils.graphviz.GraphViz.Color;
 import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
 import aeminium.runtime.utils.graphviz.GraphViz.RankDir;
 
+import com.jprofiler.api.agent.Controller;
+
 
 /*
  * This is the Runtime implementation that holds all Runtime Components such as the Graph, Scheduler and Error Manager.
@@ -75,15 +78,17 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final ImplicitGraph graph;
 	public final BlockingWorkStealingScheduler scheduler;
 	protected ExecutorService executorService;
+	protected ParallelizationDecider decider;
+	protected boolean shouldParallelize = true;
+	protected Timer deciderTimer;
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
 	protected AeminiumProfiler profiler;
 	protected ErrorManager errorManager;
-	protected State state = State.UNINITIALIZED;  
+	protected State state = State.UNINITIALIZED;
 	protected ImplicitWorkStealingRuntimeDataGroupFactory dataGroupFactory;
 	
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
-	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 3);
 	
 	public final boolean enableProfiler 	= Configuration.getProperty(getClass(), "enableProfiler", true);
 	public final boolean offlineProfiling	= Configuration.getProperty(getClass(), "offlineProfiling", false);
@@ -99,6 +104,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
+	protected final int parallelizeUpdateTimer = Configuration.getProperty(getClass(), "parallelizeUpdateTimer", 100);
 	
 	private AtomicInteger idCounter = new AtomicInteger(0); // Required for Profiling
 	
@@ -112,6 +118,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 		scheduler    = new BlockingWorkStealingScheduler(this);
 		eventManager = new EventManager();
 		errorManager = new ErrorManagerAdapter();
+		decider 	 = DeciderFactory.getDecider();
+		decider.setRuntime(this);
 	}
 	
 	
@@ -199,6 +207,13 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 				System.err.println(PREFIX + "Task " + task + " causes a dependency cycle.");
 			}
 		});
+		deciderTimer = new Timer();
+		deciderTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				shouldParallelize = decider.parallelize();
+			}
+		}, parallelizeUpdateTimer, parallelizeUpdateTimer);
 		state = State.INITIALIZED;
 	}
 	
@@ -215,6 +230,9 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			}
 			executorService = null;
 			dataGroupFactory = null;
+			deciderTimer.cancel();
+			deciderTimer.purge();
+			deciderTimer = null;
 			state = State.UNINITIALIZED;
 		}
 	}
@@ -278,15 +296,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 	@Override
 	public final boolean parallelize() {
-		Thread thread = Thread.currentThread();
-		if ( thread instanceof WorkStealingThread ) {
-			if ( ((WorkStealingThread)thread).getTaskQueue().size() > parallelizeThreshold ) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-		return true;
+		return this.shouldParallelize;
 	}
 	
 	public final ExecutorService getExecutorService() {
