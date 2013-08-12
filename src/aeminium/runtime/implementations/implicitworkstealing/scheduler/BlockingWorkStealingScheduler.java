@@ -224,6 +224,11 @@ public final class BlockingWorkStealingScheduler {
 			}
 		}
 	}
+	
+	public int getSubmissionQueueSize() {
+		return submissionQueue.size();
+	}
+	
 
 	/* Awakes a specific thread. */
 	public final void signalWork(WorkStealingThread thread) {

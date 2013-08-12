@@ -280,13 +280,10 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final boolean parallelize() {
 		Thread thread = Thread.currentThread();
 		if ( thread instanceof WorkStealingThread ) {
-			if ( ((WorkStealingThread)thread).getTaskQueue().size() > parallelizeThreshold ) {
-				return false;
-			} else {
-				return true;
-			}
+			return ((WorkStealingThread)thread).getTaskQueue().size() <= parallelizeThreshold;
+		} else {
+			return scheduler.getSubmissionQueueSize() <= parallelizeThreshold;
 		}
-		return true;
 	}
 	
 	public final ExecutorService getExecutorService() {
