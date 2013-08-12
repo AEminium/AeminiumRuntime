@@ -55,7 +55,7 @@ public final class BlockingWorkStealingScheduler {
 
 	public static volatile int unparkInterval = initialUnparkInterval;
 	protected static Boolean active_park = false;
-	
+
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected AeminiumProfiler profiler;
 
@@ -71,7 +71,7 @@ public final class BlockingWorkStealingScheduler {
 
 	/*
 	 * Initializes the scheduler, creating threads, queues and loads the
-	 * WorkStealing algorith.
+	 * WorkStealing algorithm.
 	 */
 	public void init(EventManager eventManager) {
 		this.eventManager = eventManager;
@@ -121,7 +121,7 @@ public final class BlockingWorkStealingScheduler {
 		}
 	}
 
-	
+
 	protected WorkStealingAlgorithm loadWorkStealingAlgorithm(String name) {
 		WorkStealingAlgorithm wsa = null;
 
@@ -156,41 +156,29 @@ public final class BlockingWorkStealingScheduler {
 			blockingThreadPool.submitTask((ImplicitBlockingTask) task);
 			return;
 		}
-		if (maxQueueLength > 0) {
-			Thread thread = Thread.currentThread();
-			if (thread instanceof WorkStealingThread) {
-				WorkStealingThread wthread = (WorkStealingThread) thread;
-				WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
+		
+		Thread thread = Thread.currentThread();
+		if (thread instanceof WorkStealingThread) {
+			WorkStealingThread wthread = (WorkStealingThread) thread;
+			WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
+			if (maxQueueLength > 0) {
 				if (taskQueue.size() < maxQueueLength || wthread.remainingRecursionDepth == 0) {
 					taskQueue.push(task);
 					if (taskQueue.size() <= 1) {
 						signalWork();
 					}
 				} else {
+					// Invoke inlined if maximum recursionDepth is achieved 
 					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
 					wthread.remainingRecursionDepth++;
 
 					if (enableProfiler) {
-						if (task instanceof ImplicitAtomicTask)
-							wthread.incrementNoAtomicTasksHandled();
-						else if (task instanceof ImplicitBlockingTask)
-							wthread.incrementNoBlockingTasksHandled();
-						else if (task instanceof ImplicitNonBlockingTask)
-							wthread.incrementNoNonBlockingTasksHandled();
+						handleTaskExecutionInThread(task, wthread);
 					}
 				}
 			} else {
-				submissionQueue.add(task);
-				signalWork();
-			}
-		} else {
-			Thread thread = Thread.currentThread();
-			if (thread instanceof WorkStealingThread) {
-				// worker thread
-				WorkStealingThread wthread = (WorkStealingThread) thread;
 				if (oneTaskPerLevel) {
-					WorkStealingQueue<ImplicitTask> taskQueue = wthread.getTaskQueue();
 					ImplicitTask head = taskQueue.peek();
 					if (head != null && head.level == task.level && wthread.remainingRecursionDepth > 0) {
 						wthread.remainingRecursionDepth--;
@@ -198,12 +186,7 @@ public final class BlockingWorkStealingScheduler {
 						wthread.remainingRecursionDepth++;
 
 						if (enableProfiler) {
-							if (task instanceof ImplicitAtomicTask)
-								wthread.incrementNoAtomicTasksHandled();
-							else if (task instanceof ImplicitBlockingTask)
-								wthread.incrementNoBlockingTasksHandled();
-							else if (task instanceof ImplicitNonBlockingTask)
-								wthread.incrementNoNonBlockingTasksHandled();
+							handleTaskExecutionInThread(task, wthread);
 						}
 
 					} else {
@@ -213,23 +196,33 @@ public final class BlockingWorkStealingScheduler {
 						}
 					}
 				} else {
-					wthread.getTaskQueue().push(task);
-					if (wthread.getTaskQueue().size() <= 1) {
+					taskQueue.push(task);
+					if (taskQueue.size() <= 1) {
 						signalWork(wthread);
 					}
 				}
-			} else {
-				// external thread
-				submissionQueue.add(task);
-				signalWork();
 			}
+		} else {
+			// If it is not inside WS, goes to submissionQueue
+			submissionQueue.add(task);
+			signalWork();
 		}
 	}
-	
+
+	protected void handleTaskExecutionInThread(ImplicitTask task,
+			WorkStealingThread wthread) {
+		if (task instanceof ImplicitAtomicTask)
+			wthread.incrementNoAtomicTasksHandled();
+		else if (task instanceof ImplicitBlockingTask)
+			wthread.incrementNoBlockingTasksHandled();
+		else if (task instanceof ImplicitNonBlockingTask)
+			wthread.incrementNoNonBlockingTasksHandled();
+	}
+
 	public int getSubmissionQueueSize() {
 		return submissionQueue.size();
 	}
-	
+
 
 	/* Awakes a specific thread. */
 	public final void signalWork(WorkStealingThread thread) {
@@ -252,31 +245,28 @@ public final class BlockingWorkStealingScheduler {
 	public final void parkThread(WorkStealingThread thread) {
 		eventManager.signalThreadSuspend(thread);
 		wsa.threadGoingToPark(thread);
-		
+
 		boolean active;
-		
-		synchronized (active_park)
-		{
-			if (active_park)
+
+		synchronized (active_park) {
+			if (active_park) {
 				active = false;
-			else
-			{
+			} else {
 				active = true;
 				active_park = true;
 			}
 		}
-		
-		if (active)
-		{
+
+		if (active) {
 			LockSupport.parkNanos(thread, unparkInterval);
 			unparkInterval *= 2;
-			
-			synchronized (active_park)
-			{
+
+			synchronized (active_park) {
 				active_park = false;
 			}
-		} else
+		} else {
 			LockSupport.park(thread);
+		}
 	}
 
 	/* Steals work from queues using an algorithm. */
