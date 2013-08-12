@@ -282,6 +282,10 @@ public final class BlockingWorkStealingScheduler {
 		}
 		return result;
 	}
+	
+	public WorkStealingThread[] getThreads() {
+		return threads;
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * PROFILER * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
