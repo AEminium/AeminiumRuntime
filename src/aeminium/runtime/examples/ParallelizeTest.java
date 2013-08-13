@@ -45,7 +45,7 @@ public class ParallelizeTest {
 		}
 
 		protected final int fib(Runtime rt, Task current, int value) {
-			if ( rt.parallelize() ) {
+			if ( rt.parallelize(current) ) {
 				if ( value <= threshold ) {
 					return seqFib(value);
 				} else { 

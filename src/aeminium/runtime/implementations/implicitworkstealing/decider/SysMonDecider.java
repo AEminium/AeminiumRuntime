@@ -2,7 +2,7 @@ package aeminium.runtime.implementations.implicitworkstealing.decider;
 
 import aeminium.runtime.Runtime;
 import aeminium.runtime.implementations.Configuration;
-import aeminium.runtime.implementations.implicitworkstealing.decider.ParallelizationDecider;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 import com.jezhumble.javasysmon.CpuTimes;
 import com.jezhumble.javasysmon.JavaSysMon;
@@ -25,7 +25,7 @@ public class SysMonDecider implements ParallelizationDecider {
 	}
 
 	@Override
-	public boolean parallelize() {
+	public boolean parallelize(ImplicitTask current) {
 		if (mon.physical().getFreeBytes() / mon.physical().getTotalBytes() * 100 < memoryThreshold) return false;
 
 		CpuTimes tmp = mon.cpuTimes();

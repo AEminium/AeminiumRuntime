@@ -4,6 +4,7 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
+import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public class DefaultDecider implements ParallelizationDecider {
 
@@ -11,7 +12,7 @@ public class DefaultDecider implements ParallelizationDecider {
 	protected ImplicitWorkStealingRuntime runtime = null;
 	
 	@Override
-	public boolean parallelize() {
+	public boolean parallelize(ImplicitTask current) {
 		int c=0;
 		for (WorkStealingThread thread: runtime.scheduler.getThreads()) {
 			c += thread.getTaskQueue().size(); 

@@ -38,7 +38,7 @@ public class ForTask {
 
 				while (bottom < top) {
 					boolean shouldCheck = (bottom % PPS == 0);
-					if (shouldCheck && (top-bottom > PPS) && rt.parallelize()) {
+					if (shouldCheck && (top-bottom > PPS) && rt.parallelize(current)) {
 						int half = (top - bottom)/2 + bottom;
 						Task otherHalf = rt.createNonBlockingTask(createLazyBinarySplitting(half, top, collection, forBody, hints), (short) (hints | Hints.LOOPS));
 						rt.schedule(otherHalf, current, Runtime.NO_DEPS);
@@ -67,7 +67,7 @@ public class ForTask {
 
 				while (bottom < top) {
 					boolean shouldCheck = (bottom % PPS == 0);
-					if (shouldCheck && (top-bottom > PPS) && rt.parallelize()) {
+					if (shouldCheck && (top-bottom > PPS) && rt.parallelize(current)) {
 						int half = (top - bottom)/2 + bottom;
 						Task otherHalf = rt.createNonBlockingTask(createLazyBinarySplitting(half, top, increment, forBody, hints), (short) (hints | Hints.LOOPS));
 						rt.schedule(otherHalf, current, Runtime.NO_DEPS);

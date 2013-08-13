@@ -76,7 +76,7 @@ public interface Runtime {
     public void schedule(Task task, Task parent, Collection<Task> deps) ;
 
     /* Checks whether runtime has enough tasks to process. */
-    public boolean parallelize();
+    public boolean parallelize(Task t);
 
     /* Creates a new data group object */
     public DataGroup createDataGroup() ;
