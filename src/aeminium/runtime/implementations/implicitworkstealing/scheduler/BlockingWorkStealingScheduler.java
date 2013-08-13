@@ -286,6 +286,14 @@ public final class BlockingWorkStealingScheduler {
 	public WorkStealingThread[] getThreads() {
 		return threads;
 	}
+	
+	public int getActiveThreadCount() {
+		return this.threads.length - this.parkedThreads.size();
+	}
+	
+	public int getIdleThreadCount() {
+		return this.parkedThreads.size();
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * PROFILER * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
