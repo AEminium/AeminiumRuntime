@@ -7,7 +7,7 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 import com.jezhumble.javasysmon.CpuTimes;
 import com.jezhumble.javasysmon.JavaSysMon;
 
-public class SysMonDecider implements ParallelizationDecider {
+public class SysMon implements ParallelizationDecider {
 
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 70);
 	protected final int memoryThreshold  = Configuration.getProperty(getClass(), "memoryThreshold", 70);
@@ -15,7 +15,7 @@ public class SysMonDecider implements ParallelizationDecider {
 	static JavaSysMon mon = new JavaSysMon();
 	CpuTimes last = null;
 	
-	public SysMonDecider() {
+	public SysMon() {
 		last = mon.cpuTimes();
 	}
 	

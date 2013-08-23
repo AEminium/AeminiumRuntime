@@ -1,12 +1,8 @@
 package aeminium.runtime.implementations.implicitworkstealing.decider;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
-import aeminium.runtime.Body;
-import aeminium.runtime.Hints;
 import aeminium.runtime.Runtime;
-import aeminium.runtime.Task;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
 import aeminium.runtime.implementations.implicitworkstealing.scheduler.WorkStealingThread;
@@ -33,16 +29,14 @@ public class ATC implements ParallelizationDecider {
 			
 			// Save time
 			final long start = System.nanoTime();
-			Task saveTime = rt.createNonBlockingTask(new Body() {
+			
+			current.setFinishedCallback(new Runnable() {
 				@Override
-				public void execute(Runtime rt, Task current) throws Exception {
+				public void run() {
 					int value = (int) ((System.nanoTime() - start) / 1000);
 					cache.put(key, value);
 				}
-				
-			}, Hints.SMALL);
-			rt.schedule(saveTime, Runtime.NO_PARENT, Arrays.asList((Task)current));
-			
+			});
 			
 			// Base Decision
 			int totalTasks = rt.scheduler.getSubmissionQueueSize();

@@ -57,6 +57,7 @@ public abstract class ImplicitTask implements Task
 	public final short hints;
 	public short level;
 	public Thread waiter;    // we could same this and just mention that there is someone waiting
+	public Runnable finishedCallback;
 
 	/* Added for profiler. */
 	public int id;
@@ -184,6 +185,7 @@ public abstract class ImplicitTask implements Task
 
 	public final void taskFinished(ImplicitWorkStealingRuntime rt)
 	{
+		
 		boolean completed = false;
 		synchronized (this) {
 			if (childCount == 0) {
@@ -241,6 +243,12 @@ public abstract class ImplicitTask implements Task
 					t.decDependencyCount(rt);
 
 				task.dependents = null;
+			}
+			
+			// callback
+			if (finishedCallback != null) {
+				finishedCallback.run();
+				finishedCallback = null;
 			}
 
 			// cleanup references
@@ -345,6 +353,11 @@ public abstract class ImplicitTask implements Task
 	public ImplicitTaskState getState() {
 		return this.state;
 	}
+	
+	public void setFinishedCallback(Runnable r) {
+		finishedCallback = r;
+	}
+	
 
 	@Override
 	public String toString()
