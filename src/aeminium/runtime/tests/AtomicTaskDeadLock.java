@@ -21,8 +21,7 @@ package aeminium.runtime.tests;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import aeminium.runtime.Body;
