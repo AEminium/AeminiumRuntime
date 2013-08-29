@@ -300,12 +300,17 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	}
 
 	@Override
-	public final boolean parallelize(Task task) {
+	public boolean parallelize(Task task) {
 		if (parallelizeUseTimer) {
 			return this.shouldParallelize;
 		} else {
 			return this.decider.parallelize((ImplicitTask) task);
 		}
+	}
+	
+	@Override
+	public int getTaskCount() {
+		return idCounter.get();
 	}
 	
 	public final ExecutorService getExecutorService() {

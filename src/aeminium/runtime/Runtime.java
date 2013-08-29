@@ -93,4 +93,7 @@ public interface Runtime {
     /* Add/Remove error handlers */
     public void addErrorHandler(ErrorHandler eh);
     public void removeErrorHandler(ErrorHandler eh);
+    
+    /* Returns an estimation of how many tasks were created. */
+	public int getTaskCount();
 }
