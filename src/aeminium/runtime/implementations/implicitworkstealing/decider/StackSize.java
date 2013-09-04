@@ -17,7 +17,7 @@ public class StackSize implements ParallelizationDecider {
 
 	@Override
 	public boolean parallelize(ImplicitTask current) {
-		return Thread.currentThread().getStackTrace().length > maxStackSize;
+		return Thread.currentThread().getStackTrace().length < maxStackSize;
 	}
 
 }
