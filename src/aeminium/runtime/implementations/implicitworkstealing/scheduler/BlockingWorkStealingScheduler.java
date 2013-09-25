@@ -306,7 +306,7 @@ public final class BlockingWorkStealingScheduler {
 	}
 	
 	public int getTaskCount() {
-		return WorkStealingThread.IdGenerator.get();
+		return rt.getTaskCount();
 	}
 	
 	public int getStealCount() {
