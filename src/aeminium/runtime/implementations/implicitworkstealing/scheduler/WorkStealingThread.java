@@ -46,7 +46,11 @@ public final class WorkStealingThread extends AeminiumThread {
 	public int remainingRecursionDepth = Configuration.getProperty(getClass(), "maxRecursionDepth", 512);
 	protected WorkStealingQueue<ImplicitTask> taskQueue;
 	protected static final AtomicInteger IdGenerator = new AtomicInteger(0);
-	
+	protected int steals = 0;
+	protected int nosteals = 0;
+	protected int parks = 0;
+	protected int maxQueueSize = 0;
+
 	/* Profiler information. */
 	private AtomicInteger noAtomicTasksHandled = new AtomicInteger(0);
 	private AtomicInteger noBlockingTasksHandled = new AtomicInteger(0);
@@ -80,6 +84,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		rt.scheduler.registerThread(this);
 		while (!shutdown) {
 			ImplicitTask task = null;
+			maxQueueSize = Math.max(maxQueueSize, taskQueue.size());
 			task = taskQueue.pop();
 			
 			if ( task != null ) {
@@ -99,6 +104,7 @@ public final class WorkStealingThread extends AeminiumThread {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
 				if ( task != null ) {
+					steals++;
 					task.invoke(rt);
 					
 					rt.scheduler.signalWork();
@@ -118,7 +124,9 @@ public final class WorkStealingThread extends AeminiumThread {
 					}
 					
 				} else {
+					nosteals++;
 					if ( pollCounter == 0) {
+						parks++;
 						rt.scheduler.parkThread(this);
 						pollCounter = pollingCount;
 					} else {
@@ -169,6 +177,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		int pollCounter = pollingCount;
 		while ( !toComplete.isCompleted() ) {
 			ImplicitTask task = null;
+			maxQueueSize = Math.max(maxQueueSize, taskQueue.size());
 			task = taskQueue.pop();
 			if ( task != null ) {
 				task.invoke(rt);
@@ -184,6 +193,7 @@ public final class WorkStealingThread extends AeminiumThread {
 			} else {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
+				steals++;
 				if ( task != null ) {
 					task.invoke(rt);
 					
@@ -196,6 +206,7 @@ public final class WorkStealingThread extends AeminiumThread {
 							noNonBlockingTasksHandled.getAndIncrement();
 					}
 				} else {
+					nosteals++;
 					if ( pollCounter == 0) {
 						// reset counter
 						pollCounter = pollingCount;
@@ -206,6 +217,19 @@ public final class WorkStealingThread extends AeminiumThread {
 				}
 			}
 		}
+	}
+	
+	public int getSteals() {
+		return steals;
+	}
+	public int getNoSteals() {
+		return nosteals;
+	}
+	public int getParks() {
+		return parks;
+	}
+	public int getMaxQueueSize() {
+		return parks;
 	}
 	
 	/* Added for profiler. */

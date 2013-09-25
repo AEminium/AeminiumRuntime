@@ -52,10 +52,12 @@ public final class BlockingWorkStealingScheduler {
 	protected static final boolean useBlockingThreadPool = Configuration.getProperty(BlockingWorkStealingScheduler.class, "useBlockingThreadPool", false);
 	protected static final int maxQueueLength = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
 	protected static final int initialUnparkInterval = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 100);
+	
 
 	public static volatile int unparkInterval = initialUnparkInterval;
 	protected static Boolean active_park = false;
 
+	protected static final boolean enableStats = Configuration.getProperty(BlockingWorkStealingScheduler.class, "enableStats", false);
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected AeminiumProfiler profiler;
 
@@ -112,13 +114,21 @@ public final class BlockingWorkStealingScheduler {
 		// cleanup
 		wsa.shutdown();
 		wsa = null;
-		threads = null;
 		parkedThreads = null;
-		counter = null;
 		submissionQueue = null;
 		if (useBlockingThreadPool) {
 			blockingThreadPool.shutdown();
 		}
+		
+		if (BlockingWorkStealingScheduler.enableStats) {
+			System.err.println(this.getTaskCount());
+			System.err.println(this.getStealCount());
+			System.err.println(this.getNoStealCount());
+			System.err.println(this.getParkCount());
+			System.err.println(this.getAvgMaxQueueSize());
+		}
+		counter = null;
+		threads = null;
 	}
 
 
@@ -293,6 +303,42 @@ public final class BlockingWorkStealingScheduler {
 	
 	public int getIdleThreadCount() {
 		return this.parkedThreads.size();
+	}
+	
+	public int getTaskCount() {
+		return WorkStealingThread.IdGenerator.get();
+	}
+	
+	public int getStealCount() {
+		int s = 0;
+		for (WorkStealingThread wst : threads) {
+			s += wst.getSteals();
+		}
+		return s;
+	}
+	
+	public int getNoStealCount() {
+		int s = 0;
+		for (WorkStealingThread wst : threads) {
+			s += wst.getNoSteals();
+		}
+		return s;
+	}
+	
+	public int getParkCount() {
+		int s = 0;
+		for (WorkStealingThread wst : threads) {
+			s += wst.getParks();
+		}
+		return s;
+	}
+	
+	public float getAvgMaxQueueSize() {
+		float s = 0;
+		for (WorkStealingThread wst : threads) {
+			s += wst.getMaxQueueSize();
+		}
+		return s / threads.length;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
