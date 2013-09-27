@@ -50,6 +50,7 @@ public final class WorkStealingThread extends AeminiumThread {
 	protected int nosteals = 0;
 	protected int parks = 0;
 	protected int maxQueueSize = 0;
+	protected int tasks = 0;
 
 	/* Profiler information. */
 	private AtomicInteger noAtomicTasksHandled = new AtomicInteger(0);
@@ -89,6 +90,7 @@ public final class WorkStealingThread extends AeminiumThread {
 			
 			if ( task != null ) {
 				task.invoke(rt);
+				tasks++;
 
 				if (enableProfiler) {
 					if (task instanceof ImplicitAtomicTask)
@@ -106,6 +108,7 @@ public final class WorkStealingThread extends AeminiumThread {
 				if ( task != null ) {
 					steals++;
 					task.invoke(rt);
+					tasks++;
 					
 					rt.scheduler.signalWork();
 					BlockingWorkStealingScheduler.unparkInterval = Math.max
@@ -181,6 +184,7 @@ public final class WorkStealingThread extends AeminiumThread {
 			task = taskQueue.pop();
 			if ( task != null ) {
 				task.invoke(rt);
+				tasks++;
 				
 				if (enableProfiler) {
 					if (task instanceof ImplicitAtomicTask)
@@ -196,6 +200,7 @@ public final class WorkStealingThread extends AeminiumThread {
 				steals++;
 				if ( task != null ) {
 					task.invoke(rt);
+					tasks++;
 					
 					if (enableProfiler) {
 						if (task instanceof ImplicitAtomicTask)
@@ -229,7 +234,10 @@ public final class WorkStealingThread extends AeminiumThread {
 		return parks;
 	}
 	public int getMaxQueueSize() {
-		return parks;
+		return maxQueueSize;
+	}
+	public int getTaskCount() {
+		return tasks;
 	}
 	
 	/* Added for profiler. */
