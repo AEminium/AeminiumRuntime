@@ -1,4 +1,4 @@
-/**
+	/**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
  * 
  * This file is part of Plaid Programming Language.
@@ -80,6 +80,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected ExecutorService executorService;
 	protected ParallelizationDecider decider;
 	protected boolean shouldParallelize = true;
+	protected int shouldParallelizeCacheCounter = 0;
 	protected Timer deciderTimer;
 	protected final EventManager eventManager;
 	protected DiGraphViz digraphviz;
@@ -105,6 +106,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
 	protected final boolean parallelizeUseTimer = Configuration.getProperty(getClass(), "parallelizeUseTimer", false);
+	protected final int parallelizeUseCache = Configuration.getProperty(getClass(), "parallelizeUseCache", 1);
 	protected final int parallelizeUpdateTimer = Configuration.getProperty(getClass(), "parallelizeUpdateTimer", 100);
 	
 	private AtomicInteger idCounter = new AtomicInteger(0); // Required for Profiling
@@ -302,6 +304,11 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	@Override
 	public boolean parallelize(Task task) {
 		if (parallelizeUseTimer) {
+			return this.shouldParallelize;
+		} else if (parallelizeUseCache > 1)  {
+			if (shouldParallelizeCacheCounter % parallelizeUseCache == 0) {
+				this.shouldParallelize = this.decider.parallelize((ImplicitTask) task);
+			}
 			return this.shouldParallelize;
 		} else {
 			return this.decider.parallelize((ImplicitTask) task);
