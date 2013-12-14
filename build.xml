@@ -17,6 +17,7 @@
 		<pathelement path="${lib.dir}/javasysmon-0.3.4.jar" /><!-- SysMon -->
 		<pathelement path="${lib.dir}/jna-4.0.0.jar" /><!-- Affinity -->
 		<pathelement path="${lib.dir}/jna-platform-4.0.0.jar" /><!-- Affinity -->
+		<pathelement path="${lib.dir}/affinity-1.6.jar" /><!-- Affinity -->
 	</path>
 	
 	<path id="rt.classpath.debug">
