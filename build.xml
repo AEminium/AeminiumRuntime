@@ -15,6 +15,8 @@
 		<pathelement path="${lib.dir}/api.jar" /><!-- JProfiler -->
 		<pathelement path="${lib.dir}/apisrc.jar" /><!-- JProfiler -->
 		<pathelement path="${lib.dir}/javasysmon-0.3.4.jar" /><!-- SysMon -->
+		<pathelement path="${lib.dir}/jna-4.0.0.jar" /><!-- Affinity -->
+		<pathelement path="${lib.dir}/jna-platform-4.0.0.jar" /><!-- Affinity -->
 	</path>
 	
 	<path id="rt.classpath.debug">
