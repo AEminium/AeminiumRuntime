@@ -21,10 +21,9 @@ package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import vanilla.java.affinity.AffinityLock;
 import aeminium.runtime.implementations.Configuration;
 import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealingRuntime;
-import aeminium.runtime.implementations.implicitworkstealing.os.AffinityManager;
-import aeminium.runtime.implementations.implicitworkstealing.os.AffinityManagerFactory;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitNonBlockingTask;
@@ -53,8 +52,6 @@ public final class WorkStealingThread extends AeminiumThread {
 	protected int parks = 0;
 	protected int maxQueueSize = 0;
 	protected int tasks = 0;
-
-	static AffinityManager affinity = AffinityManagerFactory.getManager();
 	
 	/* Profiler information. */
 	private AtomicInteger noAtomicTasksHandled = new AtomicInteger(0);
@@ -85,7 +82,8 @@ public final class WorkStealingThread extends AeminiumThread {
 	public final void run() {
 		super.run();
 		
-		 affinity.setAffinity(index);
+		// Thread Pinning
+		AffinityLock.acquireLock();
 		
 		taskQueue = new ConcurrentWorkStealingQueue<ImplicitTask>(13);
 		int pollCounter = pollingCount;

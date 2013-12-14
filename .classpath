@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="lib/javasysmon-0.3.4.jar"/>
 	<classpathentry kind="lib" path="lib/jna-4.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/jna-platform-4.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/affinity-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
