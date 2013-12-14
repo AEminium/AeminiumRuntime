@@ -20,6 +20,8 @@
 package aeminium.runtime.implementations.implicitworkstealing.scheduler;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import vanilla.java.affinity.AffinityLock;
 import aeminium.runtime.implementations.Configuration;
@@ -83,6 +85,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		super.run();
 		
 		// Thread Pinning
+		Logger.getLogger("AffinityLock").setLevel(Level.OFF);
 		AffinityLock.acquireLock();
 		
 		taskQueue = new ConcurrentWorkStealingQueue<ImplicitTask>(13);
