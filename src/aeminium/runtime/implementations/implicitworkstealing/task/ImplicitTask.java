@@ -257,8 +257,11 @@ public abstract class ImplicitTask implements Task
 
 			rt.graph.taskCompleted(task);
 
-			if (task.waiter != null)
-				notifyAll();
+			if (task.waiter != null) {
+				synchronized(this) {
+					notifyAll();
+				}	
+			}
 			
 			task = next;
 		} while (task != null);
