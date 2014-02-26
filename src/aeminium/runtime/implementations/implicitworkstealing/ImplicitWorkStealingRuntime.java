@@ -311,6 +311,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			}
 			return this.shouldParallelize;
 		} else {
+			if (task == null || task == Runtime.NO_PARENT) return true;
 			return this.decider.parallelize((ImplicitTask) task);
 		}
 	}
