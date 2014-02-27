@@ -141,6 +141,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		}
 		
 		rt.scheduler.unregisterThread(this);
+		taskQueue =  new ConcurrentWorkStealingQueue<ImplicitTask>(4);
 		taskQueue = null;
 	}
 
