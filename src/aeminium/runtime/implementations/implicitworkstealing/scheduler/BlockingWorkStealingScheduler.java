@@ -128,7 +128,7 @@ public final class BlockingWorkStealingScheduler {
 			System.err.println(this.getAvgMaxQueueSize());
 		}
 		counter = null;
-		threads = null;
+		//threads = null;
 	}
 
 

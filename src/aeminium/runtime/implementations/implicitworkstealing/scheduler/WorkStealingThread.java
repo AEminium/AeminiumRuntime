@@ -63,6 +63,7 @@ public final class WorkStealingThread extends AeminiumThread {
 	public WorkStealingThread(ImplicitWorkStealingRuntime rt, int index) {
 		this.rt           = rt;
 		this.index        = index;
+		taskQueue = new ConcurrentWorkStealingQueue<ImplicitTask>(13);
 		setName("WorkerStealingThread-"+IdGenerator.incrementAndGet());
 	}
 	
@@ -80,7 +81,6 @@ public final class WorkStealingThread extends AeminiumThread {
 	@Override
 	public final void run() {
 		super.run();
-		taskQueue = new ConcurrentWorkStealingQueue<ImplicitTask>(13);
 		int pollCounter = pollingCount;
 		rt.scheduler.registerThread(this);
 		while (!shutdown) {
@@ -141,8 +141,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		}
 		
 		rt.scheduler.unregisterThread(this);
-		taskQueue =  new ConcurrentWorkStealingQueue<ImplicitTask>(4);
-		taskQueue = null;
+		//taskQueue = null;
 	}
 
 	/* External access for stealing a task from the current thread queue. */
