@@ -79,7 +79,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	public final BlockingWorkStealingScheduler scheduler;
 	protected ExecutorService executorService;
 	protected ParallelizationDecider decider;
-	protected boolean shouldParallelize = true;
+	protected boolean shouldParallelizeCached = true;
 	protected int shouldParallelizeCacheCounter = 0;
 	protected Timer deciderTimer;
 	protected final EventManager eventManager;
@@ -91,7 +91,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	
 	protected final boolean nestedAtomicTasks = Configuration.getProperty(getClass(), "nestedAtomicTasks", false);
 	
-	public final boolean enableProfiler 	= Configuration.getProperty(getClass(), "enableProfiler", true);
+	public final boolean enableProfiler 	= Configuration.getProperty(getClass(), "enableProfiler", false);
 	public final boolean offlineProfiling	= Configuration.getProperty(getClass(), "offlineProfiling", false);
 	public final String outputOffline 		= Configuration.getProperty(getClass(), "outputOffline", "snapshot.jsp");
 	
@@ -105,8 +105,8 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 	protected final String graphVizName       = Configuration.getProperty(getClass(), "graphVizName", "GraphVizOutput");
 	protected final int ranksep               = Configuration.getProperty(getClass(), "ranksep", 1);
 	protected final RankDir rankdir           = GraphViz.getDefaultValue(Configuration.getProperty(getClass(), "rankdir", "TB"), RankDir.TB, RankDir.values());
+	protected final int parallelizeCacheSize = Configuration.getProperty(getClass(), "parallelizeCacheSize", 1);
 	protected final boolean parallelizeUseTimer = Configuration.getProperty(getClass(), "parallelizeUseTimer", false);
-	protected final int parallelizeUseCache = Configuration.getProperty(getClass(), "parallelizeUseCache", 1);
 	protected final int parallelizeUpdateTimer = Configuration.getProperty(getClass(), "parallelizeUpdateTimer", 100);
 	
 	private AtomicInteger idCounter = new AtomicInteger(0); // Required for Profiling
@@ -215,7 +215,7 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 			deciderTimer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					shouldParallelize = decider.parallelize(null);
+					shouldParallelizeCached = decider.parallelize(null);
 				}
 			}, parallelizeUpdateTimer, parallelizeUpdateTimer);
 		}
@@ -303,17 +303,15 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 	@Override
 	public boolean parallelize(Task task) {
+		if (task == null) return true;
 		if (parallelizeUseTimer) {
-			return this.shouldParallelize;
-		} else if (parallelizeUseCache > 1)  {
-			if (shouldParallelizeCacheCounter % parallelizeUseCache == 0) {
-				this.shouldParallelize = this.decider.parallelize((ImplicitTask) task);
-			}
-			return this.shouldParallelize;
-		} else {
-			if (task == null || task == Runtime.NO_PARENT) return true;
-			return this.decider.parallelize((ImplicitTask) task);
+			return this.shouldParallelizeCached;
 		}
+		if (parallelizeCacheSize > 1) {
+			if (this.shouldParallelizeCacheCounter++ % parallelizeCacheSize == 0) this.shouldParallelizeCached = this.decider.parallelize((ImplicitTask) task);
+			return this.shouldParallelizeCached;
+		}
+		return this.decider.parallelize((ImplicitTask) task);
 	}
 	
 	@Override
