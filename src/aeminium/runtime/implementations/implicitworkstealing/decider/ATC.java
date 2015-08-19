@@ -1,6 +1,6 @@
 package aeminium.runtime.implementations.implicitworkstealing.decider;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import aeminium.runtime.Runtime;
 import aeminium.runtime.implementations.Configuration;
@@ -13,7 +13,7 @@ public class ATC implements ParallelizationDecider {
 	
 	protected final int maxTotalTasksPerCoreThreshold  = Configuration.getProperty(getClass(), "maxTotalTasksPerCoreThreshold", 2);
 	protected final int maxLevel  = Configuration.getProperty(getClass(), "maxLevelThreshold", 16);
-	protected final static HashMap<String, Integer> cache = new HashMap<String, Integer>(); // function_level => ms
+	protected final static ConcurrentHashMap<String, Integer> cache = new ConcurrentHashMap<String, Integer>(); // function_level => ms
 	
 	@Override
 	public void setRuntime(Runtime rt) {
