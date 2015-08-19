@@ -22,30 +22,32 @@ public class ATC implements ParallelizationDecider {
 
 	@Override
 	public boolean parallelize(ImplicitTask current) {
-		final String key = current.getClass().getName() + "_" + current.level; 
-		if (cache.containsKey(key)) {
-			return cache.get(key) > 1; // ms
-		} else {
-			
-			// Save time
-			final long start = System.nanoTime();
-			
-			current.setFinishedCallback(new Runnable() {
-				@Override
-				public void run() {
-					int value = (int) ((System.nanoTime() - start) / 1000);
-					cache.put(key, value);
-				}
-			});
-			
-			// Base Decision
-			int totalTasks = rt.scheduler.getSubmissionQueueSize();
-			for (WorkStealingThread thread: rt.scheduler.getThreads()) {
-				totalTasks += thread.getTaskQueue().size(); 
+		if (current != null) {
+			final String key = current + "_" + current.level; 
+			if (cache.containsKey(key)) {
+				return cache.get(key) > 1; // ms
+			} else {
+				// Save time
+				final long start = System.nanoTime();
+				
+				current.setFinishedCallback(new Runnable() {
+					@Override
+					public void run() {
+						int value = (int) ((System.nanoTime() - start) / 1000000);
+						cache.put(key, value);
+					}
+				});
 			}
-			return (totalTasks < rt.scheduler.getMaxParallelism() * maxTotalTasksPerCoreThreshold) &&
-				(current.level < maxLevel);
 		}
+		// Base Decision
+		int totalTasks = rt.scheduler.getSubmissionQueueSize();
+		for (WorkStealingThread thread: rt.scheduler.getThreads()) {
+			totalTasks += thread.getTaskQueue().size(); 
+		}
+		int level = current == null ? 1 : current.level;
+		
+		return (totalTasks < rt.scheduler.getMaxParallelism() * maxTotalTasksPerCoreThreshold) &&
+			(level < maxLevel);
 	}
 
 }

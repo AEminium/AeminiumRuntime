@@ -303,7 +303,6 @@ public final class ImplicitWorkStealingRuntime implements Runtime {
 
 	@Override
 	public boolean parallelize(Task task) {
-		if (task == null) return true;
 		if (parallelizeUseTimer) {
 			return this.shouldParallelizeCached;
 		}
