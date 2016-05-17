@@ -54,7 +54,7 @@ public class ImplicitGraph {
 	
 	/* Profiler information. */
 	protected AeminiumProfiler profiler;
-	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
+	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", false);
 	
 	private AtomicInteger noAtomicTasksCompleted = new AtomicInteger(0);
 	private AtomicInteger noBlockingTasksCompleted = new AtomicInteger(0);
