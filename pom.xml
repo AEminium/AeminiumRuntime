@@ -27,14 +27,14 @@
         <!-- Local JAR dependencies from lib folder -->
         <dependency>
             <groupId>local.lib</groupId>
-            <artifactId>javasysmon api</artifactId>
+            <artifactId>javasysmon_api</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/api.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>local.lib</groupId>
-            <artifactId>javasysmon apisrc</artifactId>
+            <artifactId>javasysmon_apisrc</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/apisrc.jar</systemPath>

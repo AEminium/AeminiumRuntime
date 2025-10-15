@@ -14,6 +14,6 @@ repos:
     hooks:
       - id: checkstyle
         name: checkstyle
-        entry: maven checkstyle:checkstyle
+        entry: mvn checkstyle:checkstyle
         language: system
         types: [java]
