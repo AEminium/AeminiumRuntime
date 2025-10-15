@@ -27,21 +27,21 @@
         <!-- Local JAR dependencies from lib folder -->
         <dependency>
             <groupId>local.lib</groupId>
-            <artifactId>example1</artifactId>
+            <artifactId>javasysmon api</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/api.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>local.lib</groupId>
-            <artifactId>example2</artifactId>
+            <artifactId>javasysmon apisrc</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/apisrc.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>local.lib</groupId>
-            <artifactId>example3</artifactId>
+            <artifactId>javasysmon</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/javasysmon-0.3.4.jar</systemPath>
