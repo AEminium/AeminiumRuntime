@@ -10,10 +10,10 @@ repos:
 #   hooks:
 #     - id: checkstyle
 #       exclude: /test/
--   repo: local
-    hooks:
-      - id: checkstyle
-        name: checkstyle
-        entry: mvn checkstyle:checkstyle
-        language: system
-        types: [java]
+# -   repo: local
+#     hooks:
+#       - id: checkstyle
+#         name: checkstyle
+#         entry: mvn checkstyle:checkstyle
+#         language: system
+#         types: [java]

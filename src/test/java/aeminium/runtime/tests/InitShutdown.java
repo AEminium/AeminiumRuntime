@@ -19,6 +19,9 @@
 
 package aeminium.runtime.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import aeminium.runtime.Runtime;
@@ -36,5 +39,10 @@ public class InitShutdown extends BaseTest {
 		for (int i = 0; i < 100; i++ ) {
 			initShutdownSingle();
 		}
+	}
+
+	@Test
+	public void testThatAlwaysFails() {
+		assertTrue(false);
 	}
 }
