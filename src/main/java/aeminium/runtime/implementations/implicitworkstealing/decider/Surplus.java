@@ -8,9 +8,9 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public class Surplus implements ParallelizationDecider {
 	ImplicitWorkStealingRuntime rt;
-	
+
 	protected final int surplusThreshold  = Configuration.getProperty(getClass(), "surplusThreshold", 3);
-	
+
 	@Override
 	public void setRuntime(Runtime rt) {
 		this.rt = (ImplicitWorkStealingRuntime) rt;
@@ -20,18 +20,18 @@ public class Surplus implements ParallelizationDecider {
 	public boolean parallelize(ImplicitTask current) {
 		int currentQueueSize;
 		Thread t = Thread.currentThread();
-		
+
 		if (t instanceof WorkStealingThread) {
 			WorkStealingThread wst = (WorkStealingThread) t;
 			currentQueueSize = wst.getLocalQueueSize();
 		} else {
-			currentQueueSize = rt.scheduler.getSubmissionQueueSize(); 
+			currentQueueSize = rt.scheduler.getSubmissionQueueSize();
 		}
-		
+
 		int idle = rt.scheduler.getIdleThreadCount();
 		int active = rt.scheduler.getActiveThreadCount();
 		int otherQueues = currentQueueSize * idle/active;
-	
+
 		return (currentQueueSize - otherQueues < surplusThreshold);
 	}
 

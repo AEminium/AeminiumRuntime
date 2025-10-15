@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -33,8 +33,8 @@ import aeminium.runtime.profiler.DataCollection;
 /*
  * Thread that is part of the threadpool that executes NonBlocking tasks
  * and Atomic Tasks.
- * 
- * A thread has its own queue of tasks to executed and follows a work-stealing 
+ *
+ * A thread has its own queue of tasks to executed and follows a work-stealing
  * technique. If a task finds its queue empty, it will try to get another task
  * from the scheduler.
  */
@@ -56,27 +56,27 @@ public final class WorkStealingThread extends AeminiumThread {
 	private AtomicInteger noAtomicTasksHandled = new AtomicInteger(0);
 	private AtomicInteger noBlockingTasksHandled = new AtomicInteger(0);
 	private AtomicInteger noNonBlockingTasksHandled = new AtomicInteger(0);
-	
+
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", true);
 	protected AeminiumProfiler profiler;
-	
+
 	public WorkStealingThread(ImplicitWorkStealingRuntime rt, int index) {
 		this.rt           = rt;
 		this.index        = index;
 		taskQueue = new ConcurrentWorkStealingQueue<ImplicitTask>(13);
 		setName("WorkerStealingThread-"+IdGenerator.incrementAndGet());
 	}
-	
+
 	public final WorkStealingQueue<ImplicitTask> getTaskQueue() {
 		return taskQueue;
 	}
-	
+
 	public final void shutdown() {
 		shutdown = true;
 	}
-	
-	/* Main loop that executes tasks from queue, steals if empty, 
-	 * or parks until some task awakes it. 
+
+	/* Main loop that executes tasks from queue, steals if empty,
+	 * or parks until some task awakes it.
 	 */
 	@Override
 	public final void run() {
@@ -87,7 +87,7 @@ public final class WorkStealingThread extends AeminiumThread {
 			ImplicitTask task = null;
 			maxQueueSize = Math.max(maxQueueSize, taskQueue.size());
 			task = taskQueue.pop();
-			
+
 			if ( task != null ) {
 				task.invoke(rt);
 				tasks++;
@@ -98,10 +98,10 @@ public final class WorkStealingThread extends AeminiumThread {
 					else if (task instanceof ImplicitBlockingTask)
 						noBlockingTasksHandled.getAndIncrement();
 					else if (task instanceof ImplicitNonBlockingTask)
-						noNonBlockingTasksHandled.getAndIncrement();						
+						noNonBlockingTasksHandled.getAndIncrement();
 				}
-				
-				
+
+
 			} else {
 				// scan for other queues
 				task = rt.scheduler.scanQueues(this);
@@ -109,14 +109,14 @@ public final class WorkStealingThread extends AeminiumThread {
 					steals++;
 					task.invoke(rt);
 					tasks++;
-					
+
 					rt.scheduler.signalWork();
 					BlockingWorkStealingScheduler.unparkInterval = Math.max
 					(
 						BlockingWorkStealingScheduler.unparkInterval / 4,
 						BlockingWorkStealingScheduler.initialUnparkInterval
 					);
-					
+
 					if (enableProfiler) {
 						if (task instanceof ImplicitAtomicTask)
 							noAtomicTasksHandled.getAndIncrement();
@@ -125,7 +125,7 @@ public final class WorkStealingThread extends AeminiumThread {
 						else if (task instanceof ImplicitNonBlockingTask)
 							noNonBlockingTasksHandled.getAndIncrement();
 					}
-					
+
 				} else {
 					nosteals++;
 					if ( pollCounter == 0) {
@@ -139,7 +139,7 @@ public final class WorkStealingThread extends AeminiumThread {
 				}
 			}
 		}
-		
+
 		rt.scheduler.unregisterThread(this);
 		//taskQueue = null;
 	}
@@ -152,7 +152,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		}
 		return null;
 	}
-	
+
 	/* External access to look at the top of the queue. */
 	public final ImplicitTask peekStealingTask() {
 		WorkStealingQueue<ImplicitTask> queue = taskQueue;
@@ -161,7 +161,7 @@ public final class WorkStealingThread extends AeminiumThread {
 		}
 		return null;
 	}
-	
+
 	/* Returns the number of tasks in queue. */
 	public final int getLocalQueueSize() {
 		WorkStealingQueue<ImplicitTask> queue = taskQueue;
@@ -170,10 +170,10 @@ public final class WorkStealingThread extends AeminiumThread {
 		}
 		return 0;
 	}
-	
+
 	/* A secondary loop inside the main loop that tries to fulfil a certain task
 	 * before continuing on the outter loop. Supports nested loops.
-	 * 
+	 *
 	 * This method is only called when using the getResult() API.
 	 */
 	public final void progressToCompletion(ImplicitTask toComplete) {
@@ -185,7 +185,7 @@ public final class WorkStealingThread extends AeminiumThread {
 			if ( task != null ) {
 				task.invoke(rt);
 				tasks++;
-				
+
 				if (enableProfiler) {
 					if (task instanceof ImplicitAtomicTask)
 						noAtomicTasksHandled.getAndIncrement();
@@ -201,7 +201,7 @@ public final class WorkStealingThread extends AeminiumThread {
 				if ( task != null ) {
 					task.invoke(rt);
 					tasks++;
-					
+
 					if (enableProfiler) {
 						if (task instanceof ImplicitAtomicTask)
 							noAtomicTasksHandled.getAndIncrement();
@@ -223,7 +223,7 @@ public final class WorkStealingThread extends AeminiumThread {
 			}
 		}
 	}
-	
+
 	public int getSteals() {
 		return steals;
 	}
@@ -239,32 +239,32 @@ public final class WorkStealingThread extends AeminiumThread {
 	public int getTaskCount() {
 		return tasks;
 	}
-	
+
 	/* Added for profiler. */
 	public final void getNoTasksHandled(int taskHandled[]) {
-		
+
 		taskHandled[DataCollection.ATOMIC_TASK] = this.noAtomicTasksHandled.get();
 		taskHandled[DataCollection.BLOCKING_TASK] = this.noBlockingTasksHandled.get();
 		taskHandled[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksHandled.get();
 
 	}
-	
+
 	public void setProfiler(AeminiumProfiler profiler) {
 		this.profiler = profiler;
 	}
-	
+
 	public final String toString() {
 		return getName();
 	}
-	
+
 	public void incrementNoBlockingTasksHandled() {
 		this.noBlockingTasksHandled.getAndIncrement();
 	}
-	
+
 	public void incrementNoNonBlockingTasksHandled() {
 		this.noNonBlockingTasksHandled.getAndIncrement();
 	}
-	
+
 	public void incrementNoAtomicTasksHandled() {
 		this.noAtomicTasksHandled.getAndIncrement();
 	}

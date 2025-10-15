@@ -8,7 +8,7 @@ public class MaxLevel implements ParallelizationDecider {
 
 	protected final int maxLevel  = Configuration.getProperty(getClass(), "maxLevelThreshold", 16);
 
-	
+
 	@Override
 	public void setRuntime(Runtime rt) {
 		// No need

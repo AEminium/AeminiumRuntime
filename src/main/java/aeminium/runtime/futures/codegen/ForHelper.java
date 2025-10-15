@@ -15,16 +15,16 @@ import aeminium.runtime.futures.RuntimeManager;
 import aeminium.runtime.implementations.Configuration;
 
 public class ForHelper {
-	
+
 	public static boolean binarySplit = Configuration.getProperty(ForHelper.class, "BinarySplitting", false);
 	public static boolean compilerRange = Configuration.getProperty(ForHelper.class, "CompilerRange", true);
 	public static int PPS = Configuration.getProperty(ForHelper.class, "PPS", 3);
-	
+
 	public static BiFunction<Integer, Integer, Integer> intSum = (t1, t2) -> t1 + t2;
 	public static BiFunction<Long, Long, Long> longSum = (t1, t2) -> t1 + t2;
 	public static BiFunction<Float, Float, Float> floatSum = (t1, t2) -> t1 + t2;
 	public static BiFunction<Double, Double, Double> doubleSum = (t1, t2) -> t1 + t2;
-	
+
 	public static void forContinuousInteger(int start, int end, Function<Integer, Void> fun, short hint, int units) {
 		if (!compilerRange) {
 			forContinuousInteger(start, end, fun, hint);
@@ -50,7 +50,7 @@ public class ForHelper {
 			t.getResult();
 		}
 	}
-	
+
 	public static void forContinuousLong(long start, long end, Function<Long, Void> fun, short hint, int units) {
 		if (!compilerRange) {
 			forContinuousLong(start, end, fun, hint);
@@ -76,11 +76,11 @@ public class ForHelper {
 			t.getResult();
 		}
 	}
-	
+
 	public interface ReduceBody<T> extends Body {
 		public T getAcc();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static <T> HollowFuture<T> forContinuousIntegerReduce1(int start, int end, Function<Integer, T> fun, BiFunction<T, T, T> reduce, short hint, int units) {
 		if (!compilerRange) {
@@ -109,7 +109,7 @@ public class ForHelper {
 			tasks[i] = RuntimeManager.rt.createNonBlockingTask(bodies[i], hint);
 			RuntimeManager.rt.schedule(tasks[i], Runtime.NO_PARENT, Runtime.NO_DEPS);
 		}
-		return new Future<T>( (t) -> { 
+		return new Future<T>( (t) -> {
 			T acc = null;
 			for (int i=0; i<nTasks; i++) {
 				tasks[i].getResult();
@@ -119,7 +119,7 @@ public class ForHelper {
 			return acc;
 		});
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static <T> HollowFuture<T> forContinuousLongReduce1(long start, long end, Function<Long, T> fun, BiFunction<T, T, T> reduce, short hint, int units) {
 		if (!compilerRange) {
@@ -148,7 +148,7 @@ public class ForHelper {
 			tasks[i] = RuntimeManager.rt.createNonBlockingTask(bodies[i], hint);
 			RuntimeManager.rt.schedule(tasks[i], Runtime.NO_PARENT, Runtime.NO_DEPS);
 		}
-		return new Future<T>( (t) -> { 
+		return new Future<T>( (t) -> {
 			T acc = null;
 			for (int i=0; i<nTasks; i++) {
 				tasks[i].getResult();
@@ -158,8 +158,8 @@ public class ForHelper {
 			return acc;
 		});
 	}
-	
-	
+
+
 	public static void forContinuousInteger(int start, int end, Function<Integer, Void> fun, short hint) {
 		if (start == end) return;
 		if (RuntimeManager.shouldSeq()) {
@@ -174,7 +174,7 @@ public class ForHelper {
 		RuntimeManager.rt.schedule(current, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		current.getResult();
 	}
-	
+
 	public static void forContinuousLong(long  start, long end, Function<Long, Void> fun, short hint) {
 		if (start == end) return;
 		if (!RuntimeManager.rt.parallelize(null)) {
@@ -189,8 +189,8 @@ public class ForHelper {
 		RuntimeManager.rt.schedule(current, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		current.getResult();
 	}
-	
-	
+
+
 	public static <T> HollowFuture<T> forContinuousIntegerReduce1(int start, int end, Function<Integer, T> fun, BiFunction<T, T, T> reduce, short hint) {
 		Body b = forContinuousIntegerReduce1Body(start, end, fun, reduce, hint);
 		Task current = RuntimeManager.rt.createNonBlockingTask(b,
@@ -198,7 +198,7 @@ public class ForHelper {
 		RuntimeManager.rt.schedule(current, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		return new FutureWrapper<T>(current);
 	}
-	
+
 	public static <T> HollowFuture<T> forContinuousLongReduce1(long start, long end, Function<Long, T> fun, BiFunction<T, T, T> reduce, short hint) {
 		Body b = forContinuousLongReduce1Body(start, end, fun, reduce, hint);
 		Task current = RuntimeManager.rt.createNonBlockingTask(b,
@@ -241,13 +241,13 @@ public class ForHelper {
 							fun.apply(bottom++);
 						}
 					}
-					for (Task child : children) 
+					for (Task child : children)
 						child.getResult();
 				}
 			}
 		};
 	}
-	
+
 	public static Body forContinuousLongBody(final long start, final long end,
 			Function<Long, Void> fun, short hint) {
 		return new Body() {
@@ -278,11 +278,11 @@ public class ForHelper {
 							rt.schedule(otherHalf, current, Runtime.NO_DEPS);
 							children.add(otherHalf);
 							top = half;
-						} else {						
+						} else {
 							fun.apply(bottom++);
 						}
 					}
-					for (Task child : children) 
+					for (Task child : children)
 						child.getResult();
 				}
 			}
@@ -325,7 +325,7 @@ public class ForHelper {
 							children.add(otherHalf);
 							bodies.add(body);
 							top = half;
-						} else {				
+						} else {
 							T res = fun.apply(bottom++);
 							field = (field == null) ? res : reduce.apply(field, res);
 						}
@@ -379,7 +379,7 @@ public class ForHelper {
 							children.add(otherHalf);
 							bodies.add(body);
 							top = half;
-						} else {				
+						} else {
 							T res = fun.apply(bottom++);
 							field = (field == null) ? res : reduce.apply(field, res);
 						}
@@ -396,7 +396,7 @@ public class ForHelper {
 			}
 		};
 	}
-	
+
 
 	private static void seqForInteger(final int start, final int end,
 			Function<Integer, Void> fun) {
@@ -404,14 +404,14 @@ public class ForHelper {
 			fun.apply(i);
 		}
 	}
-	
+
 	private static void seqForLong(final long start, final long end,
 			Function<Long, Void> fun) {
 		for (long i=start; i<end; i++) {
 			fun.apply(i);
 		}
 	}
-	
+
 	private static <T> T seqForInteger(final int start, final int end,
 			Function<Integer, T> fun, BiFunction<T, T, T> reduce) {
 		T acc = fun.apply(start);
@@ -420,7 +420,7 @@ public class ForHelper {
 		}
 		return acc;
 	}
-	
+
 	private static <T> T seqForLong(final long start, final long end,
 			Function<Long, T> fun, BiFunction<T, T, T> reduce) {
 		T acc = fun.apply(start);
@@ -429,19 +429,19 @@ public class ForHelper {
 		}
 		return acc;
 	}
-	
+
 	public static void main(String[] args) {
 		RuntimeManager.init();
 		ForHelper.forContinuousInteger(0, 10, (Integer t) -> {
 			System.out.println(t);
 			return null;
 		}, Hints.NO_HINTS);
-		
+
 		HollowFuture<Integer> t = ForHelper.forContinuousIntegerReduce1(0, 10, (Integer i) -> {
 			return 1;
 		}, ForHelper.intSum, Hints.SMALL);
 		System.out.println("Sum:" + t.get());
 		RuntimeManager.shutdown();
-		
+
 	}
 }
