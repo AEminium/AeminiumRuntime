@@ -14,8 +14,11 @@ tuning.
 
 How to use:
 
-This project uses ANT, so it only requires `ant jar` on the command-line to
-generate a jar containing the runtime.
+The project uses maven to manage the build process.
+
+"mvn test" will run the tests.
+
+"mvn package" will generate a jar in the target folder.
 
 
 Source Code organization:
