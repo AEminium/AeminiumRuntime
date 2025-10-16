@@ -13,7 +13,7 @@ public class ForTask {
 
 	public static int PPS = Configuration.getProperty(ForTask.class, "LazyBinarySplittingPPS", 1);
 
-	
+
 	public static <T> Task createFor(Runtime rt, final Iterable<T> collection,
 			final ForBody<T> forBody, final short hints) {
 		// Initial Copy
@@ -28,7 +28,7 @@ public class ForTask {
 			final ForBody<T> forBody, final short hints) {
 		return rt.createNonBlockingTask(createLazyBinarySplitting(0, collection.size(), collection, forBody, hints), Runtime.NO_HINTS);
 	}
-	
+
 	public static <T> Body createLazyBinarySplitting(final int start, final int end, final List<T> collection, final ForBody<T> forBody, final short hints) {
 		return new Body() {
 			@Override

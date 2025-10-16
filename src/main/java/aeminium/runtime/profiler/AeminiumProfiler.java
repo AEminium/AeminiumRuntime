@@ -7,12 +7,12 @@ import aeminium.runtime.implementations.implicitworkstealing.scheduler.BlockingW
  * from the class CountersProbe.
  */
 public class AeminiumProfiler {
-	
+
 	public static BlockingWorkStealingScheduler scheduler;
 	public static ImplicitGraph graph;
 
 	public AeminiumProfiler(BlockingWorkStealingScheduler scheduler, ImplicitGraph graph) {
-		
+
 		AeminiumProfiler.scheduler = scheduler;
 		AeminiumProfiler.graph = graph;
 	}

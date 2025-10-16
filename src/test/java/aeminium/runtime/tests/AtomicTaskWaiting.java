@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -29,12 +29,12 @@ import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
 
 public class AtomicTaskWaiting extends BaseTest {
-	
+
 	@Test
 	public void runAtomicTaskWaitingTest() {
 		Runtime rt = getRuntime();
 		rt.init();
-		
+
 		DataGroup dg = rt.createDataGroup();
 		Task t1 = createAtomicTask(rt, dg, 110);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
@@ -46,10 +46,10 @@ public class AtomicTaskWaiting extends BaseTest {
 		rt.schedule(t4, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		Task t5 = createAtomicTask(rt, dg, 150);
 		rt.schedule(t5, Runtime.NO_PARENT, Runtime.NO_DEPS);
-		
+
 		rt.shutdown();
 	}
-	
+
 	public Task createAtomicTask(final Runtime rt, DataGroup group, final int delay) {
 		return rt.createAtomicTask(new Body() {
 			@Override
@@ -64,7 +64,7 @@ public class AtomicTaskWaiting extends BaseTest {
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-						
+
 					}
 					@Override
 					public String toString() {
@@ -72,7 +72,7 @@ public class AtomicTaskWaiting extends BaseTest {
 					}
 				}, Runtime.NO_HINTS);
 				rt.schedule(t1, current, Runtime.NO_DEPS);
-				
+
 				Task t2 = rt.createNonBlockingTask(new Body() {
 					@Override
 					public void execute(Runtime rt, Task current) {
@@ -82,7 +82,7 @@ public class AtomicTaskWaiting extends BaseTest {
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-						
+
 					}
 					@Override
 					public String toString() {
@@ -91,16 +91,16 @@ public class AtomicTaskWaiting extends BaseTest {
 
 				}, Runtime.NO_HINTS);
 				rt.schedule(t2, current, Arrays.asList(t1));
-	
+
 				getLogger().info("Task waiting for "+delay + " ms");
 				try {
 					Thread.sleep(delay);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 			}
-			
+
 			@Override
 			public String toString() {
 				return ""+delay;

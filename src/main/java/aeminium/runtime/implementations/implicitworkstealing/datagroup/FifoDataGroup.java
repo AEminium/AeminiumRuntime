@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -34,10 +34,10 @@ import aeminium.runtime.utils.graphviz.GraphViz.Color;
 import aeminium.runtime.utils.graphviz.GraphViz.LineStyle;
 
 
-/*  
+/*
  * A DataGroup (DG) implementation that works similar to a lock.
  */
-public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup {	
+public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup {
 	protected static final boolean checkForDeadlocks        = Configuration.getProperty(FifoDataGroup.class, "checkForDeadlocks", false);
 	protected static final boolean graphVizEnabled          = Configuration.getProperty(ImplicitWorkStealingRuntime.class, "enableGraphViz", false);
 	protected static final boolean graphVizShowLockingOrder = Configuration.getProperty(FifoDataGroup.class, "graphVizShowLockingOrder", false);
@@ -47,14 +47,14 @@ public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup
 	protected ImplicitTask owner = null;
 	protected ImplicitTask previousOwner;
 	protected final int id = idGen.incrementAndGet();
-	
+
 	// Tries to hold the lock on the DG.
 	public final boolean trylock(ImplicitWorkStealingRuntime rt, ImplicitTask task) {
-		
+
 		synchronized (this) {
 			if ( locked ) {
 				waitQueue.add(task);
-				if ( checkForDeadlocks ) {					
+				if ( checkForDeadlocks ) {
 					ImplicitAtomicTask atomicParent = ((ImplicitAtomicTask)task).getAtomicParent();
 					atomicParent.addDataGroupDependecy(this);
 					checkForDeadlock(atomicParent, rt.getErrorManager());
@@ -84,7 +84,7 @@ public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup
 				if ( checkForDeadlocks ) {
 					ImplicitAtomicTask atomicParent = ((ImplicitAtomicTask)head).getAtomicParent();
 					atomicParent.addDataGroupDependecy(this);
-				}				
+				}
 			}
 		}
 		if ( head != null ) {
@@ -92,24 +92,24 @@ public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup
 		}
 	}
 
-	public final boolean checkForDeadlock(final ImplicitAtomicTask atomicParent, 
+	public final boolean checkForDeadlock(final ImplicitAtomicTask atomicParent,
 					                      final ErrorManager em) {
-		for ( DataGroup dg : atomicParent.getDataGroupDependencies() ) {			
+		for ( DataGroup dg : atomicParent.getDataGroupDependencies() ) {
 			if ( checkForDeadlock(atomicParent, (ImplicitAtomicTask)((FifoDataGroup)dg).owner, em) ) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public final boolean checkForDeadlock(final ImplicitAtomicTask atomicParent, 
-			                              final ImplicitAtomicTask current, 
+
+	public final boolean checkForDeadlock(final ImplicitAtomicTask atomicParent,
+			                              final ImplicitAtomicTask current,
 			                              final ErrorManager em) {
 		boolean result = false;
 		if ( atomicParent == current ) {
 			em.signalLockingDeadlock();
 			result = true;
-		} else {			
+		} else {
 			for ( DataGroup dg : current.getDataGroupDependencies() ) {
 				if ( checkForDeadlock(atomicParent, ((ImplicitAtomicTask)((FifoDataGroup)dg).owner).getAtomicParent(), em) ) {
 					result = true;
@@ -119,7 +119,7 @@ public final class FifoDataGroup implements ImplicitWorkStealingRuntimeDataGroup
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final String toString() {
 		if ( locked == false ) {

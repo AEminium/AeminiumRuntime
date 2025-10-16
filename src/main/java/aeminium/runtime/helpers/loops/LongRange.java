@@ -7,25 +7,25 @@ public class LongRange implements Iterable<Long> {
 	public long start = 0;
 	public long end = 0;
 	public long increment = 0;
-	
+
 	public LongRange(long darts) {
 		this(0, darts, 1);
 	}
-	
+
 	public LongRange(long min, long max) {
 		this(min, max, 1);
 	}
-	
+
 	public LongRange(long min, long max, long inc) {
 		this.start = min;
 		this.end = max;
 		this.increment = inc;
 	}
-	
+
 	@Override
 	public Iterator<Long> iterator() {
 		return new Iterator<Long>() {
-			
+
 			private long c = start;
 
 			@Override
@@ -43,10 +43,10 @@ public class LongRange implements Iterable<Long> {
 			public void remove() {
 				// Ignore
 			}
-			
+
 		};
 	}
-	
+
 
 	public long getStart() {
 		return start;
@@ -60,5 +60,5 @@ public class LongRange implements Iterable<Long> {
 		return increment;
 	}
 
-	
+
 }
