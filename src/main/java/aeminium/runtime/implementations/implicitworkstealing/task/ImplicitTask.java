@@ -61,20 +61,20 @@ public abstract class ImplicitTask implements Task
 
 	/* Added for profiler. */
 	public int id;
-	
+
 	public ImplicitTask(Body body, short hints, boolean enableProfiler) {
 		this.body = body;
 		this.hints = hints;
 		this.enableProfiler = enableProfiler;
 	}
-		
+
 	public void invoke(ImplicitWorkStealingRuntime rt) {
-		
+
 		if (enableProfiler)
 			this.setState(ImplicitTaskState.RUNNING, rt.graph);
 		else
 			this.setState(ImplicitTaskState.RUNNING);
-		
+
 		try {
 			body.execute(rt, this);
 		} catch (Throwable e)
@@ -185,7 +185,7 @@ public abstract class ImplicitTask implements Task
 
 	public final void taskFinished(ImplicitWorkStealingRuntime rt)
 	{
-		
+
 		boolean completed = false;
 		synchronized (this) {
 			if (childCount == 0) {
@@ -204,23 +204,23 @@ public abstract class ImplicitTask implements Task
 
 	public boolean detachChild(ImplicitWorkStealingRuntime rt)
 	{
-		
+
 		synchronized(this)
 		{
 			this.childCount--;
-			
+
 			if (this.childCount <= 0 && state == ImplicitTaskState.WAITING_FOR_CHILDREN)
 				return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	public void taskCompleted(ImplicitWorkStealingRuntime rt)
 	{
 		ImplicitTask task = this;
 		ImplicitTask next;
-		
+
 		do
 		{
 			synchronized(task)
@@ -236,7 +236,7 @@ public abstract class ImplicitTask implements Task
 				next = task.parent;
 			else
 				next = null;
-				
+
 			if (task.dependents != null)
 			{
 				for (ImplicitTask t : task.dependents)
@@ -244,7 +244,7 @@ public abstract class ImplicitTask implements Task
 
 				task.dependents = null;
 			}
-			
+
 			// callback
 			if (finishedCallback != null) {
 				finishedCallback.run();
@@ -260,9 +260,9 @@ public abstract class ImplicitTask implements Task
 			if (task.waiter != null) {
 				synchronized(this) {
 					notifyAll();
-				}	
+				}
 			}
-			
+
 			task = next;
 		} while (task != null);
 	}
@@ -305,25 +305,25 @@ public abstract class ImplicitTask implements Task
 			checkForCycles(task, nextDependents, em);
 		}
 	}
-	
+
 	/* This method simply changes the state of the task. */
 	public void setState(ImplicitTaskState newState) {
 		this.state = newState;
 	}
-	
+
 	/* If we are using the profiler, we need to call these methods, because we need to update
-	 * the value of the graph variables concerning the actual state, namely, for example, the 
+	 * the value of the graph variables concerning the actual state, namely, for example, the
 	 * number of running tasks or the number of tasks waiting for dependencies.
 	 */
 	public void setState(ImplicitTaskState newState, ImplicitGraph graph) {
-		
+
 		/* First, we have to test the previous state, decreasing the corresponding
 		 * number of tasks in the graph for that category.
 		 */
 		if (this.state == ImplicitTaskState.UNSCHEDULED) {
 			graph.noUnscheduledTasks.decrementAndGet();
 		} else if (this.state == ImplicitTaskState.WAITING_IN_QUEUE) {
-				graph.noTasksWaitingInQueue.decrementAndGet();	
+				graph.noTasksWaitingInQueue.decrementAndGet();
 		} else if (this.state == ImplicitTaskState.RUNNING) {
 			graph.noRunningTasks.decrementAndGet();
 		} else if (this.state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES) {
@@ -333,15 +333,15 @@ public abstract class ImplicitTask implements Task
 		} else if (this.state == ImplicitTaskState.COMPLETED) {
 			graph.noCompletedTasks.decrementAndGet();
 		}
-		
+
 		/* Update the task state. */
 		this.state = newState;
-		
+
 		/* Having the new state, we also need to update the graph counters. */
 		if (this.state == ImplicitTaskState.UNSCHEDULED) {
 			graph.noUnscheduledTasks.incrementAndGet();
 		} else if (this.state == ImplicitTaskState.WAITING_IN_QUEUE) {
-				graph.noTasksWaitingInQueue.incrementAndGet();	
+				graph.noTasksWaitingInQueue.incrementAndGet();
 		} else if (this.state == ImplicitTaskState.RUNNING) {
 			graph.noRunningTasks.incrementAndGet();
 		} else if (this.state == ImplicitTaskState.WAITING_FOR_DEPENDENCIES) {
@@ -352,15 +352,15 @@ public abstract class ImplicitTask implements Task
 			graph.noCompletedTasks.incrementAndGet();
 		}
 	}
-	
+
 	public ImplicitTaskState getState() {
 		return this.state;
 	}
-	
+
 	public void setFinishedCallback(Runnable r) {
 		finishedCallback = r;
 	}
-	
+
 
 	@Override
 	public String toString()

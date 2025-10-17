@@ -7,25 +7,25 @@ public class FloatRange implements Iterable<Float> {
 	public float start = 0;
 	public float end = 0;
 	public float increment = 0;
-	
+
 	public FloatRange(float darts) {
 		this(0, darts, 1);
 	}
-	
+
 	public FloatRange(float min, float max) {
 		this(min, max, 1);
 	}
-	
+
 	public FloatRange(float min, float max, float inc) {
 		this.start = min;
 		this.end = max;
 		this.increment = inc;
 	}
-	
+
 	@Override
 	public Iterator<Float> iterator() {
 		return new Iterator<Float>() {
-			
+
 			private float c = start;
 
 			@Override
@@ -43,10 +43,10 @@ public class FloatRange implements Iterable<Float> {
 			public void remove() {
 				// Ignore
 			}
-			
+
 		};
 	}
-	
+
 
 	public float getStart() {
 		return start;
@@ -60,5 +60,5 @@ public class FloatRange implements Iterable<Float> {
 		return increment;
 	}
 
-	
+
 }

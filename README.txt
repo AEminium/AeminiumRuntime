@@ -35,6 +35,5 @@ Config File:
 
 Inside each AeminiumRuntime project, you may place a aeminiumrt.config file
 containing the configuration for your project. This may contain default values
-for debugging (including graphviz output), performance settings as well as 
+for debugging (including graphviz output), performance settings as well as
 parallelization thresholds.
-

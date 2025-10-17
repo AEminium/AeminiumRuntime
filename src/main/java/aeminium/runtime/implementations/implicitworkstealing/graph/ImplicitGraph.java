@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -51,30 +51,30 @@ public class ImplicitGraph {
 	protected final int pollingTimeout;
 	protected final boolean debug;
 	protected boolean polling = false;
-	
+
 	/* Profiler information. */
 	protected AeminiumProfiler profiler;
 	protected final boolean enableProfiler = Configuration.getProperty(getClass(), "enableProfiler", false);
-	
+
 	private AtomicInteger noAtomicTasksCompleted = new AtomicInteger(0);
 	private AtomicInteger noBlockingTasksCompleted = new AtomicInteger(0);
 	private AtomicInteger noNonBlockingTasksCompleted = new AtomicInteger(0);
-	
+
 	public AtomicInteger noUnscheduledTasks = new AtomicInteger(0);
 	public AtomicInteger noRunningTasks = new AtomicInteger(0);
 	public AtomicInteger noWaitingForDependenciesTasks = new AtomicInteger(0);
 	public AtomicInteger noWaitingForChildrenTasks = new AtomicInteger(0);
 	public AtomicInteger noTasksWaitingInQueue = new AtomicInteger(0);
 	public AtomicInteger noCompletedTasks = new AtomicInteger(0);
-	
+
 	private static final class TaskCounter {
 		protected final Thread thread;
 		public volatile int taskCount = 0;
-		
+
 		public TaskCounter(Thread thread) {
 			this.thread = thread;
 		}
-		
+
 		public final int getTaskCount() {
 			if ( thread instanceof AeminiumThread ) {
 				return ((AeminiumThread)thread).taskCount;
@@ -82,8 +82,8 @@ public class ImplicitGraph {
 				return taskCount;
 			}
 		}
-		
-		@Override 
+
+		@Override
 		public final String toString() {
 			return "TaskCounter<"+getTaskCount()+">";
 		}
@@ -95,9 +95,9 @@ public class ImplicitGraph {
 		checkForCycles = Configuration.getProperty(getClass(), "checkForCycles", false);
 		pollingTimeout = Configuration.getProperty(getClass(), "pollingTimeout", 50);
 	}
-	
+
 	public final void init(EventManager eventManager) {
-		taskCounterList  = new ArrayList<TaskCounter>(); 
+		taskCounterList  = new ArrayList<TaskCounter>();
 		taskCounters     = new ThreadLocal<TaskCounter>(){
 			@Override
 			protected TaskCounter initialValue() {
@@ -106,16 +106,16 @@ public class ImplicitGraph {
 					taskCounterList.add(tc);
 				}
 				return tc;
-			}		
+			}
 		};
-		eventManager.registerRuntimeEventListener(new RuntimeEventListener() {		
+		eventManager.registerRuntimeEventListener(new RuntimeEventListener() {
 			@Override
 			public final void onThreadSuspend(Thread thread) {
 				synchronized (taskCounterList) {
 					if ( isEmpty() ) {
 						taskCounterList.notifyAll();
 					}
-				}				
+				}
 			}
 
 			@Override
@@ -135,7 +135,7 @@ public class ImplicitGraph {
 		taskCounterList = null;
 		taskCounters    = null;
 	}
-	
+
 	/*
 	 * Sets up a new task in relation to another tasks (dependents and dependencies)
 	 * and schedules it for execution if it is the case.
@@ -149,10 +149,10 @@ public class ImplicitGraph {
 		} else {
 			taskCounters.get().taskCount++;
 		}
-		
+
 		boolean schedule = false;
 
-		synchronized (itask) {			
+		synchronized (itask) {
 			// check for double scheduling
 			if ( itask.getState() != ImplicitTaskState.UNSCHEDULED) {
 				if ( thread instanceof AeminiumThread ) {
@@ -163,7 +163,7 @@ public class ImplicitGraph {
 				rt.getErrorManager().signalTaskDuplicatedSchedule(itask);
 				return;
 			}
-			
+
 			if (enableProfiler)
 				this.noUnscheduledTasks.incrementAndGet();
 
@@ -180,8 +180,8 @@ public class ImplicitGraph {
 				itask.setState(ImplicitTaskState.WAITING_FOR_DEPENDENCIES, this);
 			else
 				itask.setState(ImplicitTaskState.WAITING_FOR_DEPENDENCIES);
-			
-			
+
+
 			if ( (Object)deps != Runtime.NO_DEPS ) {
 				int count = 0;
 				for ( Task t : deps) {
@@ -198,14 +198,14 @@ public class ImplicitGraph {
 				schedule = true;
 			}
 		}
-		
+
 		// schedule task if it's marked as waiting in queue
 		if (schedule) {
 			if (enableProfiler)
 				itask.setState(ImplicitTaskState.WAITING_IN_QUEUE, this);
 			else
 				itask.setState(ImplicitTaskState.WAITING_IN_QUEUE);
-			
+
 			rt.scheduler.scheduleTask(itask);
 		}
 
@@ -215,7 +215,7 @@ public class ImplicitGraph {
 		}
 	}
 
-	
+
 	/* taskCompleted is executed when a task has completed */
 	public final void taskCompleted(ImplicitTask task) {
 		Thread thread = Thread.currentThread();
@@ -234,7 +234,7 @@ public class ImplicitGraph {
 				this.noNonBlockingTasksCompleted.getAndIncrement();
 		}
 	}
-	
+
 	protected final boolean isEmpty() {
 		int count = 0;
 		for(TaskCounter tc : taskCounterList ) {
@@ -261,26 +261,26 @@ public class ImplicitGraph {
 			}
 		}
 	}
-	
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-	 *                                          PROFILER                                               *      
+	 *                                          PROFILER                                               *
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	public synchronized void collectData(DataCollection data) {
-		
+
 		data.noTasksCompleted[DataCollection.ATOMIC_TASK] = this.noAtomicTasksCompleted.get();
 		data.noTasksCompleted[DataCollection.BLOCKING_TASK] = this.noBlockingTasksCompleted.get();
 		data.noTasksCompleted[DataCollection.NON_BLOCKING_TASK] = this.noNonBlockingTasksCompleted.get();
-		
+
 		data.noUnscheduledTasks = this.noUnscheduledTasks.get();
 		data.noWaitingForDependenciesTasks = this.noWaitingForDependenciesTasks.get();
 		data.noWaitingForChildrenTasks = this.noWaitingForChildrenTasks.get();
 		data.noRunningTasks = this.noRunningTasks.get();
 		data.noTasksWaitingInQueue = this.noTasksWaitingInQueue.get();
 		data.noCompletedTasks = this.noCompletedTasks.get();
-		
+
 		return;
 	}
-	
+
 	public void setProfiler (AeminiumProfiler profiler) {
 		this.profiler = profiler;
 	}

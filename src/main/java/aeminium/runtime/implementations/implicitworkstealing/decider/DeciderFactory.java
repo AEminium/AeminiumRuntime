@@ -9,7 +9,7 @@ public class DeciderFactory {
 	/**
 	 * Prohibit Factory instantiation.
 	 */
-	protected DeciderFactory() {} 
+	protected DeciderFactory() {}
 
 	/**
 	 * Returns a new 'default' runtime object.
@@ -17,13 +17,13 @@ public class DeciderFactory {
 	 */
 	public final static ParallelizationDecider getDecider() {
 		String deciderConf = Configuration.getProperty(DeciderFactory.class, "implementation", "default");
-		
+
 		if ( decider == null ) {
 			synchronized (DeciderFactory.class) {
 				if ( deciderConf == null || deciderConf.equals("default")) {
 					decider = new DefaultDecider();
 				} else {
-					// try to load runtime from specified class 
+					// try to load runtime from specified class
 					ClassLoader cl = Factory.class.getClassLoader();
 					try {
 						Class<?> klazz = cl.loadClass(deciderConf);
@@ -40,5 +40,5 @@ public class DeciderFactory {
 			}
 		}
 		return decider;
-	}	
+	}
 }

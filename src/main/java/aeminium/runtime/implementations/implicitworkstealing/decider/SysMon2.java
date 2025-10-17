@@ -11,7 +11,7 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 public class SysMon2 implements ParallelizationDecider  {
 	static OperatingSystemMXBean o = ManagementFactory.getOperatingSystemMXBean();
 	static com.sun.management.OperatingSystemMXBean so;
-	
+
 	protected final int parallelizeThreshold  = Configuration.getProperty(getClass(), "parallelizeThreshold", 70);
 	protected final int memoryThreshold  = Configuration.getProperty(getClass(), "memoryThreshold", 70);
 
@@ -20,7 +20,7 @@ public class SysMon2 implements ParallelizationDecider  {
 			 so = (com.sun.management.OperatingSystemMXBean) o;
 		}
 	}
-	
+
 	@Override
 	public void setRuntime(Runtime rt) {
 	}
@@ -33,7 +33,7 @@ public class SysMon2 implements ParallelizationDecider  {
 		double load = o.getSystemLoadAverage();
 		if (load < 0) return true;
 		return load * 100 < parallelizeThreshold;
-		
+
 	}
-	
+
 }
