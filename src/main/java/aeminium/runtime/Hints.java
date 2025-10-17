@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -21,13 +21,13 @@ package aeminium.runtime;
 
 /**
  * Task hints.
- * 
+ *
  * @author sven
  *
  */
 public final class Hints {
 	private Hints() {}
-	
+
 	/**
 	 * Base offset to leave the lower bits unused.
 	 */
@@ -60,22 +60,22 @@ public final class Hints {
 	 * Task that are lightweight.
 	 */
 	public static final short LARGE  		= 1<<(OFFSET+6);
-	
+
 	/**
 	 * Convert hints to string representation.
-	 *  
+	 *
 	 * @param hints
 	 * @return
 	 */
-	
+
 	public static boolean check(short hints, short test) {
 		return ((hints & test) == test);
-	} 
-	
+	}
+
 	private static void addIfHint(short hints, short test, String name, StringBuilder sb) {
 		if ((hints & test) == test) sb.append(name + "|");
 	}
-	
+
 	public static final String toString(short hints) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");

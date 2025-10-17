@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -28,7 +28,7 @@ import aeminium.runtime.implementations.implicitworkstealing.events.EventManager
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitBlockingTask;
 
 /* Threadpool for executing Blocking Tasks.
- * Has a traditional threadpool behavior. 
+ * Has a traditional threadpool behavior.
  */
 public final class BlockingThreadPool {
 	protected ImplicitWorkStealingRuntime rt;
@@ -43,20 +43,20 @@ public final class BlockingThreadPool {
 			return "FINISHED";
 		}
 	};
-	
+
 	public void init(ImplicitWorkStealingRuntime rt, EventManager eventManager) {
 		this.rt   = rt;
 		this.eventManager = eventManager;
 		taskQueue = new LinkedList<ImplicitBlockingTask>();
 	}
-	
+
 	public void shutdown() {
 		synchronized (taskQueue) {
 			int finishedCount = currentThreads;
 			for( int i = 0; i < finishedCount; i++ ) {
 				submitTask(FINISHED);
 			}
-			
+
 			while ( currentThreads > 0 ) {
 				try {
 					taskQueue.wait();
@@ -64,7 +64,7 @@ public final class BlockingThreadPool {
 				}
 			}
 		}
-		
+
 		// cleanup
 		taskQueue    = null;
 		rt           = null;
@@ -90,7 +90,7 @@ public final class BlockingThreadPool {
 					}
 				}
 				return task;
-			} else { 
+			} else {
 				return taskQueue.remove(0);
 			}
 		}
@@ -105,8 +105,8 @@ public final class BlockingThreadPool {
 			}
 		}
 	}
-	
-	
+
+
 	/* Adds a new task to the queue. */
 	public final void submitTask(ImplicitBlockingTask task) {
 		synchronized (taskQueue) {
@@ -122,20 +122,20 @@ public final class BlockingThreadPool {
 			}
 		}
 	}
-	
+
 	public int getTaskQueueSize() {
 		return taskQueue.size();
 	}
-	
+
 	protected final class BlockingThread extends AeminiumThread {
 		protected boolean finished = false;
-		
+
 		public BlockingThread() {
 			setName("BlockingThead-" + currentThreads);
 		}
-		
+
 		@Override
-		public void run() {			
+		public void run() {
 			eventManager.signalNewThread(Thread.currentThread());
 			while ( !finished ) {
 				ImplicitBlockingTask task = getWork();

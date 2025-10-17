@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -27,7 +27,7 @@ import aeminium.runtime.implementations.implicitworkstealing.ImplicitWorkStealin
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitAtomicTask;
 import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
-/*  
+/*
  * A DataGroup (DG) implementation that supports nested atomic tasks on the same DG.
  * It works by having a stack of locks that grows as nesting increases.
  */
@@ -36,11 +36,11 @@ public final class NestedAtomicTasksDataGroup implements ImplicitWorkStealingRun
 	protected final ImplicitWorkStealingRuntimeDataGroupFactory factory;
 	protected static final AtomicInteger idGen = new AtomicInteger();
 	protected final int id = idGen.incrementAndGet();
-	
+
 	public NestedAtomicTasksDataGroup(ImplicitWorkStealingRuntimeDataGroupFactory factory) {
 		this.factory = factory;
 	}
-	
+
 	@Override
 	public final synchronized boolean trylock(ImplicitWorkStealingRuntime rt, ImplicitTask task) {
 		return getLock(task).trylock(rt, task);
@@ -48,9 +48,9 @@ public final class NestedAtomicTasksDataGroup implements ImplicitWorkStealingRun
 
 	@Override
 	public final synchronized void unlock(ImplicitWorkStealingRuntime rt, ImplicitTask task) {
-		getLock(task).unlock(rt, task);	
+		getLock(task).unlock(rt, task);
 	}
-	
+
 	protected ImplicitWorkStealingRuntimeDataGroup getLock(ImplicitTask task) {
 		final int level = getLockLevel(task);
 		dataGroups.ensureCapacity(level+1);
@@ -59,7 +59,7 @@ public final class NestedAtomicTasksDataGroup implements ImplicitWorkStealingRun
 		}
 		return dataGroups.get(level);
 	}
-	
+
 	protected int getLockLevel(ImplicitTask task) {
 		if ( task == null ) {
 			return -1; // remove the starting task itself
@@ -80,7 +80,7 @@ public final class NestedAtomicTasksDataGroup implements ImplicitWorkStealingRun
 		public ImplicitWorkStealingRuntimeDataGroup create();
 	}
 
-	@Override 
+	@Override
 	public String toString() {
 		return "HierarchicalDataGroup["+id+"]" + Arrays.deepToString(dataGroups.toArray());
 	}
