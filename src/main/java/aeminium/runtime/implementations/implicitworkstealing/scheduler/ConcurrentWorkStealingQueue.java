@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -19,14 +19,14 @@
 
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -43,10 +43,10 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * Work stealing queue that has only one thread adding elements to it
- * at the beginning while multiple threads can steal elements from the 
- * end. The design was heavily inspired by the work stealing queue 
- * implementation of the fork/join framework.  
- * 
+ * at the beginning while multiple threads can steal elements from the
+ * end. The design was heavily inspired by the work stealing queue
+ * implementation of the fork/join framework.
+ *
  * @author sven
  *
  * @param <E>
@@ -57,7 +57,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 	protected volatile int base; // base of the circular buffer
 	protected int sp;            // next free slot
 	public final static int MAX_QUEUE_POWER = 28;
-	
+
 	public ConcurrentWorkStealingQueue(int power) {
 		if ( power < 2 || power >= MAX_QUEUE_POWER ) {
 			throw new Error("Invalid initial size: 2 <= power < MAX_QUEUE_SIZE.");
@@ -69,17 +69,17 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		E[] bufferArray = (E[])new Object[length];
 		this.buffer      = new AtomicReferenceArray<E>(bufferArray);
 	}
-	
+
 	public final boolean isEmpty() {
 		return base == sp ;
 	}
-	
+
 	public final boolean isFull() {
 		return (base == ((length+sp+1)%length))  ;
 	}
-	
+
 	public final E tryStealing() {
-		E value = buffer.get(base) ; 
+		E value = buffer.get(base) ;
 		if ( value != null ) {
 			if ( buffer.compareAndSet(base, value, null) ) {
 				base = (length+base+1) % length;
@@ -89,7 +89,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		}
 		return value;
 	}
-	
+
 	public final E peekSteeling() {
 		return buffer.get(base);
 	}
@@ -101,7 +101,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		buffer.set(sp, e);
 		sp = ((length+sp+1)%length);
 	}
-	
+
 	public final E pop() {
 		int newSp = (length+sp-1)%length;
 		E result = buffer.get(newSp);
@@ -114,11 +114,11 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		}
 		return result;
 }
-	
+
 	public final E peek() {
 		return buffer.get((length+sp-1)%length);
 	}
-	
+
 	public final int size() {
 		if ( base < sp ) {
 			return sp - base;
@@ -128,7 +128,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 			return 0;
 		}
 	}
-	
+
 	protected final void growQueue() {
 		int newLength = length << 1;
 		if ( newLength >= (1<<MAX_QUEUE_POWER) ) {
@@ -136,7 +136,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		}
 		@SuppressWarnings("unchecked")
 		AtomicReferenceArray<E> newBuffer = new AtomicReferenceArray<E>((E[])new Object[newLength]);
-		
+
 		// need to start with base
 		E value = null;
 		while ( !isEmpty() && value == null ) {
@@ -149,7 +149,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 				}
 			}
 		}
-		
+
 		if ( !isEmpty() && value != null ) {
 			newBuffer.set(base, value);
 			int newSp = (newLength+base+1)%length;
@@ -166,7 +166,7 @@ public class ConcurrentWorkStealingQueue<E> implements WorkStealingQueue<E> {
 		}
 
 	}
-	
+
 	@Override
 	public final String toString() {
 		return "[base="+base+","+"sp="+sp+",len="+length+"] "+buffer.toString();

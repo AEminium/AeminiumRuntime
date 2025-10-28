@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -40,19 +40,19 @@ public class ExecutorServiceTests extends BaseTest {
 	public void simpleShutdown() {
 		Runtime rt = getRuntime();
 		rt.init();
-		
+
 		ExecutorService es = rt.getExecutorService();
-		
+
 		es.shutdown();
-		
+
 		rt.shutdown();
 	}
-	
-	@Test 
+
+	@Test
 	public void simpleTask() {
 		Runtime rt = getRuntime();
 		rt.init();
-		
+
 		ExecutorService es = rt.getExecutorService();
 		es.submit(new Runnable() {
 			@Override
@@ -61,16 +61,16 @@ public class ExecutorServiceTests extends BaseTest {
 			}
 		});
 		es.shutdown();
-		
+
 		rt.shutdown();
 	}
-	
-	@Test 
+
+	@Test
 	public void waitTask() {
 		final String RESULT = "I have run";
 		Runtime rt = getRuntime();
 		rt.init();
-		
+
 		ExecutorService es = rt.getExecutorService();
 		Future<String> f = es.submit(new Callable<String>() {
 
@@ -81,17 +81,17 @@ public class ExecutorServiceTests extends BaseTest {
 			}
 
 		});
-		
+
 		try {
 			assertTrue( RESULT.equals(f.get()));
 		} catch (Exception e) {
 		}
-		
+
 		es.shutdown();
-		
+
 		rt.shutdown();
 	}
-	
+
 	@Test
 	public void invokeAll() {
 		final String[] data = {"FIR$T", "$ECOND"};
@@ -116,7 +116,7 @@ public class ExecutorServiceTests extends BaseTest {
 
 		try {
 			List<Future<String>> futures = es.invokeAll(tasks);
-			
+
 			for (int i = 0; i < futures.size(); i++ ) {
 				assertTrue( data[i].equals(futures.get(i).get()));
 			}
@@ -125,9 +125,9 @@ public class ExecutorServiceTests extends BaseTest {
 		} catch (ExecutionException e) {
 			org.junit.Assert.fail();
 		}
-		
+
 		rt.shutdown();
-		
+
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class ExecutorServiceTests extends BaseTest {
 		final Runtime rt = getRuntime();
 		rt.init();
 		ExecutorService es = rt.getExecutorService();
-		
+
 		Future<String> f = es.submit(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
@@ -144,7 +144,7 @@ public class ExecutorServiceTests extends BaseTest {
 				return DATA;
 			}
 		});
-		
+
 		try {
 			@SuppressWarnings("unused")
 			String result = f.get(100, TimeUnit.MILLISECONDS);
@@ -156,18 +156,18 @@ public class ExecutorServiceTests extends BaseTest {
 		} catch (TimeoutException e) {
 			assertTrue(true);
 		}
-		
-		
+
+
 		rt.shutdown();
 	}
-	
+
 	@Test
 	public void timeoutTest2() {
 		final String DATA = "Te$t$tring";
 		final Runtime rt = getRuntime();
 		rt.init();
 		ExecutorService es = rt.getExecutorService();
-		
+
 		Future<String> f = es.submit(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
@@ -175,7 +175,7 @@ public class ExecutorServiceTests extends BaseTest {
 				return DATA;
 			}
 		});
-		
+
 		try {
 			String result = f.get(300, TimeUnit.MILLISECONDS);
 			assertTrue(result.equals(DATA));
@@ -186,8 +186,8 @@ public class ExecutorServiceTests extends BaseTest {
 		} catch (TimeoutException e) {
 			fail();
 		}
-		
-		
+
+
 		rt.shutdown();
 	}
 }
