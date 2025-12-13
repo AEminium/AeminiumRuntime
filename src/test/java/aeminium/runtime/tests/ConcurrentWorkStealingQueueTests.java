@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -35,12 +35,12 @@ public class ConcurrentWorkStealingQueueTests {
 		for( char c: control.toCharArray() ) {
 			wsq.push(""+c);
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 		while ( !wsq.isEmpty() ) {
 			sb.append(wsq.tryStealing());
 		}
-		assertTrue( control.equals(sb.toString())); 
+		assertTrue( control.equals(sb.toString()));
 	}
 
 	@Test
@@ -50,13 +50,13 @@ public class ConcurrentWorkStealingQueueTests {
 		for( char c: control.toCharArray() ) {
 			wsq.push(""+c);
 		}
-		
-		String hello = wsq.tryStealing() + 
+
+		String hello = wsq.tryStealing() +
 		               wsq.tryStealing() +
-		               wsq.tryStealing() + 
-		               wsq.tryStealing() + 
+		               wsq.tryStealing() +
+		               wsq.tryStealing() +
 		               wsq.tryStealing();
-		
+
 		StringBuilder sb = new StringBuilder();
 		while ( !wsq.isEmpty() ) {
 			sb.append(wsq.pop());
@@ -87,8 +87,8 @@ public class ConcurrentWorkStealingQueueTests {
 	public void stessTest() {
 		final int N = 10000000;
 		final WorkStealingQueue<Integer> wsq = new ConcurrentWorkStealingQueue<Integer>(13);
-		
-		Thread producer = new Thread(new Runnable() {	
+
+		Thread producer = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				int counter = 0;
@@ -106,7 +106,7 @@ public class ConcurrentWorkStealingQueueTests {
 				System.out.println("Producer consumed " + counter);
 			}
 		});
-		
+
 		Thread consumer1 = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -141,11 +141,11 @@ public class ConcurrentWorkStealingQueueTests {
 			}
 		});
 
-		
+
 		consumer1.start();
 		consumer2.start();
 		producer.start();
-		
+
 		try {
 			consumer1.join();
 			consumer2.join();

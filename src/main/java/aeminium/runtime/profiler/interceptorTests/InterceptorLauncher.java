@@ -5,7 +5,7 @@ public class InterceptorLauncher
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) 
+	public static void main(String[] args)
 	{
 		int i = 0;
 		while (i < 5)
@@ -15,7 +15,7 @@ public class InterceptorLauncher
 			i++;
 		}
 	}
-	
+
 	public static void methodOne(String name)
 	{
 		System.out.println("Entered method one!!");
@@ -27,7 +27,7 @@ public class InterceptorLauncher
 		}
 		System.out.println("Exited method one...");
 	}
-	
+
 	public static void methodTwo(String name)
 	{
 		System.out.println("Entered method two!!");

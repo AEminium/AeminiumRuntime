@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -32,7 +32,7 @@ public class DiGraphViz extends GraphViz {
 	protected final String EOL = System.getProperty("line.separator");
 	protected final int ranksep;
 	protected final RankDir rankdir;
-	
+
 	public DiGraphViz(String name, int ranksep, RankDir rankdir) {
 		this.name    = name;
 		this.ranksep = ranksep;
@@ -40,26 +40,26 @@ public class DiGraphViz extends GraphViz {
 		nodes        = new StringBuffer();
 		connections  = new StringBuffer();
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public void addNode(int id, String label) {
 		addNode(id, label, DEFAULT_SHAPE, DEFAULT_COLOR);
 	}
-	
+
 	public void addNode(int id,
 					    String label,
 					    Shape shape,
 					    Color color) {
 		nodes.append(String.format("    %12d [label=\"%s\", shape=\"%s\", color=\"%s\"]"+EOL, id, label, shape.name().toLowerCase(), color.name().toLowerCase()));
 	}
-	
+
 	public void addConnection(int from, int to) {
-		addConnection(from, to, DEFAULT_LINE_STYLE, DEFAULT_COLOR, "");	
+		addConnection(from, to, DEFAULT_LINE_STYLE, DEFAULT_COLOR, "");
 	}
-	
+
 	public void addConnection(int from,
 							  int to,
 							  LineStyle lineStyle,
@@ -67,7 +67,7 @@ public class DiGraphViz extends GraphViz {
 							  String label) {
 		connections.append(String.format("    %12d -> %12d [style=\"%s\", color=\"%s\", fontcolor=\"%s\", label=\"%s\"]"+EOL, from, to, lineStyle.name().toLowerCase(), color.name().toLowerCase(), color.name().toLowerCase(), label));
 	}
-	
+
 	public boolean dump(File file) {
 		try {
 			FileOutputStream fos = new FileOutputStream(file);
@@ -78,7 +78,7 @@ public class DiGraphViz extends GraphViz {
 		}
 		return false;
 	}
-	
+
 	public boolean dump(OutputStream os ) {
 		try {
 			dumpOutputStream(os);
@@ -87,7 +87,7 @@ public class DiGraphViz extends GraphViz {
 		}
 		return false;
 	}
-	
+
 	protected void dumpOutputStream(OutputStream os) throws IOException {
 		os.write(String.format("digraph %s {" + EOL, name).getBytes());
 		os.write(String.format("    rankdir=%s" + EOL, rankdir.name()).getBytes());

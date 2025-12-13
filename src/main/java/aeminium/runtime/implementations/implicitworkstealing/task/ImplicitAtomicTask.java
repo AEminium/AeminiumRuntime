@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -54,7 +54,7 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		}
 		requiredGroups.add(required);
 	}
-	
+
 	/* Detaches another datagroup with the current Task. */
 	public void removeDataGroupDependecy(DataGroup required) {
 		if ( requiredGroups == null ) {
@@ -66,16 +66,16 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		}
 		requiredGroups.remove(required);
 	}
-	
+
 	/* Retrives all datagroups associated with the current task. */
 	public Set<DataGroup> getDataGroupDependencies() {
 		if ( requiredGroups == null ) {
 			return Collections.emptySet();
-		} else {			
+		} else {
 			return Collections.unmodifiableSet(requiredGroups);
 		}
 	}
-	
+
 	/* In case of nested synchronization, returns the task that held the lock
 	 * before executing this task.
 	 *  */
@@ -84,28 +84,28 @@ public final class ImplicitAtomicTask extends ImplicitTask implements AtomicTask
 		if ( result == null ) {
 			synchronized (this) {
 				atomicParent = this;
-				// search upwards 
+				// search upwards
 				ImplicitTask parent = this.parent;
 				while ( parent != null ) {
 					if ( parent instanceof ImplicitAtomicTask) {
 						atomicParent = (ImplicitAtomicTask)parent;
 					}
 					parent = parent.parent;
-				}				
+				}
 				result = atomicParent;
 			}
 		}
 		return result;
 	}
-	
+
 	@Override
 	public final void invoke(ImplicitWorkStealingRuntime rt) {
 		if ( datagroup.trylock(rt, this) ) {
 			super.invoke(rt);
-		}	
+		}
 	}
 
-	@Override 
+	@Override
 	public final void taskCompleted(ImplicitWorkStealingRuntime rt) {
 		datagroup.unlock(rt, this);
 		super.taskCompleted(rt);

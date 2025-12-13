@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -52,7 +52,7 @@ public final class BlockingWorkStealingScheduler {
 	protected static final boolean useBlockingThreadPool = Configuration.getProperty(BlockingWorkStealingScheduler.class, "useBlockingThreadPool", false);
 	protected static final int maxQueueLength = Configuration.getProperty(BlockingWorkStealingScheduler.class, "maxQueueLength", 0);
 	protected static final int initialUnparkInterval = Configuration.getProperty(BlockingWorkStealingScheduler.class, "unparkInterval", 100);
-	
+
 
 	public static volatile int unparkInterval = initialUnparkInterval;
 	protected static Boolean active_park = false;
@@ -119,7 +119,7 @@ public final class BlockingWorkStealingScheduler {
 		if (useBlockingThreadPool) {
 			blockingThreadPool.shutdown();
 		}
-		
+
 		if (BlockingWorkStealingScheduler.enableStats) {
 			System.err.println(this.getTaskCount());
 			System.err.println(this.getStealCount());
@@ -166,7 +166,7 @@ public final class BlockingWorkStealingScheduler {
 			blockingThreadPool.submitTask((ImplicitBlockingTask) task);
 			return;
 		}
-		
+
 		Thread thread = Thread.currentThread();
 		if (thread instanceof WorkStealingThread) {
 			WorkStealingThread wthread = (WorkStealingThread) thread;
@@ -178,7 +178,7 @@ public final class BlockingWorkStealingScheduler {
 						signalWork();
 					}
 				} else {
-					// Invoke inlined if maximum recursionDepth is achieved 
+					// Invoke inlined if maximum recursionDepth is achieved
 					wthread.remainingRecursionDepth--;
 					task.invoke(rt);
 					wthread.remainingRecursionDepth++;
@@ -292,19 +292,19 @@ public final class BlockingWorkStealingScheduler {
 		}
 		return result;
 	}
-	
+
 	public WorkStealingThread[] getThreads() {
 		return threads;
 	}
-	
+
 	public int getActiveThreadCount() {
 		return this.threads.length - this.parkedThreads.size();
 	}
-	
+
 	public int getIdleThreadCount() {
 		return this.parkedThreads.size();
 	}
-	
+
 	public int getTaskCount() {
 		int s = 0;
 		for (WorkStealingThread wst : threads) {
@@ -312,7 +312,7 @@ public final class BlockingWorkStealingScheduler {
 		}
 		return s;
 	}
-	
+
 	public int getStealCount() {
 		int s = 0;
 		for (WorkStealingThread wst : threads) {
@@ -320,7 +320,7 @@ public final class BlockingWorkStealingScheduler {
 		}
 		return s;
 	}
-	
+
 	public int getNoStealCount() {
 		int s = 0;
 		for (WorkStealingThread wst : threads) {
@@ -328,7 +328,7 @@ public final class BlockingWorkStealingScheduler {
 		}
 		return s;
 	}
-	
+
 	public int getParkCount() {
 		int s = 0;
 		for (WorkStealingThread wst : threads) {
@@ -336,7 +336,7 @@ public final class BlockingWorkStealingScheduler {
 		}
 		return s;
 	}
-	
+
 	public float getAvgMaxQueueSize() {
 		float s = 0;
 		for (WorkStealingThread wst : threads) {

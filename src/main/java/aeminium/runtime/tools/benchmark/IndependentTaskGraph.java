@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -27,7 +27,7 @@ import aeminium.runtime.implementations.Factory;
 public class IndependentTaskGraph implements Benchmark {
 	private static final String name = "IndepenetTaskGraph";
 	private final int[] COUNTS = {100, 1000, 10000, 100000, 1000000};
-	
+
 	@Override
 	public String getName() {
 		return name;
@@ -45,7 +45,7 @@ public class IndependentTaskGraph implements Benchmark {
 		Runtime rt = Factory.getRuntime();
 
 		rt.init();
-		
+
 		long start = System.nanoTime();
 		for(int i = 0; i < count; i++ ) {
 			Task nextTask = createTask(rt);
@@ -57,10 +57,10 @@ public class IndependentTaskGraph implements Benchmark {
 		reporter.reportLn(result);
 
 	}
-	
+
 	private Task createTask(Runtime rt) {
 		return rt.createNonBlockingTask(new Body() {
-			
+
 			@Override
 			public void execute(Runtime rt, Task parent) {
 				// DO NOTHING
