@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -33,7 +33,7 @@ public class StealFromMaxQueue implements WorkStealingAlgorithm {
 	private ConcurrentLinkedQueue<WorkStealingThread> parkedThreads;
 	private WorkStealingThread[] threads;
 	private Queue<ImplicitTask> submissionQueue;
-	
+
 	@Override
 	public final void init(WorkStealingThread[] threads, Queue<ImplicitTask> submissionQueue) {
 		this.threads         = threads;
@@ -51,7 +51,7 @@ public class StealFromMaxQueue implements WorkStealingAlgorithm {
 	@Override
 	public final WorkStealingThread signalWorkInLocalQueue(WorkStealingThread current) {
 		WorkStealingThread thread = threads[(current.index+1)%threads.length];
-		parkedThreads.remove(thread);		
+		parkedThreads.remove(thread);
 		return thread;
 	}
 
@@ -69,7 +69,7 @@ public class StealFromMaxQueue implements WorkStealingAlgorithm {
 				return task;
 			}
 		}
-		
+
 		WorkStealingThread richest = threads[(current.index+threads.length-1)%threads.length];
 		int richestCount     = richest.getLocalQueueSize();
 		for ( int i = 1;  i < threads.length ; i++ ) {
@@ -80,12 +80,12 @@ public class StealFromMaxQueue implements WorkStealingAlgorithm {
 				richest      = next;
 			}
 		}
-		
+
 		return richest.tryStealingTask();
 	}
 
 	@Override
 	public final void threadGoingToPark(WorkStealingThread thread) {
-		parkedThreads.add(thread);		
+		parkedThreads.add(thread);
 	}
 }
