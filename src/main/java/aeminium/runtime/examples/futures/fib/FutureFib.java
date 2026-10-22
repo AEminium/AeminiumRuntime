@@ -10,7 +10,7 @@ public class FutureFib {
 		System.out.println(f.fib(5));
 		RuntimeManager.shutdown();
 	}
-	
+
 	public int fib(int n) {
 		if (n<2) return 1;
 		else {
@@ -19,7 +19,7 @@ public class FutureFib {
 			return a1.get() + a2.get();
 		}
 	}
-	
+
 	int[] createArray() {
 		int[] a = new int[1];
 		a[0] = 10;

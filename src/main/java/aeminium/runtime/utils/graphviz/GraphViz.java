@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -24,7 +24,7 @@ public abstract class GraphViz {
 	protected final Color DEFAULT_COLOR          = Color.BLACK;
 	protected final LineStyle DEFAULT_LINE_STYLE = LineStyle.SOLID;
 	protected final Shape DEFAULT_SHAPE          = Shape.ELLIPSE;
-			                                              
+
 	public static <T extends Enum<?>> T getDefaultValue(String configEntry, T defaultValue, T[] values) {
 		for ( T value : values ) {
 			if ( value.name().equals(configEntry)) {
@@ -33,14 +33,14 @@ public abstract class GraphViz {
 		}
 		return defaultValue;
 	}
-	
+
 	public static enum RankDir {
 		TB,
 		BT,
 		LR,
 		RL;
 	}
-	
+
 	public static enum Color {
 		RED,
 		GREEN,
@@ -48,7 +48,7 @@ public abstract class GraphViz {
 		BLACK,
 		YELLOW
 	}
-	
+
 	public static enum LineStyle {
 		SOLID,
 		DASHED,
