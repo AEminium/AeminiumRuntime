@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -39,46 +39,46 @@ public class TestSelfCycle extends BaseTest {
 		rt.init();
 
 		rt.addErrorHandler(new ErrorHandler() {
-			
+
 			@Override
 			public void handleTaskException(Task task, Throwable t) {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleTaskDuplicatedSchedule(Task task) {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleLockingDeadlock() {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleInternalError(Error err) {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleDependencyCycle(Task task) {
 				cycle.set(true);
-				
+
 			}
 		});
-		
+
 		Task t1 = rt.createNonBlockingTask(createBody(1), Runtime.NO_HINTS);
 		rt.schedule(t1, Runtime.NO_PARENT, Arrays.asList(t1));
-		
+
 		if ( !cycle.get() ) {
 			Assert.fail("Did not detect self cylcle.");
 			rt.shutdown();
 		}
-		
+
 	}
 
 	public Body createBody(final int i) {
@@ -87,7 +87,7 @@ public class TestSelfCycle extends BaseTest {
 			public void execute(Runtime rt, Task parent) {
 				System.out.println("Task " + i);
 			}
-			
+
                         @Override
 			public String toString() {
 				return "" + i;
