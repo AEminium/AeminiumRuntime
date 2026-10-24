@@ -8,9 +8,9 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public class MaxTasksInQueue implements ParallelizationDecider {
 	ImplicitWorkStealingRuntime rt;
-	
+
 	protected final int maxTasksInQueueThreshold  = Configuration.getProperty(getClass(), "maxTasksInQueueThreshold", 2);
-	
+
 	@Override
 	public void setRuntime(Runtime rt) {
 		this.rt = (ImplicitWorkStealingRuntime) rt;
@@ -20,12 +20,12 @@ public class MaxTasksInQueue implements ParallelizationDecider {
 	public boolean parallelize(ImplicitTask current) {
 		int currentQueueSize;
 		Thread t = Thread.currentThread();
-		
+
 		if (t instanceof WorkStealingThread) {
 			WorkStealingThread wst = (WorkStealingThread) t;
 			currentQueueSize = wst.getLocalQueueSize();
 		} else {
-			currentQueueSize = rt.scheduler.getSubmissionQueueSize(); 
+			currentQueueSize = rt.scheduler.getSubmissionQueueSize();
 		}
 		return (currentQueueSize < maxTasksInQueueThreshold);
 	}
