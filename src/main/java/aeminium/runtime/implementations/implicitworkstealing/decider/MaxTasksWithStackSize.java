@@ -21,7 +21,7 @@ public class MaxTasksWithStackSize implements ParallelizationDecider {
 	@Override
 	public boolean parallelize(ImplicitTask current) {
 		if (Thread.currentThread().getStackTrace().length > maxStackSize) return false;
-		
+
 		int totalTasks = rt.scheduler.getSubmissionQueueSize();
 		for (WorkStealingThread thread : rt.scheduler.getThreads()) {
 			totalTasks += thread.getTaskQueue().size();
