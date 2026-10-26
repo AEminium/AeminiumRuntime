@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -31,13 +31,13 @@ public class TestChildTasks extends BaseTest {
 	public void childTasks() {
 		Runtime rt = Factory.getRuntime();
 		rt.init();
-		
+
 		Task t1 = createTask(rt, 2);
 		rt.schedule(t1, Runtime.NO_PARENT, Runtime.NO_DEPS);
-			
+
 		rt.shutdown();
 	}
-	
+
 	public Task createTask(final Runtime rt, final int level ) {
 		return rt.createNonBlockingTask((Runtime rt1, Task current) -> {
                     if (level > 0) {
