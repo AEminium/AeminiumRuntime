@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -38,37 +38,37 @@ public class TestCycle extends BaseTest {
 		final AtomicBoolean cycle = new AtomicBoolean();
 		Runtime rt = Factory.getRuntime();
 		rt.init();
-		
+
 		rt.addErrorHandler(new ErrorHandler() {
-			
+
 			@Override
 			public void handleTaskException(Task task, Throwable t) {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleTaskDuplicatedSchedule(Task task) {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleLockingDeadlock() {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleInternalError(Error err) {
 
-				
+
 			}
-			
+
 			@Override
 			public void handleDependencyCycle(Task task) {
 				cycle.set(true);
-				
+
 			}
 		});
 
@@ -94,7 +94,7 @@ public class TestCycle extends BaseTest {
 			public void execute(Runtime rt, Task parent) {
 				System.out.println("Task " + i);
 			}
-			
+
 			public String toString() {
 				return "" + i;
 			}
