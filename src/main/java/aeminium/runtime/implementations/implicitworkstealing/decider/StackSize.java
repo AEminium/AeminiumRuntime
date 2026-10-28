@@ -7,9 +7,9 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public class StackSize implements ParallelizationDecider {
 	ImplicitWorkStealingRuntime rt;
-	
+
 	protected final int maxStackSize  = Configuration.getProperty(getClass(), "maxStackSize", 13);
-	
+
 	@Override
 	public void setRuntime(Runtime rt) {
 		this.rt = (ImplicitWorkStealingRuntime) rt;

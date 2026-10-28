@@ -14,7 +14,7 @@ public class Revenge implements WorkStealingAlgorithm {
 	private WorkStealingThread[] threads;
 	private WorkStealingThread[] thiefes;
 	private Queue<ImplicitTask> submissionQueue;
-	
+
 	@Override
 	public final void init(WorkStealingThread[] threads, Queue<ImplicitTask> submissionQueue) {
 		this.threads         = threads;
@@ -33,7 +33,7 @@ public class Revenge implements WorkStealingAlgorithm {
 	@Override
 	public final WorkStealingThread signalWorkInLocalQueue(WorkStealingThread current) {
 		WorkStealingThread thread = threads[(current.index+1)%threads.length];
-		parkedThreads.remove(thread);		
+		parkedThreads.remove(thread);
 		return thread;
 	}
 
@@ -59,9 +59,9 @@ public class Revenge implements WorkStealingAlgorithm {
 					return task;
 				}
 			}
-		} 
+		}
 
-		
+
 		WorkStealingThread biggest = threads[(current.index+threads.length-1)%threads.length];
 		int smallestCount     = 0; //smallest.getLocalQueueSize();
 		for ( int i = 1;  i < threads.length ; i++ ) {
@@ -72,14 +72,14 @@ public class Revenge implements WorkStealingAlgorithm {
 				biggest      = next;
 			}
 		}
-		
+
 		thiefes[biggest.index] = current;
-		
+
 		return biggest.tryStealingTask();
 	}
 
 	@Override
 	public final void threadGoingToPark(WorkStealingThread thread) {
-		parkedThreads.add(thread);		
+		parkedThreads.add(thread);
 	}
 }
