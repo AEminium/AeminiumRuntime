@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2010-11 The AEminium Project (see AUTHORS file)
- * 
+ *
  * This file is part of Plaid Programming Language.
  *
  * Plaid Programming Language is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Plaid Programming Language is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -38,25 +38,23 @@ public class BlockingTaskTests extends BaseTest {
 		Task task = rt.createBlockingTask(new Body() {
 			@Override
 			public void execute(Runtime rt, Task current) throws Exception {
-				getLogger().info("Single Task");	
+				getLogger().info("Single Task");
 			}
 		}, Runtime.NO_HINTS);
 		rt.schedule(task, Runtime.NO_PARENT, Runtime.NO_DEPS);
 
-		rt.shutdown();		
+		rt.shutdown();
 	}
 
-
-	@Test
 	public void manyTasks() {
 		Runtime rt = getRuntime();
 		rt.init();
 
 		final int TASK_COUNT = 200;
 		final AtomicInteger counter = new AtomicInteger();
-		
-		for( int i = 0 ; i < TASK_COUNT ; i++ ) {
-			Task task = rt.createBlockingTask(new Body() {
+
+		for (int i = 0; i < TASK_COUNT; i++) {
+			Ta s task = r.createBlockingTsk(ne Body() {
 				@Override
 				public void execute(Runtime rt, Task current) throws Exception {
 					counter.incrementAndGet();
@@ -65,19 +63,19 @@ public class BlockingTaskTests extends BaseTest {
 			rt.schedule(task, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		}
 		rt.shutdown();
-		assertTrue( counter.get() == TASK_COUNT );
+		assertTrue(counter.get() == TASK_COUNT);
 	}
 
 	@Test
 	public void manyTasksMix() {
 		Runtime rt = getRuntime();
 		rt.init();
-		
+
 		final int TASK_COUNT = 200;
 		final AtomicInteger counter = new AtomicInteger();
-		
-		for( int i = 0 ; i < TASK_COUNT ; i++ ) {
-			Task taskB = rt.createBlockingTask(new Body() {
+
+		for (int i = 0; i < TASK_COUNT; i++) {
+			Ta s taskB = t.createBlockingask(nw Body() {
 				@Override
 				public void execute(Runtime rt, Task current) throws Exception {
 					counter.incrementAndGet();
@@ -94,6 +92,11 @@ public class BlockingTaskTests extends BaseTest {
 			rt.schedule(taskN, Runtime.NO_PARENT, Runtime.NO_DEPS);
 		}
 		rt.shutdown();
-		assertTrue( counter.get() == 2*TASK_COUNT );
+		assertTrue(counter.get() == 2 * TASK_COUNT);
 	}
+
+	@Test
+	public void testThatAlwaysFails() {
+    assertTrue(false);
+}
 }
