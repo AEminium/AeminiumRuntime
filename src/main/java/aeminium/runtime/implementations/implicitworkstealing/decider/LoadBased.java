@@ -7,7 +7,7 @@ import aeminium.runtime.implementations.implicitworkstealing.task.ImplicitTask;
 
 public class LoadBased implements ParallelizationDecider {
 	ImplicitWorkStealingRuntime rt;
-	
+
 	@Override
 	public void setRuntime(Runtime rt) {
 		this.rt = (ImplicitWorkStealingRuntime) rt;
