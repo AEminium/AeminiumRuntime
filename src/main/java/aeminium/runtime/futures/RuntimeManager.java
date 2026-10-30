@@ -14,7 +14,7 @@ public class RuntimeManager {
 
 	static int rtcalls = 0;
 	public final static Runtime rt = Factory.getRuntime();
-	
+
 	public static void init() {
 		if (rtcalls++ == 0) {
 			rt.init();
@@ -44,7 +44,7 @@ public class RuntimeManager {
 				public void handleInternalError(Error err) {
 					err.printStackTrace();
 				}
-				
+
 			});
 		}
 	}
@@ -55,19 +55,19 @@ public class RuntimeManager {
 			rt.shutdown();
 			rtcalls = 0;
 		}
-	}	
-	
+	}
+
 	public static boolean shouldSeq() {
 		return !rt.parallelize(currentTask.get());
 	}
-	
+
 	public static <T> FBody<T> createTask(FBody<T> b, Task... ts) {
 		Task t = RuntimeManager.rt.createNonBlockingTask(b, Runtime.NO_HINTS);
 		b.setTask(t);
 		RuntimeManager.rt.schedule(t, currentTask.get(), Arrays.asList(ts));
 		return b;
 	}
-	
+
 	public static <T> FBody<T> createTask(FBody<T> b) {
 		Task t = RuntimeManager.rt.createNonBlockingTask(b, Runtime.NO_HINTS);
 		b.setTask(t);
@@ -76,16 +76,16 @@ public class RuntimeManager {
 		RuntimeManager.rt.schedule(t, parent, Runtime.NO_DEPS);
 		return b;
 	}
-	
+
 	public static <T> void submit(final HollowFuture<T> f, Collection<Task> deps) {
 		RuntimeManager.submit(f, Runtime.NO_PARENT, deps);
 	}
-	
+
 	public static <T> void submit(final HollowFuture<T> f, Task parent, Collection<Task> deps) {
 		/*
 		 * Currently being done by the compiler at the declaration site
  		if (!rt.parallelize(parent)) {
-		 
+
 			f.it = f.body.evaluate(parent);
 			return;
 		}
@@ -99,9 +99,9 @@ public class RuntimeManager {
 		f.task = t;
 		rt.schedule(t, parent, deps);
 	}
-	
+
 	public static DataGroup getNewDataGroup() {
 		return rt.createDataGroup();
 	}
-	
+
 }
