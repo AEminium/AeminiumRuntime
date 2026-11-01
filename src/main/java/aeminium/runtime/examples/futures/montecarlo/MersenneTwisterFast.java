@@ -3,15 +3,15 @@ package aeminium.runtime.examples.futures.montecarlo;
 import java.io.*;
 import java.util.*;
 
-/** 
+/**
  * <h3>MersenneTwister and MersenneTwisterFast</h3>
  * <p><b>Version 17</b>, based on version MT199937(99/10/29)
- * of the Mersenne Twister algorithm found at 
+ * of the Mersenne Twister algorithm found at
  * <a href="http://www.math.keio.ac.jp/matumoto/emt.html">
  * The Mersenne Twister Home Page</a>, with the initialization
  * improved using the new 2002/1/26 initialization algorithm
  * By Sean Luke, October 2004.
- * 
+ *
  * <p><b>MersenneTwister</b> is a drop-in subclass replacement
  * for java.util.Random.  It is properly synchronized and
  * can be used in a multithreaded environment.  On modern VMs such
@@ -55,9 +55,9 @@ import java.util.*;
  * as it presently makes no difference in the speed, correctness, or results of the
  * algorithm.
  *
- * <p><b>Changes Since V13:</b> clone() method CloneNotSupportedException removed.  
+ * <p><b>Changes Since V13:</b> clone() method CloneNotSupportedException removed.
  *
- * <p><b>Changes Since V12:</b> clone() method added.  
+ * <p><b>Changes Since V12:</b> clone() method added.
  *
  * <p><b>Changes Since V11:</b> stateEquals(...) method added.  MersenneTwisterFast
  * is equal to other MersenneTwisterFasts with identical state; likewise
@@ -89,7 +89,7 @@ import java.util.*;
  * in speed to the point where it is faster than MersenneTwister but slower
  * than MersenneTwisterFast (which should be the case, as it's a less complex
  * algorithm but is synchronized).
- * 
+ *
  * <p><b>Changes Since V5:</b> New empty constructor made to work the same
  * as java.util.Random -- namely, it seeds based on the current time in
  * milliseconds.
@@ -98,17 +98,17 @@ import java.util.*;
  * (see <a href="http://www.math.keio.ac.jp/matumoto/MT2002/emt19937ar.html"</a>
  * http://www.math.keio.ac.jp/matumoto/MT2002/emt19937ar.html</a>)
  *
- * <p>The MersenneTwister code is based on standard MT19937 C/C++ 
+ * <p>The MersenneTwister code is based on standard MT19937 C/C++
  * code by Takuji Nishimura,
  * with suggestions from Topher Cooper and Marc Rieffel, July 1997.
  * The code was originally translated into Java by Michael Lecuyer,
  * January 1999, and the original code is Copyright (c) 1999 by Michael Lecuyer.
  *
  * <h3>Java notes</h3>
- * 
+ *
  * <p>This implementation implements the bug fixes made
  * in Java 1.2's version of Random, which means it can be used with
- * earlier versions of Java.  See 
+ * earlier versions of Java.  See
  * <a href="http://www.javasoft.com/products/jdk/1.2/docs/api/java/util/Random.html">
  * the JDK 1.2 java.util.Random documentation</a> for further documentation
  * on the random-number generation contracts made.  Additionally, there's
@@ -120,7 +120,7 @@ import java.util.*;
  * uses 48 bits.  The Mersenne Twister instead uses 32 bits (int size).
  * So it's best if your seed does not exceed the int range.
  *
- * <p>MersenneTwister can be used reliably 
+ * <p>MersenneTwister can be used reliably
  * on JDK version 1.1.5 or above.  Earlier Java versions have serious bugs in
  * java.util.Random; only MersenneTwisterFast (and not MersenneTwister nor
  * java.util.Random) should be used with them.
@@ -131,28 +131,28 @@ import java.util.*;
  * Portions copyright (c) 1993 by Michael Lecuyer. <br>
  * All rights reserved. <br>
  *
- * <p>Redistribution and use in source and binary forms, with or without 
+ * <p>Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * <ul>
- * <li> Redistributions of source code must retain the above copyright notice, 
+ * <li> Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * <li> Redistributions in binary form must reproduce the above copyright notice, 
- * this list of conditions and the following disclaimer in the documentation 
+ * <li> Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <li> Neither the name of the copyright owners, their employers, nor the 
- * names of its contributors may be used to endorse or promote products 
+ * <li> Neither the name of the copyright owners, their employers, nor the
+ * names of its contributors may be used to endorse or promote products
  * derived from this software without specific prior written permission.
  * </ul>
- * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
- * DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNERS OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNERS OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  @version 17
@@ -280,7 +280,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 	/**
 	 * Initalize the pseudo random number generator.  Don't
 	 * pass in a long that's bigger than an int (Mersenne Twister
-	 * only uses the first 32 bits for its seed).   
+	 * only uses the first 32 bits for its seed).
 	 */
 
 	synchronized public void setSeed(final long seed)
@@ -296,10 +296,10 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		mag01[1] = MATRIX_A;
 
 		mt[0]= (int)(seed & 0xffffffff);
-		for (mti=1; mti<N; mti++) 
+		for (mti=1; mti<N; mti++)
 		{
-			mt[mti] = 
-				(1812433253 * (mt[mti-1] ^ (mt[mti-1] >>> 30)) + mti); 
+			mt[mti] =
+				(1812433253 * (mt[mti-1] ^ (mt[mti-1] >>> 30)) + mti);
 			/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
 			/* In the previous versions, MSBs of the seed affect   */
 			/* only MSBs of the array mt[].                        */
@@ -325,7 +325,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		setSeed(19650218);
 		i=1; j=0;
 		k = (N>array.length ? N : array.length);
-		for (; k!=0; k--) 
+		for (; k!=0; k--)
 		{
 			mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >>> 30)) * 1664525)) + array[j] + j; /* non linear */
 			mt[i] &= 0xffffffff; /* for WORDSIZE > 32 machines */
@@ -334,17 +334,17 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 			if (i>=N) { mt[0] = mt[N-1]; i=1; }
 			if (j>=array.length) j=0;
 		}
-		for (k=N-1; k!=0; k--) 
+		for (k=N-1; k!=0; k--)
 		{
 			mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >>> 30)) * 1566083941)) - i; /* non linear */
 			mt[i] &= 0xffffffff; /* for WORDSIZE > 32 machines */
 			i++;
-			if (i>=N) 
+			if (i>=N)
 			{
-				mt[0] = mt[N-1]; i=1; 
+				mt[0] = mt[N-1]; i=1;
 			}
 		}
-		mt[0] = 0x80000000; /* MSB is 1; assuring non-zero initial array */ 
+		mt[0] = 0x80000000; /* MSB is 1; assuring non-zero initial array */
 	}
 
 
@@ -355,8 +355,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -392,8 +392,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -429,8 +429,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -465,8 +465,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -512,8 +512,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -557,8 +557,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -585,8 +585,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -622,8 +622,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -660,8 +660,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 			if (mti >= N)   // generate N words at one time
 			{
 				int kk;
-				final int[] mt = this.mt; // locals are slightly faster 
-				final int[] mag01 = this.mag01; // locals are slightly faster 
+				final int[] mt = this.mt; // locals are slightly faster
+				final int[] mag01 = this.mag01; // locals are slightly faster
 
 				for (kk = 0; kk < N - M; kk++)
 				{
@@ -698,8 +698,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -726,8 +726,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -764,7 +764,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 			throw new IllegalArgumentException("n must be positive, got: " + n);
 
 		long bits, val;
-		do 
+		do
 		{
 			int y;
 			int z;
@@ -772,8 +772,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 			if (mti >= N)   // generate N words at one time
 			{
 				int kk;
-				final int[] mt = this.mt; // locals are slightly faster 
-				final int[] mag01 = this.mag01; // locals are slightly faster 
+				final int[] mt = this.mt; // locals are slightly faster
+				final int[] mag01 = this.mag01; // locals are slightly faster
 
 				for (kk = 0; kk < N - M; kk++)
 				{
@@ -800,8 +800,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 			if (mti >= N)   // generate N words at one time
 			{
 				int kk;
-				final int[] mt = this.mt; // locals are slightly faster 
-				final int[] mag01 = this.mag01; // locals are slightly faster 
+				final int[] mt = this.mt; // locals are slightly faster
+				final int[] mag01 = this.mag01; // locals are slightly faster
 
 				for (kk = 0; kk < N - M; kk++)
 				{
@@ -841,8 +841,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -869,8 +869,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -919,7 +919,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		{
 			d = nextDouble();                           // grab a value, initially from half-open [0.0, 1.0)
 			if (includeOne && nextBoolean()) d += 1.0;  // if includeOne, with 1/2 probability, push to [1.0, 2.0)
-		} 
+		}
 		while ( (d > 1.0) ||                            // everything above 1.0 is always invalid
 				(!includeZero && d == 0.0));            // if we're not including zero, 0.0 is invalid
 		return d;
@@ -933,12 +933,12 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		{
 			__haveNextNextGaussian = false;
 			return __nextNextGaussian;
-		} 
-		else 
+		}
+		else
 		{
 			double v1, v2, s;
-			do 
-			{ 
+			do
+			{
 				int y;
 				int z;
 				int a;
@@ -947,8 +947,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 				if (mti >= N)   // generate N words at one time
 				{
 					int kk;
-					final int[] mt = this.mt; // locals are slightly faster 
-					final int[] mag01 = this.mag01; // locals are slightly faster 
+					final int[] mt = this.mt; // locals are slightly faster
+					final int[] mag01 = this.mag01; // locals are slightly faster
 
 					for (kk = 0; kk < N - M; kk++)
 					{
@@ -975,8 +975,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 				if (mti >= N)   // generate N words at one time
 				{
 					int kk;
-					final int[] mt = this.mt; // locals are slightly faster 
-					final int[] mag01 = this.mag01; // locals are slightly faster 
+					final int[] mt = this.mt; // locals are slightly faster
+					final int[] mag01 = this.mag01; // locals are slightly faster
 
 					for (kk = 0; kk < N - M; kk++)
 					{
@@ -1003,8 +1003,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 				if (mti >= N)   // generate N words at one time
 				{
 					int kk;
-					final int[] mt = this.mt; // locals are slightly faster 
-					final int[] mag01 = this.mag01; // locals are slightly faster 
+					final int[] mt = this.mt; // locals are slightly faster
+					final int[] mag01 = this.mag01; // locals are slightly faster
 
 					for (kk = 0; kk < N - M; kk++)
 					{
@@ -1031,8 +1031,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 				if (mti >= N)   // generate N words at one time
 				{
 					int kk;
-					final int[] mt = this.mt; // locals are slightly faster 
-					final int[] mag01 = this.mag01; // locals are slightly faster 
+					final int[] mt = this.mt; // locals are slightly faster
+					final int[] mag01 = this.mag01; // locals are slightly faster
 
 					for (kk = 0; kk < N - M; kk++)
 					{
@@ -1084,8 +1084,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		if (mti >= N)   // generate N words at one time
 		{
 			int kk;
-			final int[] mt = this.mt; // locals are slightly faster 
-			final int[] mag01 = this.mag01; // locals are slightly faster 
+			final int[] mt = this.mt; // locals are slightly faster
+			final int[] mag01 = this.mag01; // locals are slightly faster
 
 			for (kk = 0; kk < N - M; kk++)
 			{
@@ -1132,7 +1132,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		{
 			d = nextFloat();                            // grab a value, initially from half-open [0.0f, 1.0f)
 			if (includeOne && nextBoolean()) d += 1.0f; // if includeOne, with 1/2 probability, push to [1.0f, 2.0f)
-		} 
+		}
 		while ( (d > 1.0f) ||                           // everything above 1.0f is always invalid
 				(!includeZero && d == 0.0f));           // if we're not including zero, 0.0f is invalid
 		return d;
@@ -1154,8 +1154,8 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 			if (mti >= N)   // generate N words at one time
 			{
 				int kk;
-				final int[] mt = this.mt; // locals are slightly faster 
-				final int[] mag01 = this.mag01; // locals are slightly faster 
+				final int[] mt = this.mt; // locals are slightly faster
+				final int[] mag01 = this.mag01; // locals are slightly faster
 
 				for (kk = 0; kk < N - M; kk++)
 				{
@@ -1183,15 +1183,15 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 		}
 
 		int bits, val;
-		do 
+		do
 		{
 			int y;
 
 			if (mti >= N)   // generate N words at one time
 			{
 				int kk;
-				final int[] mt = this.mt; // locals are slightly faster 
-				final int[] mag01 = this.mag01; // locals are slightly faster 
+				final int[] mt = this.mt; // locals are slightly faster
+				final int[] mag01 = this.mag01; // locals are slightly faster
 
 				for (kk = 0; kk < N - M; kk++)
 				{
@@ -1226,7 +1226,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 	 * Tests the code.
 	 */
 	public static void main(String args[])
-	{ 
+	{
 		int j;
 
 		MersenneTwisterFast r;
@@ -1244,7 +1244,7 @@ public strictfp class MersenneTwisterFast implements Serializable, Cloneable
 			String s = String.valueOf(l);
 			while(s.length() < 10) s = " " + s;  // buffer
 			System.out.print(s + " ");
-			if (j%5==4) System.out.println();       
+			if (j%5==4) System.out.println();
 		}
 
 		// SPEED TEST
