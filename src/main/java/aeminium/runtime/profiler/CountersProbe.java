@@ -12,31 +12,31 @@ public class CountersProbe implements TelemetryProbe {
 	private final static int NON_BLOCKING_TASK = 1;
 	private final static int BLOCKING_TASK = 2;
 	private final static int NO_TASKS_COMPLETED = 3;
-	
+
 	private final static int NO_UNSCHEDULED_TASKS = 4;
 	private final static int NO_WAITING_FOR_DEPENDENCIES_TASKS = 5;
 	private final static int NO_WAITING_FOR_CHILDREN_TASKS = 6;
 	private final static int NO_TASKS_WAITING_IN_QUEUE = 7;
 	private final static int NO_RUNNING_TASKS = 8;
 	private final static int NO_TASKS_IN_BLOCKING_QUEUE = 9;
-	
+
 	private final static int QUEUE_INFO = 10;
-	
+
 	private DataCollection data;
-	
+
 	/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-	
+
 	private int maxParallelism = 1;
-	
+
     public ProbeMetaData getMetaData() {
-    	
+
     	/* First, we get the number of processors available. */
     	maxParallelism = Configuration.getProcessorCount()*2;
-    	
+
     	ProbeMetaData metaData = ProbeMetaData.create("Counters").recordOnStartup(true)
     								.telemetry(true)
     								.description("Measures the counting variables of the system");
-    	
+
     	/* First, add space for the number of completed tasks. */
     	metaData.addCustomTelemetry("Atomic Tasks Completed", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("Non Blocking Tasks Completed", Unit.PLAIN, 1f);
@@ -48,7 +48,7 @@ public class CountersProbe implements TelemetryProbe {
     	metaData.addCustomTelemetry("No of Tasks Waiting in a Queue", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No Running Tasks", Unit.PLAIN, 1f);
     	metaData.addCustomTelemetry("No Tasks in Blocking Queue", Unit.PLAIN, 1f);
-    	
+
     	/* Then, creates a set of information for each thread capable of handling tasks
     	 * (i.e., the set will have the size of maxParallelism, corresponding to the number
     	 * of processors available).
@@ -60,16 +60,16 @@ public class CountersProbe implements TelemetryProbe {
         	metaData.addCustomTelemetry("No of Blocking Tasks Handled (" + (i + 1) + ")", Unit.PLAIN, 1f);
         	metaData.addCustomTelemetry("No of Non-blocking Tasks Handled (" + (i + 1) + ")", Unit.PLAIN, 1f);
         }
-    	
+
     	/* Initializes the data collection object. */
-    	data = new DataCollection(maxParallelism); 
-    	
+    	data = new DataCollection(maxParallelism);
+
         return metaData;
     }
 
 	@Override
-	public void fillTelemetryData(ProbeContext context, int[] customTelemetries) 
-	{	
+	public void fillTelemetryData(ProbeContext context, int[] customTelemetries)
+	{
 		/* Get the data from the graph. */
 		if (AeminiumProfiler.graph != null)
 		{
@@ -86,12 +86,12 @@ public class CountersProbe implements TelemetryProbe {
 			customTelemetries[NO_RUNNING_TASKS] = data.noRunningTasks;
 			customTelemetries[NO_TASKS_IN_BLOCKING_QUEUE] = data.taskInBlockingQueue;
 		}
-		
+
 		/* Information related to the scheduler. */
 		if (AeminiumProfiler.scheduler != null)
-		{			
+		{
 			AeminiumProfiler.scheduler.collectData(data);
-			
+
 			for (int i = 0; i < maxParallelism; i++)
 			{
 				customTelemetries[QUEUE_INFO + i*4] = data.taskInNonBlockingQueue[i];
