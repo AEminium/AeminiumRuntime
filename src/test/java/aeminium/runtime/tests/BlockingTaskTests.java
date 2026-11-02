@@ -19,14 +19,12 @@
 
 package aeminium.runtime.tests;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-
 import aeminium.runtime.Body;
 import aeminium.runtime.Runtime;
 import aeminium.runtime.Task;
+import java.util.concurrent.atomic.AtomicInteger;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 public class BlockingTaskTests extends BaseTest {
 
@@ -95,9 +93,5 @@ public class BlockingTaskTests extends BaseTest {
 		}
 		rt.shutdown();
 		assertTrue( counter.get() == 2*TASK_COUNT );
-	}
-	@Test
-	public void testThatAlwaysFails() {
-		assertTrue(false);
 	}
 }
